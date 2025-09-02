@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Users, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
+import { TournamentResultsModal } from './TournamentResultsModal';
 
 export function TournamentListForDay({ tournaments, onClose }) {
-  const [selectedTournament, setSelectedTournament] = useState(null);
+  const [selectedTournament, setSelectedTournament] = useState(null); // для регистрации
+  const [resultsTournament, setResultsTournament] = useState(null); // для результатов
 
   if (!tournaments || tournaments.length === 0) {
     return null;
@@ -85,12 +87,23 @@ export function TournamentListForDay({ tournaments, onClose }) {
                         )}
                       </div>
                     </div>
-                    <Button
-                      onClick={() => setSelectedTournament(tournament)}
-                      className="luxury-button px-6 py-2 rounded-xl"
-                    >
-                      Записаться
-                    </Button>
+
+                    {tournament.status === 'completed' ? (
+                      <Button
+                        onClick={() => setResultsTournament(tournament)}
+                        className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-2 rounded-xl"
+                     >
+                        Результаты
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => setSelectedTournament(tournament)}
+                        className="luxury-button px-6 py-2 rounded-xl"
+                      >
+                        Записаться
+                      </Button>
+                    )}
+
                   </div>
 
                   {tournament.settings_json?.buy_in_cost && (
@@ -124,6 +137,14 @@ export function TournamentListForDay({ tournaments, onClose }) {
           }}
         />
       )}
+
+      {resultsTournament && (
+        <TournamentResultsModal
+          tournament={resultsTournament}
+          onClose={() => setResultsTournament(null)}
+        />
+      )}
+
     </AnimatePresence>
   );
 }

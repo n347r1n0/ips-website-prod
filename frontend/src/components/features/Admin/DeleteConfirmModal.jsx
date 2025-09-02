@@ -1,3 +1,5 @@
+// src/components/features/Admin/DeleteConfirmModal.jsx
+
 import React from 'react';
 import { Trash2, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';

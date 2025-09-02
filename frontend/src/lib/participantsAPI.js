@@ -1,6 +1,45 @@
-// src/lib/participantsAPI.js
+// frontend/src/lib/participantsAPI.js
 
 import { supabase } from '@/lib/supabaseClient';
+
+/**
+ * Возвращает нормализованный список результатов для завершённого турнира.
+ * Учитывает и членов клуба (nickname из club_members), и гостей (guest_name).
+ */
+export async function getResultsByTournament(tournamentId) {
+  if (!tournamentId) throw new Error('tournamentId is required');
+  await supabase.auth.getSession();
+
+  const { data, error } = await supabase
+    .from('tournament_participants')
+    .select(`
+      id,
+      player_id,
+      guest_name,
+      final_place,
+      rating_points,
+      club_members:player_id (
+        nickname,
+        full_name
+      )
+    `)
+    .eq('tournament_id', tournamentId)
+    .order('final_place', { ascending: true, nullsFirst: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    place: r.final_place,
+    points: r.rating_points ?? 0,
+    name:
+      (Array.isArray(r.club_members) && r.club_members[0]?.nickname) ||
+      (Array.isArray(r.club_members) && r.club_members[0]?.full_name) ||
+      r.guest_name ||
+      'Unknown',
+    isMember: !!r.player_id,
+  }));
+}
 
 export const participantsAPI = {
   /**
