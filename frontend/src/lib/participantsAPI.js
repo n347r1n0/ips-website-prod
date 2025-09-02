@@ -144,6 +144,12 @@ export const participantsAPI = {
     return data || [];
   },
 
+  async getResultsByTournament(tournamentId) {
+    // делегируем существующей функции сверху файла
+    return getResultsByTournament(tournamentId);
+  },
+
+
   /**
    * Update participant status
    * @param {number} participantId - Participant ID

@@ -44,7 +44,7 @@ export function TournamentCalendar() {
 
         const { data, error } = await supabase
           .from('tournaments')
-          .select('id, name, tournament_date')
+          .select('id, name, tournament_date, status, settings_json')
           .gte('tournament_date', start)
           .lt('tournament_date', end)
           .order('tournament_date', { ascending: true });

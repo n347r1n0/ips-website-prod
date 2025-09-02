@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { getResultsByTournament } from '@/lib/participantsAPI';
+import { participantsAPI } from '@/lib/participantsAPI';
 import { Button } from '@/components/ui/Button';
 
 export function TournamentResultsModal({ tournament, onClose }) {
@@ -10,9 +10,10 @@ export function TournamentResultsModal({ tournament, onClose }) {
 
   useEffect(() => {
     let cancelled = false;
+    if (!tournament?.id) return;
     (async () => {
       try {
-        const data = await getResultsByTournament(tournament.id);
+        const data = await participantsAPI.getResultsByTournament(tournament.id);
         if (!cancelled) setRows(data);
       } catch (e) {
         console.error('Failed to load results:', e);
