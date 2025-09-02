@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(./**)",
+      "Edit(./**)"
+    ],
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./public/videos/**)",
+      "Read(./public/**)"
+    ]
+  }
+}

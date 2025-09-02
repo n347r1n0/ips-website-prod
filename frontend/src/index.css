@@ -1,0 +1,187 @@
+/* src/index.css */
+
+/* Директивы @tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* 👇 ДОБАВЛЯЕМ ЭТОТ БЛОК ДЛЯ ПОДКЛЮЧЕНИЯ ШРИФТА 👇 */
+@layer base {
+  @font-face {
+    font-family: 'Museo Cyrl';
+    font-weight: 700;
+    src: url('/fonts/exljbris - Museo Cyrl 700.otf') format('opentype');
+  }
+}
+/* ☝️ КОНЕЦ БЛОКА ☝️ */
+
+
+/* === ГЛОБАЛЬНЫЕ СТИЛИ СТРАНИЦЫ === */
+body {
+  /* Базовый темный цвет на случай, если текстура не загрузится */
+  /*background-color: theme('colors.primary-bg');*/
+  background-color: #363333;
+
+
+  /* Ваша новая светлая текстура для подложки */
+  background-image: url('/textures/subtle-light-texture.png');
+
+  /* Заставляем текстуру повторяться, а не растягиваться */
+  background-repeat: repeat;
+}
+/* ================================= */
+
+
+
+
+/* === НАШИ КАСТОМНЫЕ КОМПОНЕНТЫ === */
+@layer components {
+  .glassmorphic-panel {
+    @apply bg-black/50 backdrop-blur-xl border border-glass-border shadow-lg transition-all duration-300;
+  }
+    /* 👇 ДОБАВЛЯЕМ НОВЫЙ БЛОК ДЛЯ HOVER-ЭФФЕКТА ПАНЕЛИ */
+  .glassmorphic-panel:hover {
+    @apply bg-black/40 border-white/20 -translate-y-0.5;
+  }
+
+    /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
+  .gallery-card-panel {
+    @apply bg-black/50 backdrop-blur-xl border border-glass-border shadow-lg;
+  }
+
+
+
+
+  /* 👇 Добавляем этот класс */
+  .neumorphic-inset {
+    @apply shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),_inset_-4px_-4px_8px_rgba(255,255,255,0.05)];
+  }
+
+  .neumorphic-outset {
+  /* Те же параметры, но без слова 'inset' */
+  @apply shadow-[4px_4px_8px_rgba(0,0,0,0.4),_-4px_-4px_8px_rgba(255,255,255,0.05)];
+  }
+
+  .art-deco-divider {
+    @apply w-full h-[3px] bg-gradient-to-r from-transparent via-gold-accent to-transparent relative;
+    filter: drop-shadow(0 0 5px var(--tw-shadow-color));
+    --tw-shadow-color: theme('colors.gold-accent');
+  }
+  .gold-highlight {
+      @apply text-gold-accent;
+      text-shadow: 0 0 15px theme('colors.gold-accent/50%');
+  }
+  .luxury-button {
+      @apply bg-gradient-to-r from-deep-teal to-[#4fb3bc] text-white font-bold uppercase tracking-wider border border-white/20 transition-all duration-300;
+  }
+  /* 👇 ЗАМЕНЯЕМ СТАРЫЙ HOVER НА НОВЫЙ, БОЛЕЕ ПРОДВИНУТЫЙ */
+  .luxury-button:hover {
+      @apply -translate-y-0.5 shadow-[0_8px_25px_theme(colors.deep-teal/40%)];
+  }
+ /*
+  .luxury-button:hover {
+      @apply shadow-lg -translate-y-0.5;
+  }*/
+  
+  /* === СТИЛИ ДЛЯ КАЛЕНДАРЯ === */
+  .watermark-number {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    -webkit-text-stroke: 1px currentColor;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    letter-spacing: -0.05em;
+  }
+  
+  /* === TELEGRAM WIDGET STYLING === */
+  .telegram-widget-container iframe {
+    border-radius: 8px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+  }
+  
+  .telegram-widget-container iframe:hover {
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
+    transform: translateY(-1px);
+  }
+  
+  /* Класс для контроля заливки watermark */
+  .watermark-number-filled {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    -webkit-text-stroke: 1px currentColor;
+    -webkit-text-fill-color: currentColor;
+    text-shadow: none;
+    letter-spacing: -0.05em;
+    opacity: 0.35; /* Отдельное управление прозрачностью заливки */
+  }
+  
+  .watermark-number-outline {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    -webkit-text-stroke: 1px currentColor;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    letter-spacing: -0.05em;
+    opacity: 0.6; /* Отдельное управление прозрачностью обводки */
+  }
+}
+/* ================================== */
+
+
+
+
+/* === СКРЫВАЕМ СКРОЛЛБАР === */
+
+/* Для Chrome, Safari, Edge и других WebKit-браузеров */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Для Firefox */
+body {
+  scrollbar-width: none;
+}
+
+/* Для Internet Explorer и старых Edge */
+body {
+  -ms-overflow-style: none;
+}
+/* ========================== */
+
+
+
+/* Стили для ВСЕХ скроллбаров в приложении (для Chrome/Edge/Safari) */
+::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 20px !important;
+  border: transparent !important;
+}
+
+/* Прячем кнопки-стрелки, делая их нулевого размера */
+::-webkit-scrollbar-button {
+  height: 0 !important;
+  width: 0 !important;
+  opacity: 0;
+  background-color: transparent;
+}
+
+/* Стили для ВСЕХ скроллбаров в приложении (для Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+body, html {
+  /* ...ваши старые стили... */
+  overflow-x: hidden;
+}

@@ -1,0 +1,57 @@
+# FullHD(1080)
+
+Get-ChildItem -Filter "*.mp4" | ForEach-Object {
+    $inputFile = $_.Name
+    $outputBaseName = $_.BaseName
+    $compressedFile = "${outputBaseName}_compressed.mp4"
+    $webmFile = "${outputBaseName}.webm"
+
+    Write-Host "--- Обрабатываю файл: $inputFile ---"
+
+    # Шаг 1: Сжатие MP4
+    Write-Host "Сжимаю в MP4..."
+    ffmpeg -i $inputFile -vcodec libx264 -crf 28 -an -r 30 -movflags +faststart $compressedFile
+
+    # Шаг 2: Конвертация в WebM
+    Write-Host "Конвертирую в WebM..."
+    ffmpeg -i $compressedFile -c:v libvpx-vp9 -crf 35 -b:v 0 -an -r 30 $webmFile
+
+    Write-Host "--- Готово: $inputFile ---`n"
+}
+
+Write-Host "===== Все видео обработаны! ====="
+
+
+
+
+
+
+
+
+
+# HD(720)
+
+Get-ChildItem -Filter "*.mp4" | ForEach-Object {
+    $inputFile = $_.Name
+    $baseName = $_.BaseName
+
+    Write-Host "--- Обрабатываю файл: $inputFile ---"
+
+    # Создаем сжатую десктоп-версию (MP4 и WebM)
+    Write-Host "Создаю десктоп-версии..."
+    $desktopCompressed = "${baseName}_compressed.mp4"
+    $desktopWebm = "${baseName}.webm"
+    ffmpeg -i $inputFile -vcodec libx264 -crf 28 -an -r 30 -movflags +faststart $desktopCompressed -y
+    ffmpeg -i $desktopCompressed -c:v libvpx-vp9 -crf 35 -b:v 0 -an -r 30 $desktopWebm -y
+
+    # Создаем супер-легкую мобильную версию (MP4 и WebM)
+    Write-Host "Создаю мобильные версии..."
+    $mobileMp4 = "${baseName}_mobile.mp4"
+    $mobileWebm = "${baseName}_mobile.webm"
+    ffmpeg -i $inputFile -vf "scale=1280:-2" -vcodec libx264 -crf 32 -an -r 24 -movflags +faststart $mobileMp4 -y
+    ffmpeg -i $mobileMp4 -c:v libvpx-vp9 -crf 40 -b:v 0 -an -r 24 $mobileWebm -y
+
+    Write-Host "--- Готово: $inputFile ---`n"
+}
+
+Write-Host "===== ВСЕ ВЕРСИИ ВИДЕО СОЗДАНЫ! ====="

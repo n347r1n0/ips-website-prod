@@ -1,0 +1,34 @@
+# supabase/config.toml
+
+#[api]
+#enabled = true
+#port = 54321
+#
+#[db]
+#enabled = true
+#port = 54322
+#
+#[functions]
+#enabled = true
+#port = 54323
+#
+#[edge_functions]
+#enabled = true
+
+
+# supabase/config.toml
+
+# Project ID твоего проекта Supabase (взят из лога ошибки)
+project_id = "jdiutiqdfherukamniqx"
+
+[api]
+port = 54321
+# 'enabled' удалено
+
+[db]
+port = 54322
+# 'enabled' удалено
+
+# Разделы [functions] и [edge_functions] были полностью удалены,
+# так как их синтаксис вызывал ошибку. CLI будет использовать
+# стандартные настройки для деплоя, что нам и нужно.
