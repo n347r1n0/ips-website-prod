@@ -2,51 +2,54 @@
 
 import { supabase } from '@/lib/supabaseClient';
 
-/**
- * Возвращает нормализованный список результатов для завершённого турнира.
- * Учитывает и членов клуба (nickname из club_members), и гостей (guest_name).
- */
-export async function getResultsByTournament(tournamentId) {
-  if (!tournamentId) throw new Error('tournamentId is required');
-  await supabase.auth.getSession();
-
-  const { data, error } = await supabase
-    .from('tournament_participants')
-    .select(`
-      id,
-      player_id,
-      guest_name,
-      final_place,
-      rating_points,
-      club_members:player_id (
-        nickname,
-        full_name
-      )
-    `)
-    .eq('tournament_id', tournamentId)
-    .order('final_place', { ascending: true, nullsFirst: false });
-
-  if (error) throw error;
-
-  return (data ?? []).map((r) => ({
-    id: r.id,
-    place: r.final_place,
-    points: r.rating_points ?? 0,
-    name:
-      (Array.isArray(r.club_members) && r.club_members[0]?.nickname) ||
-      (Array.isArray(r.club_members) && r.club_members[0]?.full_name) ||
-      r.guest_name ||
-      'Unknown',
-    isMember: !!r.player_id,
-  }));
-}
-
 export const participantsAPI = {
+  /**
+   * Возвращает нормализованный список результатов для завершённого турнира.
+   * Учитывает и членов клуба (nickname из club_members), и гостей (guest_name).
+   */
+  async getResultsByTournament(tournamentId) {
+    if (!tournamentId) throw new Error('tournamentId is required');
+    // На всякий случай — чтобы после OAuth/редиректа токен точно был подтянут
+    await supabase.auth.getSession();
+
+    // Пытаемся взять ник из club_members (LEFT JOIN по FK player_id)
+    const { data, error } = await supabase
+      .from('tournament_participants')
+      .select(`
+        id,
+        player_id,
+        guest_name,
+        final_place,
+        rating_points,
+        club_members:player_id (
+          nickname,
+          full_name
+        )
+      `)
+      .eq('tournament_id', tournamentId)
+      .order('final_place', { ascending: true, nullsFirst: false });
+
+    if (error) throw error;
+
+    // Нормализация для удобной отрисовки
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      place: r.final_place,
+      points: r.rating_points ?? 0,
+      name:
+        (Array.isArray(r.club_members) && r.club_members[0]?.nickname) ||
+        (Array.isArray(r.club_members) && r.club_members[0]?.full_name) ||
+        r.guest_name ||
+        'Unknown',
+      isMember: !!r.player_id,
+    }));
+  },
+
   /**
    * Register a user or guest for a tournament
    * @param {Object} params - Registration parameters
    * @param {number} params.tournamentId - Tournament ID
-   * @param {string} [params.userId] - User ID for registered users
+   * @param {string} [params.userId] - User ID for registered users (should be player_id)
    * @param {Object} [params.guestData] - Guest data for non-registered users
    * @param {string} params.guestData.name - Guest name
    * @param {string} params.guestData.contact - Guest contact info
@@ -143,12 +146,6 @@ export const participantsAPI = {
 
     return data || [];
   },
-
-  async getResultsByTournament(tournamentId) {
-    // делегируем существующей функции сверху файла
-    return getResultsByTournament(tournamentId);
-  },
-
 
   /**
    * Update participant status
