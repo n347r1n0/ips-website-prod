@@ -9,36 +9,30 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
   const [error, setError] = useState(null);
   const widgetRef = useRef(null);
   const { signInWithTelegram } = useAuth();
-  //  const { signIn } = useAuth();
 
   useEffect(() => {
-    // Create unique callback function name to avoid conflicts
+    // Уникальное имя коллбэка для onauth
     const callbackName = `onTelegramAuth_${Date.now()}`;
     const origin = window.location.origin;
 
-    // Define the callback function that handles Telegram auth response
+    // Обработчик ответа от Telegram (для "знакомого" браузера)
     window[callbackName] = async (user) => {
       console.log('Telegram auth callback received:', user);
       setIsLoading(true);
       setError(null);
 
       try {
-        // Handle user decline (user will be false)
         if (user === false) {
           console.log('User declined Telegram authorization');
           onAuthDecline?.();
           return;
         }
 
-        // Validate user data
         if (!user || !user.id || !user.first_name || !user.hash) {
           throw new Error('Неполные данные авторизации от Telegram');
         }
 
-        // Use AuthContext method for Telegram authentication
         const result = await signInWithTelegram(user);
-
-        // Success callback
         onAuthSuccess?.(result);
       } catch (err) {
         console.error('Telegram auth error:', err);
@@ -50,28 +44,35 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
       }
     };
 
-    // --- BOT username normalization (no leading "@", fallback var supported)
+    // Нормализуем username бота (поддерживаем обе переменные, убираем "@")
     const rawBot =
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ??
-      import.meta.env.VITE_TELEGRAM_BOT_ID;
+      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? import.meta.env.VITE_TELEGRAM_BOT_ID;
     const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
     if (!BOT) {
       console.error('[TelegramLoginWidget] Missing bot username env');
       setError('Ошибка конфигурации Telegram.');
-      return;
+      return () => {
+        if (window[callbackName]) delete window[callbackName];
+      };
     }
 
-    // --- Build auth URL for first-time login (redirect mode)
+    // На всякий случай: убираем любые старые виджеты на странице (чтобы не было гонок)
+    try {
+      document.querySelectorAll('script[data-telegram-login]').forEach((n) => n.remove());
+    } catch {}
+
+    // Формируем authUrl для редирект-ветки (первичный логин)
     const state = crypto.randomUUID();
     try {
       sessionStorage.setItem('tg_oauth_state', state);
-      // запасной ключ — на случай экзотичных браузеров
       localStorage.setItem('tg_oauth_state_last', state);
     } catch {}
-    const returnTo = '/dashboard'; // при необходимости поменяй
-    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
+    const returnTo = '/dashboard';
+    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(
+      state
+    )}&return_to=${encodeURIComponent(returnTo)}`;
 
-    // Create and configure the Telegram widget script (dual mode)
+    // Создаём виджет: оставляем И onauth, И auth-url (редирект для первого входа)
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.async = true;
@@ -80,30 +81,27 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
     script.setAttribute('data-corner-radius', '8');
     script.setAttribute('data-onauth', `${callbackName}(user)`);
     script.setAttribute('data-request-access', 'write');
-    // ключевая строка для «первичного» логина:
     script.setAttribute('data-auth-url', authUrl);
-    // (опционально) язык виджета
     script.setAttribute('data-lang', 'ru');
 
-    // Insert script into widget container
+    console.log('[TG-WIDGET] bot=', BOT, 'authUrl=', authUrl);
+
     const widgetContainer = widgetRef.current;
     if (widgetContainer) {
       widgetContainer.appendChild(script);
     }
 
-    // Cleanup function
     return () => {
+      // Чистим за собой
       if (widgetContainer && script && widgetContainer.contains(script)) {
         widgetContainer.removeChild(script);
       }
-      // Clean up global callback
       if (window[callbackName]) {
         delete window[callbackName];
       }
     };
-  }, [onAuthSuccess, onAuthError, onAuthDecline]);
+  }, [onAuthSuccess, onAuthError, onAuthDecline, signInWithTelegram]);
 
-  // Show loading state during authentication
   if (isLoading) {
     return (
       <div className="flex items-center justify-center space-x-2 py-3 px-6 bg-[#0088cc] text-white rounded-lg">
@@ -113,7 +111,6 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
     );
   }
 
-  // Show error state if authentication failed
   if (error) {
     return (
       <div className="text-center space-y-2">
@@ -123,10 +120,8 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
         <button
           onClick={() => {
             setError(null);
-            // Force widget recreation by updating key
             if (widgetRef.current) {
               widgetRef.current.innerHTML = '';
-              // Re-trigger useEffect by changing a dependency
               window.location.reload();
             }
           }}
@@ -138,7 +133,7 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
     );
   }
 
-  // Widget container
+  // Контейнер под виджет
   return (
     <div className="flex justify-center">
       <div ref={widgetRef} id="telegram-login-container" className="telegram-widget-container" />
