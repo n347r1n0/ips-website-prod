@@ -52,15 +52,41 @@ export function TelegramCallbackPage() {
       const tgUserData = Object.fromEntries(searchParams.entries());
       const { state, return_to, ...telegramAuthData } = tgUserData;
 
-      // Улучшенная проверка безопасности с "запасным ключом"
+      // Улучшенная проверка безопасности: Storage + Cookie + Telegram-индикаторы
       const expectedState = sessionStorage.getItem('tg_oauth_state');
       const expectedStateBackup = localStorage.getItem('tg_oauth_state_last');
 
+      // читаем state из куки (если есть)
+      const cookieState = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('tg_oauth_state='))
+        ?.split('=')[1];
+
+      // подчистим артефакты (как и раньше) + гасим куку
       sessionStorage.removeItem('tg_oauth_state');
       localStorage.removeItem('tg_oauth_state_last');
+      document.cookie = 'tg_oauth_state=; Max-Age=0; Path=/; SameSite=Lax; Secure';
 
-      if (!state || (state !== expectedState && state !== expectedStateBackup)) {
-        console.error('Invalid state parameter. CSRF attack suspected.');
+      // строгая проверка state по трём источникам
+      const stateMatch =
+        !!state && (state === expectedState || state === expectedStateBackup || state === cookieState);
+
+      // «мягкие» индикаторы реального возврата из Telegram
+      const nowSec = Math.floor(Date.now() / 1000);
+      const authDate = Number(telegramAuthData.auth_date || 0);
+      const hasHash = typeof telegramAuthData.hash === 'string' && telegramAuthData.hash.length > 0;
+      // на сервере у тебя 300 сек — держим тот же порог, чтобы поведение совпадало
+      const freshAuth = authDate > 0 && (nowSec - authDate) <= 300;
+      const fromTelegram = (document.referrer || '').includes('oauth.telegram.org')
+        || (document.referrer || '').includes('t.me')
+        || (document.referrer || '').includes('telegram.org');
+
+      // если state потерялся из-за сворачивания/другого WebView — позволим продолжить,
+      // опираясь на HMAC и свежесть, которые всё равно проверит Edge Function
+      if (!stateMatch && !(hasHash && freshAuth) && !fromTelegram) {
+        console.error('State mismatch and no Telegram indicators. Aborting for safety.', {
+          state, expectedState, expectedStateBackup, cookieState, authDate, ref: document.referrer
+        });
         setError('Ошибка безопасности. Пожалуйста, попробуйте войти снова.');
         setTimeout(() => navigate('/'), 5000);
         return;

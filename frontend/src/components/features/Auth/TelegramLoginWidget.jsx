@@ -27,6 +27,7 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
     try {
       sessionStorage.setItem('tg_oauth_state', state);
       localStorage.setItem('tg_oauth_state_last', state);
+      document.cookie = `tg_oauth_state=${state}; Max-Age=600; Path=/; SameSite=Lax; Secure`;
     } catch {}
 
     const returnTo = '/dashboard';
