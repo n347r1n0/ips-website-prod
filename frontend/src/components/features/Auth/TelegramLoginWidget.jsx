@@ -11,6 +11,25 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
   const { signInWithTelegram } = useAuth();
 
   useEffect(() => {
+    console.log('[TG ENV]',
+      import.meta.env.MODE,
+      import.meta.env.VITE_TELEGRAM_BOT_USERNAME,
+      import.meta.env.VITE_TELEGRAM_BOT_ID
+    );
+
+    const rawBot =
+      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ??
+      import.meta.env.VITE_TELEGRAM_BOT_ID;
+
+    const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
+    console.log('[TG BOT]', { origin: location.origin, rawBot, BOT });
+
+    const state = crypto.randomUUID();
+    const returnTo = '/dashboard';
+    const authUrl = `${location.origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
+    console.log('[TG AUTH URL]', authUrl);
+
+
     // Уникальное имя коллбэка для onauth
     const callbackName = `onTelegramAuth_${Date.now()}`;
     const origin = window.location.origin;
