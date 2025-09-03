@@ -9,7 +9,7 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
   const [error, setError] = useState(null);
   const widgetRef = useRef(null);
   const { signInWithTelegram } = useAuth();
-//  const { signIn } = useAuth();
+  //  const { signIn } = useAuth();
 
   useEffect(() => {
     // Create unique callback function name to avoid conflicts
@@ -37,10 +37,9 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
 
         // Use AuthContext method for Telegram authentication
         const result = await signInWithTelegram(user);
-        
+
         // Success callback
         onAuthSuccess?.(result);
-
       } catch (err) {
         console.error('Telegram auth error:', err);
         const errorMessage = err.message || 'Произошла ошибка при авторизации через Telegram';
@@ -74,7 +73,7 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
 
     // Create and configure the Telegram widget script (dual mode)
     const script = document.createElement('script');
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.async = true;
     script.setAttribute('data-telegram-login', BOT);
     script.setAttribute('data-size', 'large');
