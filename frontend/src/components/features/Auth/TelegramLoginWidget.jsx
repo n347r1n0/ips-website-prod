@@ -1,3 +1,5 @@
+// frontend/src/components/features/Auth/TelegramLoginWidget.jsx
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -12,7 +14,8 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
   useEffect(() => {
     // Create unique callback function name to avoid conflicts
     const callbackName = `onTelegramAuth_${Date.now()}`;
-    
+    const origin = window.location.origin;
+
     // Define the callback function that handles Telegram auth response
     window[callbackName] = async (user) => {
       console.log('Telegram auth callback received:', user);
@@ -48,15 +51,40 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
       }
     };
 
-    // Create and configure the Telegram widget script
+    // --- BOT username normalization (no leading "@", fallback var supported)
+    const rawBot =
+      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ??
+      import.meta.env.VITE_TELEGRAM_BOT_ID;
+    const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
+    if (!BOT) {
+      console.error('[TelegramLoginWidget] Missing bot username env');
+      setError('Ошибка конфигурации Telegram.');
+      return;
+    }
+
+    // --- Build auth URL for first-time login (redirect mode)
+    const state = crypto.randomUUID();
+    try {
+      sessionStorage.setItem('tg_oauth_state', state);
+      // запасной ключ — на случай экзотичных браузеров
+      localStorage.setItem('tg_oauth_state_last', state);
+    } catch {}
+    const returnTo = '/dashboard'; // при необходимости поменяй
+    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
+
+    // Create and configure the Telegram widget script (dual mode)
     const script = document.createElement('script');
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.async = true;
-    script.setAttribute('data-telegram-login', import.meta.env.VITE_TELEGRAM_BOT_USERNAME);
+    script.setAttribute('data-telegram-login', BOT);
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-corner-radius', '8');
     script.setAttribute('data-onauth', `${callbackName}(user)`);
     script.setAttribute('data-request-access', 'write');
+    // ключевая строка для «первичного» логина:
+    script.setAttribute('data-auth-url', authUrl);
+    // (опционально) язык виджета
+    script.setAttribute('data-lang', 'ru');
 
     // Insert script into widget container
     const widgetContainer = widgetRef.current;

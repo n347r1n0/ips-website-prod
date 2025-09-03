@@ -1,239 +1,215 @@
 # **CLAUDE.md**
 
-## 1. Project Overview
-This is the "IPS" poker club ecosystem, which consists of two main parts linked by a shared Supabase database:
+## **1\. Project Overview**
 
-  1. The Website (ips-website): A React web application (Vite, Tailwind CSS) that serves as the club's main hub. It's used for displaying information, managing club members, creating and preparing tournaments, user registration for events, and viewing statistics. This is the codebase you have access to.
+This is the IPS poker club ecosystem, two apps sharing one Supabase database:
 
-  2. The Poker Timer App: A standalone Python (PySide6) desktop application. It acts as the on-site tool during live tournaments. It receives tournament data (players, structure) from the website, manages the tournament process (blinds, levels, player eliminations) autonomously, and sends the results back to the shared database. You do not have access to the Timer's codebase.
+* **Website (ips-website)** — React (Vite, Tailwind). Public hub: info pages, member management, tournament creation & preparation, user registration, stats. This is the only codebase you work on.  
+* **Poker Timer App** — Python (PySide6) desktop app used on-site during live events. It pulls tournament data from the DB, runs the tournament (levels, eliminations), and writes back results. You don’t have access to this code. Infer behavior from DB schema and context I provide.
 
-Your primary role is to assist in the development of the Website. You must infer the Timer's functionality based on its interaction with the shared database schema and the context I provide.
+### **1.1. Project Structure (meaningful folders and files)**
 
-### 1.1. Project Structure (meaningful folders and files)
-```
-ips-website/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── features/
-│   │   │   │   ├── Admin/
-│   │   │   │   │   ├── AdminRoute.jsx
-│   │   │   │   │   ├── BlindsStructureEditor.jsx
-│   │   │   │   │   ├── BlindsStructurePreview.jsx
-│   │   │   │   │   ├── BuyInSettingsEditor.jsx
-│   │   │   │   │   ├── DeleteConfirmModal.jsx
-│   │   │   │   │   └── TournamentModal.jsx
-│   │   │   │   ├── AtmosphereGallery/
-│   │   │   │   ├── Auth/
-│   │   │   │   ├── FAQ/
-│   │   │   │   ├── Hero/
-│   │   │   │   ├── PlayerRatingWidget/
-│   │   │   │   ├── RegistrationForm/
-│   │   │   │   ├── TournamentCalendar/
-│   │   │   │   ├── UserPaths/
-│   │   │   │   └── ValueProps/
-│   │   │   ├── layout/
-│   │   │   │   ├── Footer.jsx
-│   │   │   │   ├── Header.jsx
-│   │   │   │   ├── ScrollToTop.jsx
-│   │   │   │   └── Section.jsx
-│   │   │   └── ui/
-│   │   │       ├── AuthErrorDisplay.jsx
-│   │   │       ├── Button.jsx
-│   │   │       ├── GlassPanel.jsx
-│   │   │       └── Toast.jsx
-│   │   ├── contexts/
-│   │   │   └── AuthContext.jsx
-│   │   ├── hooks/
-│   │   │   ├── useAuthVersion.js
-│   │   │   └── useMediaQuery.js
-│   │   ├── lib/
-│   │   │   ├── debugUtils.js (for debugging only)
-│   │   │   ├── guestStore.js
-│   │   │   ├── participantsAPI.js
-│   │   │   ├── supabaseClient.js
-│   │   │   ├── testTournaments.js (for debugging only)
-│   │   │   └── validatedStorage.js
-│   │   ├── pages/
-│   │   │   ├── AdminDashboardPage.jsx
-│   │   │   ├── DashboardPage.jsx
-│   │   │   ├── HomePage.jsx
-│   │   │   ├── ResetPasswordPage.jsx
-│   │   │   └── TelegramCallbackPage.jsx
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── .env.development.local
-│   ├── .env.local
-│   ├── AUTH-SYSTEM.md
-│   ├── CLAUDE.md
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   ├── vercel.json
-│   └── vite.config.js
-└── supabase/
-  ├── functions/
-  │   └── telegram-auth-callback/
-  │        └── index.ts
-  └── migrations/
-```
+ips-website/  
+├── frontend/  
+│   ├── src/  
+│   │   ├── components/  
+│   │   │   ├── features/  
+│   │   │   │   ├── Admin/  
+│   │   │   │   │   ├── AdminRoute.jsx  
+│   │   │   │   │   ├── BlindsStructureEditor.jsx  
+│   │   │   │   │   ├── BlindsStructurePreview.jsx  
+│   │   │   │   │   ├── BuyInSettingsEditor.jsx  
+│   │   │   │   │   ├── DeleteConfirmModal.jsx  
+│   │   │   │   │   ├── MockTimerModal.jsx  
+│   │   │   │   │   └── TournamentModal.jsx  
+│   │   │   │   ├── AtmosphereGallery/  
+│   │   │   │   ├── Auth/  
+│   │   │   │   ├── FAQ/  
+│   │   │   │   ├── Hero/  
+│   │   │   │   ├── PlayerRatingWidget/  
+│   │   │   │   ├── RegistrationForm/  
+│   │   │   │   ├── TournamentCalendar/  
+│   │   │   │   │   ├── BlindsStructureViewer.jsx  
+│   │   │   │   │   ├── BuyInSummary.jsx  
+│   │   │   │   │   ├── EventMarker.jsx  
+│   │   │   │   │   ├── RegistrationConfirmationModal.jsx  
+│   │   │   │   │   ├── TournamentCalendar.jsx  
+│   │   │   │   │   ├── TournamentListForDay.jsx  
+│   │   │   │   │   └── TournamentResultsModal.jsx  
+│   │   │   ├── layout/ (Header, Footer, etc.)  
+│   │   │   └── ui/ (AuthErrorDisplay, Button, GlassPanel, Toast)  
+│   │   ├── contexts/ (AuthContext.jsx)  
+│   │   ├── hooks/ (useAuthVersion.js, useMediaQuery.js)  
+│   │   ├── lib/ (supabaseClient.js, participantsAPI.js, etc.)  
+│   │   ├── pages/ (HomePage.jsx, AdminDashboardPage.jsx, etc.)  
+│   │   ├── App.jsx, main.jsx, index.css  
+│   ├── tailwind.config.js, postcss.config.js, vite.config.js  
+│   ├── AUTH-SYSTEM.md, CLAUDE.md  
+│   └── .env.local, .env.development.local  
+└── supabase/  
+    ├── functions/  
+    │   ├── telegram-auth-callback/  
+    │   │   └── index.ts  
+    │   └── mock-tournament-ender/  
+    │       └── index.ts  
+    └── migrations/
 
-## 2. Core Technologies
- - **Website (Frontend):** React, Vite, Tailwind CSS, Framer Motion, React Router, Zustand
- - **Website (Backend):** Supabase (PostgreSQL, GoTrue Auth)
- - **Website (Backend Logic):** Supabase Edge Functions (Deno, TypeScript)
- - **JS Client:** @supabase/supabase-js
- - **Poker Timer App:** Python, PySide6
+## **2\. Core Technologies**
 
-## 3. Frontend Development Context
- - **Commands:** `npm run dev`, `npm run build`, `npm run lint`
- - **Key Concepts:** The app is a Single Page Application using react-router-dom. Global auth state is managed in AuthContext.jsx. All authentication UI (login, register, etc.) is handled by a central AuthModal.jsx.
- - **Design System:** The project uses a dark theme with glassmorphism, neumorphism and art-deco gold accents. Always reuse existing UI components from /frontend/src/components/ui and custom utility classes from /frontend/src/index.css to maintain visual consistency.
+* **Frontend:** React, Vite, Tailwind CSS, Framer Motion, React Router, Zustand  
+* **Backend:** Supabase (PostgreSQL, GoTrue Auth), Supabase Edge Functions (Deno, TypeScript)  
+* **JS Client:** @supabase/supabase-js  
+* **Timer App:** Python, PySide6 (no code access here)
 
-## 4. Backend Development Context
- - **Technology:** Server-side logic is implemented as Supabase Edge Functions using Deno and TypeScript
- - **Location:** Functions are located at `/supabase/functions/{function-name}/index.ts`
- - **Key Concepts:** Functions are invoked from the client using `supabase.functions.invoke()`. All secrets must be accessed via server-side environment variables (`Deno.env.get()`), never hardcoded.
+## **3\. Development Workflow & Architecture**
 
-## 5. Rules & Protocols
+* **Decoupled architecture:** Static SPA frontend \+ Supabase backend (DB \+ Edge Functions).  
+* **Environment:** Assume development unless told otherwise.  
+* **DB changes:** All schema changes must be implemented as migration files under /supabase/migrations/. No direct manual edits.  
+* **Allowed work dirs:** /frontend/\*\*, /supabase/functions/\*\*.  
+* **Hard excludes:** /node\_modules/\*\*, /public/\*\*, /dist/\*\*.  
+* The public assets folder exists and is correctly configured — don’t raise concerns about missing images.  
+* No dependency or build/config changes (e.g., vite.config.js, package.json) unless explicitly instructed.
 
-### Guardrails & Scope:
- - Allowed work directories are `/frontend/**` and `/supabase/functions/**`
- - Treat everything outside these directories as out of scope
- - Hard excludes: `/node_modules/**`, `/public/**`, `/dist/**`
- - The public folder with media assets exists and is correctly configured. Do not express concern about missing images.
- - Do not add dependencies or modify build/config files (vite.config.js, package.json, etc.) unless explicitly instructed
+## **4\. Frontend Development Context**
 
-### Interaction Protocol:
- - Always use consistent import paths: `import { supabase } from '@/lib/supabaseClient'`
- - Never use relative imports like `'./supabaseClient'` as they can create multiple client instances
- - Follow existing patterns and code conventions in the project
+* **Commands:** npm run dev, npm run build, npm run lint  
+* **SPA** via react-router-dom.  
+* **Design system:** dark theme, glassmorphism (with a touch of art-deco gold). Reuse components from /components/ui and utility classes from index.css.  
+* **Supabase client:** single shared instance from @/lib/supabaseClient.  
+* Always import with @ alias; never relative paths like './supabaseClient' (prevents duplicate clients).  
+* Before any auth-dependent query, call await supabase.auth.getSession() (handles OAuth redirects).  
+* Use UTC-safe date logic where relevant (e.g., calendar month boundaries).
 
-## 6. System Architecture & Data Model
+## **5\. Backend Development Context (Edge Functions)**
 
-### 6.1. Database Schema
- - **tournaments:** The central table for all tournament events. Created and managed on the Website. Read by the Timer.
- - **club_members:** User profiles, linked to auth.users. Managed on the Website. Contains role information (member/admin).
- - **tournament_participants:** Links users/guests to specific tournaments. Records are created during registration on the Website, and updated with results (status, final_place) by the Timer.
+* Functions live in /supabase/functions/{name}/index.ts.  
+* Call from client via supabase.functions.invoke(name, { body }).  
+* Secrets & keys must come from Deno.env.get(...).  
+* **Two-Client Pattern (Security):**  
+  * **User client** (init with user’s Authorization header) — used only to verify permissions (e.g., check club\_members.role).  
+  * **Admin client** (init with SERVICE\_ROLE\_KEY) — used to perform privileged mutations (UPDATE/INSERT/DELETE) after permission check.  
+* Main functions today: telegram-auth-callback, mock-tournament-ender.
 
-### 6.2. Authentication System (Current - Clean & Simplified)
+## **6\. Rules & Interaction Protocol**
 
-The system supports three authentication methods with a clean, unified approach:
+* Keep changes localized; follow the existing patterns and conventions.  
+* Ask targeted clarifying questions before proposing code that depends on uncertain preconditions (don’t assume user is anonymous/admin/etc.).  
+* Prefer focused effects with correct dependency arrays.  
+* Don’t introduce “global” style overrides that can regress other parts of the app.
 
-**1) Email/Password Registration**
-- Client calls `supabase.auth.signUp` with email, password, and nickname in `options.data`
-- Database trigger `on_auth_user_created` creates a profile in `public.club_members`
-- Registration completed upon email verification
+## **7\. System Architecture & Data Model**
 
-**2) Email/Password Sign-In**
-- Client calls `supabase.auth.signInWithPassword`
-- Session established immediately
+### **7.1. Database Schema (high level)**
 
-**3) Telegram Sign-In (Edge Function)**
-- Client sends Telegram widget data to `/functions/v1/telegram-auth-callback` Edge Function
-- Function verifies HMAC and creates/retrieves user with shadow credentials:
-  - email = `tg_<telegram_id>@telegram.user`
-  - Deterministic password based on telegram_id
-- Returns session tokens, client calls `supabase.auth.setSession(tokens)`
+* **tournaments** — main events table. Includes:  
+  * status with lifecycle constraint (e.g., scheduled, registration\_open, completed, …) enforced via CHECK.  
+  * tournament\_date, settings\_json, and other metadata.  
+* **club\_members** — user profiles linked to auth.users, includes role (member/admin), nickname, etc.  
+* **tournament\_participants** — links users/guests to tournaments. Written at registration; later updated with final\_place, rating\_points.  
+* **global\_player\_ratings\_v1 (VIEW)** — global leaderboard aggregating rating\_points across all completed tournaments (for both members and guests).
 
-### 6.3. Auth State Management
+### **7.2. Authentication System (Current, unified & clean)**
 
-**AuthContext.jsx** provides:
-- `user`: Current authenticated user
-- `profile`: User profile from club_members table (includes role)
-- `loading`: Initial auth loading state
-- `isAdmin`: Boolean helper for admin role checking
-- Auth functions: `signIn`, `signUp`, `signOut`, `signInWithTelegram`
+Auth methods supported:
 
-**useAuthVersion Hook** (`/hooks/useAuthVersion.js`):
-- Global singleton auth version bus on `window.__AUTH_VER_BUS__`
-- Increments version on any auth state change
-- Critical feature: Checks for existing session on bus creation (handles OAuth redirects)
-- Used by components like TournamentCalendar to react to auth changes
+* **Email/Password — Sign-Up**  
+  * Client calls supabase.auth.signUp with email, password, and options.data.nickname.  
+  * DB trigger on\_auth\_user\_created creates a row in public.club\_members.  
+  * Completion after email verification.  
+* **Email/Password — Sign-In**  
+  * Client calls supabase.auth.signInWithPassword.  
+  * Session is established immediately.  
+* **Telegram Sign-In (Edge Function flow)**  
+  * Client posts Telegram widget payload to /functions/v1/telegram-auth-callback.  
+  * Function verifies HMAC and creates/retrieves the user with shadow credentials:  
+    * email \= tg\_\<telegram\_id\>@telegram.user, password is deterministic from telegram\_id.  
+  * Function returns session tokens; client sets them via supabase.auth.setSession(tokens).
 
-**Key Implementation Details:**
-- Profile loading happens **asynchronously** (non-blocking) in auth state change handler
-- Single Supabase client instance across entire app
-- Clean separation: auth state changes complete immediately, profile loads in parallel
+**Auth State Management**
 
-### 6.4. Tournament Calendar Implementation
+* **AuthContext.jsx** provides:  
+  * user, profile (from club\_members), loading, isAdmin, and auth helpers (signIn, signUp, signOut, signInWithTelegram).  
+  * Profile loading is asynchronous/non-blocking inside auth change handlers, so auth events complete immediately.  
+* **useAuthVersion:** a global bus that increments on any auth state change; includes initial session check for post-OAuth mounts. Components that depend on auth should subscribe to authVersion.
 
-**TournamentCalendar.jsx** features:
-- Single focused useEffect with dependencies: `[currentDate, authVersion]`
-- UTC date filtering for proper timezone handling
-- Calls `await supabase.auth.getSession()` before queries (OAuth redirect handling)
-- Clean query: `select('id, name, tournament_date')`
-- Proper loading states and error handling
+### **7.3. Tournament Calendar Implementation (key points)**
 
-## 7. Common Patterns & Best Practices
+* Single focused useEffect with deps \[currentDate, authVersion\].  
+* UTC month window:  
+  * start \= new Date(Date.UTC(y, m, 1)).toISOString()  
+  * end \= new Date(Date.UTC(m \=== 11 ? y \+ 1 : y, (m \+ 1\) % 12, 1)).toISOString()  
+* Query (example):  
+  select('id, name, tournament\_date, status, settings\_json')  
+  .gte('tournament\_date', start).lt('tournament\_date', end)  
+  .order('tournament\_date', { ascending: true })  
+* Proper loading/error states; avoid multiple clients; call await supabase.auth.getSession() before querying.
 
-### Authentication Checks
-```javascript
-const { user, profile, isAdmin } = useAuth();
+## **8\. Common Patterns & Best Practices**
 
-// For admin operations
-if (!isAdmin) {
-  toast.error('Admin privileges required');
-  return;
+**Auth checks (client)**
+
+const { isAdmin } \= useAuth();  
+if (\!isAdmin) {  
+  // show toast / block admin-only action  
 }
-```
 
-### API Calls with Auth
-```javascript
-// Always use the shared client instance
-import { supabase } from '@/lib/supabaseClient';
+**API calls (client)**
 
-// For OAuth redirects, ensure session awareness
-await supabase.auth.getSession();
-const { data, error } = await supabase.from('tournaments').select('*');
-```
+import { supabase } from '@/lib/supabaseClient';  
+await supabase.auth.getSession();  
+const { data, error } \= await supabase.from('tournaments').select('\*');
 
-### Component State Management
-```javascript
-// Use auth version for auth-dependent effects
-const authVersion = useAuthVersion();
+**Two-Client Pattern (edge function)**
 
-useEffect(() => {
-  // This will rerun on auth state changes
-  fetchData();
-}, [authVersion, otherDeps]);
-```
+const url \= Deno.env.get('SUPABASE\_URL')\!;  
+const anon \= Deno.env.get('SUPABASE\_ANON\_KEY')\!;  
+const service \= Deno.env.get('SUPABASE\_SERVICE\_ROLE\_KEY')\!;  
+const authHeader \= req.headers.get('Authorization') ?? '';
 
-## 8. Resolved Issues & Lessons Learned
+const userClient \= createClient(url, anon, {  
+  global: { headers: { Authorization: authHeader } },  
+});  
+const adminClient \= createClient(url, service);
 
-### ✅ **Fixed: Telegram Auth Tournament Visibility Bug**
-**Root Cause:** Blocking `await loadUserProfile()` in auth state change handler prevented auth version from incrementing properly.
+// 1\) verify role with adminClient outside RLS  
+const { data: { user } } \= await userClient.auth.getUser();  
+const { data: me } \= await adminClient  
+  .from('club\_members')  
+  .select('role')  
+  .eq('user\_id', user.id)  
+  .single();
 
-**Solution:** Made profile loading asynchronous (non-blocking) so auth events complete immediately.
+if (\!me || me.role \!== 'admin') return new Response('Forbidden', { status: 403 });
 
-### ✅ **Fixed: Admin Delete Tournament Bug** 
-**Root Cause:** Legacy `validateSession()` function calls that were undefined, causing "j is not a function" errors.
+// 2\) perform mutation with adminClient
 
-**Solution:** Removed all `validateSession()` calls and replaced with clean `isAdmin` checks from AuthContext.
+## **9\. Resolved Issues & Lessons Learned**
 
-### ✅ **Fixed: useAuthVersion OAuth Redirect Issue**
-**Root Cause:** Components mounting after `SIGNED_IN` event didn't trigger auth version increments.
+* **Telegram Auth tournament visibility**  
+  * **Root cause:** blocking await loadUserProfile() in auth handler prevented authVersion increment.  
+  * **Fix:** make profile loading async/non-blocking; let auth events finish immediately.  
+* **Admin delete tournament (“j is not a function”)**  
+  * **Root cause:** legacy validateSession() references.  
+  * **Fix:** remove legacy calls; use isAdmin from AuthContext.  
+* **AuthVersion after OAuth redirect**  
+  * **Root cause:** components mounted post-SIGNED\_IN didn’t increment version.  
+  * **Fix:** initial session check on bus creation.
 
-**Solution:** Added session check on auth version bus creation to handle existing sessions.
+## **10\. Current System Status**
 
-## 9. Current System Status
+**✅ Working:**
 
-**✅ All Core Features Working:**
-- Email & Telegram authentication
-- Tournament calendar display for all user types
-- Admin tournament management (create, edit, delete)
-- Tournament registration flow
-- Profile management
+* Email & Telegram auth  
+* Tournament calendar display  
+* Admin tournament management (create / edit / delete / simulate completion)  
+* Tournament registration flow  
+* Per-tournament results modal (reads tournament\_participants)  
+* Profile management
 
-**🔧 Development Guidelines:**
-- No legacy `validateSession()` calls - use `isAdmin` from AuthContext
-- Always use `@/lib/supabaseClient` import path
-- Auth state changes are handled by useAuthVersion hook
-- Profile loading is asynchronous and non-blocking
-- Single focused effects with proper dependencies
+**🔧 Guidelines:**
 
-The system is now stable and production-ready with clean, maintainable code patterns.
+* Always import Supabase via @/lib/supabaseClient (single client).  
+* Use useAuthVersion for auth-dependent effects.  
+* All DB changes via migrations.  
+* In edge functions, use the Two-Client Pattern.

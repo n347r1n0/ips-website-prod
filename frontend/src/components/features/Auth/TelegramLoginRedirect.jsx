@@ -36,8 +36,12 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
     const origin = window.location.origin;
     const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
 
-    const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
-    if (!botUsername) {
+    // Нормализуем имя бота (убираем "@", поддерживаем старое имя переменной)
+    const rawBot =
+      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ??
+      import.meta.env.VITE_TELEGRAM_BOT_ID;
+    const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
+    if (!BOT) {
       console.error('VITE_TELEGRAM_BOT_USERNAME is not defined');
       if (ref.current) ref.current.innerText = 'Ошибка конфигурации Telegram.';
       return;
@@ -47,7 +51,7 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.async = true;
     script.defer = true;
-    script.setAttribute('data-telegram-login', botUsername);
+    script.setAttribute('data-telegram-login', BOT);
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-auth-url', authUrl);
     script.setAttribute('data-request-access', 'write');
