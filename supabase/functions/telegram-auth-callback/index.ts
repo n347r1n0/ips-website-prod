@@ -6,6 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 const ALLOW_ORIGINS = [
   'https://www.ipoker.style',
   'https://ips-entertain.xyz',
+  'https://www.ips-entertain.xyz',
   'http://localhost:5173',
 ]
 function corsHeaders(req: Request) {

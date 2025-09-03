@@ -11,113 +11,83 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
   const { signInWithTelegram } = useAuth();
 
   useEffect(() => {
-    console.log('[TG ENV]',
-      import.meta.env.MODE,
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME,
-      import.meta.env.VITE_TELEGRAM_BOT_ID
-    );
-
-    const rawBot =
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ??
-      import.meta.env.VITE_TELEGRAM_BOT_ID;
-
-    const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
-    console.log('[TG BOT]', { origin: location.origin, rawBot, BOT });
-
-    const state = crypto.randomUUID();
-    const returnTo = '/dashboard';
-    const authUrl = `${location.origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
-    console.log('[TG AUTH URL]', authUrl);
-
-
-    // Уникальное имя коллбэка для onauth
-    const callbackName = `onTelegramAuth_${Date.now()}`;
     const origin = window.location.origin;
 
-    // Обработчик ответа от Telegram (для "знакомого" браузера)
-    window[callbackName] = async (user) => {
-      console.log('Telegram auth callback received:', user);
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        if (user === false) {
-          console.log('User declined Telegram authorization');
-          onAuthDecline?.();
-          return;
-        }
-
-        if (!user || !user.id || !user.first_name || !user.hash) {
-          throw new Error('Неполные данные авторизации от Telegram');
-        }
-
-        const result = await signInWithTelegram(user);
-        onAuthSuccess?.(result);
-      } catch (err) {
-        console.error('Telegram auth error:', err);
-        const errorMessage = err.message || 'Произошла ошибка при авторизации через Telegram';
-        setError(errorMessage);
-        onAuthError?.(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Нормализуем username бота (поддерживаем обе переменные, убираем "@")
-    const rawBot =
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? import.meta.env.VITE_TELEGRAM_BOT_ID;
-    const BOT = (rawBot ?? '').toString().trim().replace(/^@/, '');
+    // 1) Берём ТОЛЬКО username (виджету нужен username, не numeric id)
+    const rawBot = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
+    const BOT = String(rawBot).trim().replace(/^@/, '');
     if (!BOT) {
-      console.error('[TelegramLoginWidget] Missing bot username env');
+      console.error('[TG] Missing VITE_TELEGRAM_BOT_USERNAME');
       setError('Ошибка конфигурации Telegram.');
-      return () => {
-        if (window[callbackName]) delete window[callbackName];
-      };
+      return;
     }
 
-    // На всякий случай: убираем любые старые виджеты на странице (чтобы не было гонок)
-    try {
-      document.querySelectorAll('script[data-telegram-login]').forEach((n) => n.remove());
-    } catch {}
-
-    // Формируем authUrl для редирект-ветки (первичный логин)
+    // 2) Генерим state и сохраняем (для redirect-ветки)
     const state = crypto.randomUUID();
     try {
       sessionStorage.setItem('tg_oauth_state', state);
       localStorage.setItem('tg_oauth_state_last', state);
     } catch {}
+
     const returnTo = '/dashboard';
-    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(
-      state
-    )}&return_to=${encodeURIComponent(returnTo)}`;
+    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
 
-    // Создаём виджет: оставляем И onauth, И auth-url (редирект для первого входа)
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.async = true;
-    script.setAttribute('data-telegram-login', BOT);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-corner-radius', '8');
-    script.setAttribute('data-onauth', `${callbackName}(user)`);
-    script.setAttribute('data-request-access', 'write');
-    script.setAttribute('data-auth-url', authUrl);
-    script.setAttribute('data-lang', 'ru');
+    // 3) Глобальный обработчик для onauth («знакомый» браузер)
+    const callbackName = `onTelegramAuth_${Date.now()}`;
+    window[callbackName] = async (user) => {
+      console.log('[TG] onauth:', user);
+      setIsLoading(true);
+      setError(null);
+      try {
+        if (user === false) {
+          onAuthDecline?.();
+          return;
+        }
+        if (!user || !user.id || !user.first_name || !user.hash) {
+          throw new Error('Неполные данные авторизации от Telegram');
+        }
+        const result = await signInWithTelegram(user);
+        onAuthSuccess?.(result);
+      } catch (err) {
+        console.error('[TG] auth error:', err);
+        const msg = err.message || 'Произошла ошибка при авторизации через Telegram';
+        setError(msg);
+        onAuthError?.(msg);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    console.log('[TG-WIDGET] bot=', BOT, 'authUrl=', authUrl);
+    // 4) Удалим старые инстансы виджета (на всякий)
+    try {
+      document.querySelectorAll('script[data-telegram-login]').forEach(n => n.remove());
+    } catch {}
 
-    const widgetContainer = widgetRef.current;
-    if (widgetContainer) {
-      widgetContainer.appendChild(script);
-    }
+    // 5) Создаём виджет: оставляем и onauth, и redirect
+    const s = document.createElement('script');
+    s.src = 'https://telegram.org/js/telegram-widget.js?22';
+    s.async = true;
+    s.setAttribute('data-telegram-login', BOT);
+    s.setAttribute('data-size', 'large');
+    s.setAttribute('data-radius', '8'); // согласно докам: data-radius
+    s.setAttribute('data-onauth', `${callbackName}(user)`);
+    s.setAttribute('data-request-access', 'write');
+    s.setAttribute('data-auth-url', authUrl);
+    s.setAttribute('data-lang', 'ru');
+
+    console.log('[TG ENV]', {
+      mode: import.meta.env.MODE,
+      VITE_TELEGRAM_BOT_USERNAME: rawBot,
+      origin
+    });
+    console.log('[TG-WIDGET]', { bot: BOT, authUrl });
+
+    const container = widgetRef.current;
+    if (container) container.appendChild(s);
 
     return () => {
-      // Чистим за собой
-      if (widgetContainer && script && widgetContainer.contains(script)) {
-        widgetContainer.removeChild(script);
-      }
-      if (window[callbackName]) {
-        delete window[callbackName];
-      }
+      if (container && s && container.contains(s)) container.removeChild(s);
+      if (window[callbackName]) delete window[callbackName];
     };
   }, [onAuthSuccess, onAuthError, onAuthDecline, signInWithTelegram]);
 
@@ -139,10 +109,8 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
         <button
           onClick={() => {
             setError(null);
-            if (widgetRef.current) {
-              widgetRef.current.innerHTML = '';
-              window.location.reload();
-            }
+            if (widgetRef.current) widgetRef.current.innerHTML = '';
+            window.location.reload();
           }}
           className="text-sm text-white/70 hover:text-white underline"
         >
@@ -152,10 +120,10 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
     );
   }
 
-  // Контейнер под виджет
   return (
     <div className="flex justify-center">
       <div ref={widgetRef} id="telegram-login-container" className="telegram-widget-container" />
     </div>
   );
 }
+
