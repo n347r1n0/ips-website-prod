@@ -41,7 +41,7 @@ export function TournamentResultsModal({ tournament, onClose }) {
           className="relative w-full max-w-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="glassmorphic-panel rounded-2xl p-8">
+          <div className="glassmorphic-panel rounded-2xl p-8 text-white">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
