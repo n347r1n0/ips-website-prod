@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 // ---------- CORS ----------
 const ALLOW_ORIGINS = [
+  'https://www.ipokerstyle.com',
+  'https://ipokerstyle.com',
   'https://www.ipoker.style',
   'https://ips-entertain.xyz',
   'https://www.ips-entertain.xyz',
