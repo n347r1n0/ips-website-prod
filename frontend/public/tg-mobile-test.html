@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Telegram Mobile Auth Test</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            padding: 20px; 
+            background: #0b0f12; 
+            color: white;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .log { 
+            background: #1a1f24; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin: 10px 0;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        button { 
+            background: #0088cc; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer;
+        }
+        .widget-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telegram Mobile Auth Debug</h1>
+    <div id="logs"></div>
+    
+    <div class="widget-container" id="widget-container">
+        <!-- Telegram widget will be inserted here -->
+    </div>
+    
+    <button onclick="clearLogs()">Clear Logs</button>
+    <button onclick="showStorageState()">Show Storage State</button>
+    
+    <script>
+        // Mobile-specific logging
+        function log(message, data = null) {
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] ${message}`;
+            if (data) {
+                logEntry += `\n${JSON.stringify(data, null, 2)}`;
+            }
+            
+            const logsDiv = document.getElementById('logs');
+            const logElement = document.createElement('div');
+            logElement.className = 'log';
+            logElement.textContent = logEntry;
+            logsDiv.insertBefore(logElement, logsDiv.firstChild);
+            
+            console.log(message, data);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        function showStorageState() {
+            const localStorage_keys = Object.keys(localStorage);
+            const sessionStorage_keys = Object.keys(sessionStorage);
+            const cookies = document.cookie;
+            
+            log('Storage State', {
+                localStorage_keys,
+                sessionStorage_keys,
+                cookies,
+                referrer: document.referrer,
+                userAgent: navigator.userAgent,
+                origin: location.origin
+            });
+        }
+        
+        // Lifecycle logging
+        window.addEventListener('focus', () => log('Window focused'));
+        window.addEventListener('blur', () => log('Window blurred'));
+        window.addEventListener('visibilitychange', () => {
+            log(`Visibility changed to: ${document.visibilityState}`);
+        });
+        
+        // Page load logging
+        log('Page loaded', {
+            userAgent: navigator.userAgent,
+            origin: location.origin,
+            referrer: document.referrer
+        });
+        
+        // Telegram Widget Setup
+        function initTelegramWidget() {
+            // Clean up any existing widgets
+            document.querySelectorAll('script[data-telegram-login]').forEach(s => s.remove());
+            
+            // Generate state for redirect path
+            const state = crypto.randomUUID();
+            sessionStorage.setItem('tg_oauth_state', state);
+            localStorage.setItem('tg_oauth_state_last', state);
+            
+            log('Generated state', { state });
+            
+            const origin = window.location.origin;
+            const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent('/dashboard')}`;
+            
+            log('Widget setup', {
+                origin,
+                authUrl,
+                state
+            });
+            
+            // Create widget with both onauth and redirect
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-widget.js?22';
+            script.async = true;
+            script.setAttribute('data-telegram-login', 'ipokerstyle_bot'); // Replace with actual bot username
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-auth-url', authUrl);
+            script.setAttribute('data-request-access', 'write');
+            script.setAttribute('data-lang', 'ru');
+            
+            document.getElementById('widget-container').appendChild(script);
+            
+            log('Widget script inserted');
+        }
+        
+        // Initialize widget when page loads
+        window.addEventListener('load', () => {
+            log('Window loaded event');
+            initTelegramWidget();
+        });
+        
+        // Track if we're returning from Telegram
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('state') || urlParams.has('id')) {
+            log('Detected callback parameters', Object.fromEntries(urlParams));
+        }
+    </script>
+</body>
+</html>

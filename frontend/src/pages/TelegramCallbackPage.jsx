@@ -41,77 +41,134 @@ export function TelegramCallbackPage() {
   // Main callback processing logic
   useEffect(() => {
     const completeLogin = async () => {
+      // === MOBILE DEBUG TELEMETRY START ===
+      console.log('🔍 [TG-CALLBACK] Page context:', {
+        origin: window.location.origin,
+        referrer: document.referrer,
+        userAgent: navigator.userAgent,
+        isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        visibilityState: document.visibilityState,
+        timestamp: new Date().toISOString()
+      });
+      
+      const urlParams = Object.fromEntries(searchParams.entries());
+      console.log('🔍 [TG-CALLBACK] URL params:', urlParams);
+      
+      // Check storage availability before processing
+      const storageCheck = {
+        sessionStorage: {
+          available: typeof sessionStorage !== 'undefined',
+          tg_oauth_state: null,
+        },
+        localStorage: {
+          available: typeof localStorage !== 'undefined', 
+          tg_oauth_state_last: null,
+        }
+      };
+      
+      try {
+        storageCheck.sessionStorage.tg_oauth_state = sessionStorage.getItem('tg_oauth_state');
+        storageCheck.localStorage.tg_oauth_state_last = localStorage.getItem('tg_oauth_state_last');
+      } catch (e) {
+        console.warn('🔍 [TG-CALLBACK] Storage access error:', e);
+      }
+      
+      console.log('🔍 [TG-CALLBACK] Storage state:', storageCheck);
+      // === MOBILE DEBUG TELEMETRY END ===
+
       // "Быстрый путь": если сессия уже есть, немедленно уходим.
       // Это чинит "зависший" спиннер.
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        console.log('✅ [TG-CALLBACK] Session exists, redirecting immediately');
         navigate(searchParams.get('return_to') || '/dashboard', { replace: true });
         return;
       }
 
       const tgUserData = Object.fromEntries(searchParams.entries());
       const { state, return_to, ...telegramAuthData } = tgUserData;
+      
+      console.log('🔍 [TG-CALLBACK] Telegram auth data received:', {
+        hasState: !!state,
+        hasHash: !!telegramAuthData.hash,
+        hasAuthDate: !!telegramAuthData.auth_date,
+        hasId: !!telegramAuthData.id,
+        authDate: telegramAuthData.auth_date,
+        stateValue: state?.substring(0, 8) + '...' // Log partial state for debugging
+      });
 
-      // Улучшенная проверка безопасности: Storage + Cookie + Telegram-индикаторы
+      // Улучшенная проверка безопасности с "запасным ключом"
       const expectedState = sessionStorage.getItem('tg_oauth_state');
       const expectedStateBackup = localStorage.getItem('tg_oauth_state_last');
 
-      // читаем state из куки (если есть)
-      const cookieState = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('tg_oauth_state='))
-        ?.split('=')[1];
+      console.log('🔍 [TG-CALLBACK] State validation:', {
+        providedState: state?.substring(0, 8) + '...',
+        expectedState: expectedState?.substring(0, 8) + '...',
+        expectedStateBackup: expectedStateBackup?.substring(0, 8) + '...',
+        stateMatches: state === expectedState,
+        backupMatches: state === expectedStateBackup,
+        hasState: !!state
+      });
 
-      // подчистим артефакты (как и раньше) + гасим куку
       sessionStorage.removeItem('tg_oauth_state');
       localStorage.removeItem('tg_oauth_state_last');
-      document.cookie = 'tg_oauth_state=; Max-Age=0; Path=/; SameSite=Lax; Secure';
 
-      // строгая проверка state по трём источникам
-      const stateMatch =
-        !!state && (state === expectedState || state === expectedStateBackup || state === cookieState);
-
-      // «мягкие» индикаторы реального возврата из Telegram
-      const nowSec = Math.floor(Date.now() / 1000);
-      const authDate = Number(telegramAuthData.auth_date || 0);
-      const hasHash = typeof telegramAuthData.hash === 'string' && telegramAuthData.hash.length > 0;
-      // на сервере у тебя 300 сек — держим тот же порог, чтобы поведение совпадало
-      const freshAuth = authDate > 0 && (nowSec - authDate) <= 300;
-      const fromTelegram = (document.referrer || '').includes('oauth.telegram.org')
-        || (document.referrer || '').includes('t.me')
-        || (document.referrer || '').includes('telegram.org');
-
-      // если state потерялся из-за сворачивания/другого WebView — позволим продолжить,
-      // опираясь на HMAC и свежесть, которые всё равно проверит Edge Function
-      if (!stateMatch && !(hasHash && freshAuth) && !fromTelegram) {
-        console.error('State mismatch and no Telegram indicators. Aborting for safety.', {
-          state, expectedState, expectedStateBackup, cookieState, authDate, ref: document.referrer
+      if (!state || (state !== expectedState && state !== expectedStateBackup)) {
+        console.error('❌ [TG-CALLBACK] Invalid state parameter. CSRF attack suspected.', {
+          state: state?.substring(0, 8) + '...',
+          expected: expectedState?.substring(0, 8) + '...',
+          backup: expectedStateBackup?.substring(0, 8) + '...'
         });
         setError('Ошибка безопасности. Пожалуйста, попробуйте войти снова.');
         setTimeout(() => navigate('/'), 5000);
         return;
       }
 
+      console.log('✅ [TG-CALLBACK] State validation passed');
+
       try {
+        console.log('🔄 [TG-CALLBACK] Calling edge function...');
         const { data, error: invokeError } = await supabase.functions.invoke(
           'telegram-auth-callback',
           { body: { tgUserData: telegramAuthData } }
         );
 
+        console.log('🔍 [TG-CALLBACK] Edge function response:', {
+          success: data?.success,
+          hasSessionToken: !!(data?.session_token),
+          hasAccessToken: !!(data?.session_token?.access_token),
+          hasRefreshToken: !!(data?.session_token?.refresh_token),
+          error: invokeError?.message || data?.error
+        });
+
         if (invokeError) throw invokeError;
         if (!data.success) throw new Error(data.error || 'Произошла неизвестная ошибка на сервере');
 
+        console.log('🔄 [TG-CALLBACK] Setting session...');
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: data.session_token.access_token,
           refresh_token: data.session_token.refresh_token,
         });
 
-        if (sessionError) throw sessionError;
+        if (sessionError) {
+          console.error('❌ [TG-CALLBACK] Session set error:', sessionError);
+          throw sessionError;
+        }
+
+        console.log('✅ [TG-CALLBACK] Session established successfully');
+
+        // Verify session was actually set
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 [TG-CALLBACK] Final session check:', {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          expiresAt: session?.expires_at
+        });
 
         navigate(return_to || '/dashboard', { replace: true });
 
       } catch (err) {
-        console.error('Ошибка на странице callback:', err);
+        console.error('❌ [TG-CALLBACK] Complete login error:', err);
         setError(`Ошибка авторизации: ${err.message}. Вы будете перенаправлены.`);
         setTimeout(() => navigate('/'), 5000);
       }

@@ -6,40 +6,43 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    // 1) Жёсткая зачистка любых старых виджетов на странице
-    try {
-      document.querySelectorAll('script[data-telegram-login]').forEach((n) => n.remove());
-    } catch {}
+    // --- ШАГ 1: "ЭКЗОРЦИЗМ" ---
+    // Принудительно удаляем ВСЕ старые экземпляры виджета со страницы,
+    // чтобы гарантировать, что останется только наша, правильная версия.
+    document.querySelectorAll('script[data-telegram-login]').forEach(node => {
+      try {
+        node.remove();
+      } catch (e) {
+        console.warn("TelegramLoginRedirect: Failed to remove old widget script:", e);
+      }
+    });
+
+    // Additional cleanup of any orphaned Telegram callback handlers
     if (window.Telegram) {
       try {
         delete window.Telegram;
-      } catch {}
+      } catch (e) {
+        // Silent fail - some contexts don't allow deletion
+      }
     }
 
-    // 2) Генерим state и кладём в session/localStorage
+    // --- ШАГ 2: "ЗАПАСНОЙ КЛЮЧ" ---
+    // Создаем ключ безопасности и сохраняем его в ДВУХ местах:
+    // sessionStorage (основной) и localStorage (запасной для Я.Браузера).
     const state = crypto.randomUUID();
-    try {
-      sessionStorage.setItem('tg_oauth_state', state);
-      localStorage.setItem('tg_oauth_state_last', state);
-    } catch {}
+    sessionStorage.setItem('tg_oauth_state', state);
+    localStorage.setItem('tg_oauth_state_last', state); // Запасной ключ
 
     const origin = window.location.origin;
-    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(
-      state
-    )}&return_to=${encodeURIComponent(returnTo)}`;
+    const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent(returnTo)}`;
 
-    // 3) Нормализуем username бота (поддерживаем обе переменные, убираем "@")
-    const rawBot =
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? import.meta.env.VITE_TELEGRAM_BOT_ID;
-    const botUsername = (rawBot ?? '').toString().trim().replace(/^@/, '');
-
+    const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
     if (!botUsername) {
-      console.error('[TG-REDIRECT] Missing bot username env');
+      console.error('VITE_TELEGRAM_BOT_USERNAME is not defined');
       if (ref.current) ref.current.innerText = 'Ошибка конфигурации Telegram.';
       return;
     }
 
-    // 4) Создаём виджет в режиме redirect
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.async = true;
@@ -50,8 +53,6 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
     script.setAttribute('data-request-access', 'write');
     script.setAttribute('data-lang', 'ru');
 
-    console.log('[TG-REDIRECT] bot=', botUsername, 'authUrl=', authUrl);
-
     const container = ref.current;
     if (container) {
       container.innerHTML = '';
@@ -59,7 +60,9 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
     }
 
     return () => {
-      if (container) container.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
+      }
     };
   }, [returnTo]);
 
