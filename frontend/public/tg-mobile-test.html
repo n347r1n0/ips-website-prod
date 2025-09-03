@@ -1,150 +1,228 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Telegram Mobile Auth Test</title>
-    <style>
-        body { 
-            font-family: sans-serif; 
-            padding: 20px; 
-            background: #0b0f12; 
-            color: white;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .log { 
-            background: #1a1f24; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin: 10px 0;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        button { 
-            background: #0088cc; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            cursor: pointer;
-        }
-        .widget-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Telegram Mobile Auth Debug</title>
+  <style>
+    :root { --bg:#0b0f12; --panel:#111827; --muted:#9ca3af; --ink:#eaeaea; --brand:#0088cc; --alt:#374151; --warn:#b91c1c; }
+    html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    .wrap{max-width:820px;margin:24px auto;padding:0 16px}
+    h1{font-size:36px;line-height:1.15;margin:0 0 16px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    button{border:0;border-radius:10px;padding:11px 14px;background:var(--brand);color:#fff;font-weight:700}
+    button.alt{background:var(--alt)}
+    button.warn{background:var(--warn)}
+    .panel{background:var(--panel);border:1px solid #1f2937;border-radius:12px;padding:12px}
+    .log{white-space:pre-wrap;word-break:break-word}
+    label{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+    input[type="text"]{background:#0f1620;color:#fff;border:1px solid #223047;border-radius:10px;padding:9px 10px;min-width:220px}
+    .small{font-size:12px;color:var(--muted)}
+    a{color:#60a5fa}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:#0f1620;border:1px solid #233046;border-radius:6px;padding:2px 6px}
+  </style>
 </head>
 <body>
+  <div class="wrap">
     <h1>Telegram Mobile Auth Debug</h1>
-    <div id="logs"></div>
-    
-    <div class="widget-container" id="widget-container">
-        <!-- Telegram widget will be inserted here -->
+
+    <div class="row">
+      <button id="btnSetState">Set State (3 storages)</button>
+      <button id="btnShow" class="alt">Show Storage</button>
+      <button id="btnClearStor" class="alt">Clear Auth Storage</button>
+      <button id="btnClear" class="warn">Clear Logs</button>
     </div>
-    
-    <button onclick="clearLogs()">Clear Logs</button>
-    <button onclick="showStorageState()">Show Storage State</button>
-    
-    <script>
-        // Mobile-specific logging
-        function log(message, data = null) {
-            const timestamp = new Date().toISOString();
-            const logEntry = `[${timestamp}] ${message}`;
-            if (data) {
-                logEntry += `\n${JSON.stringify(data, null, 2)}`;
-            }
-            
-            const logsDiv = document.getElementById('logs');
-            const logElement = document.createElement('div');
-            logElement.className = 'log';
-            logElement.textContent = logEntry;
-            logsDiv.insertBefore(logElement, logsDiv.firstChild);
-            
-            console.log(message, data);
-        }
-        
-        function clearLogs() {
-            document.getElementById('logs').innerHTML = '';
-        }
-        
-        function showStorageState() {
-            const localStorage_keys = Object.keys(localStorage);
-            const sessionStorage_keys = Object.keys(sessionStorage);
-            const cookies = document.cookie;
-            
-            log('Storage State', {
-                localStorage_keys,
-                sessionStorage_keys,
-                cookies,
-                referrer: document.referrer,
-                userAgent: navigator.userAgent,
-                origin: location.origin
-            });
-        }
-        
-        // Lifecycle logging
-        window.addEventListener('focus', () => log('Window focused'));
-        window.addEventListener('blur', () => log('Window blurred'));
-        window.addEventListener('visibilitychange', () => {
-            log(`Visibility changed to: ${document.visibilityState}`);
-        });
-        
-        // Page load logging
-        log('Page loaded', {
-            userAgent: navigator.userAgent,
-            origin: location.origin,
-            referrer: document.referrer
-        });
-        
-        // Telegram Widget Setup
-        function initTelegramWidget() {
-            // Clean up any existing widgets
-            document.querySelectorAll('script[data-telegram-login]').forEach(s => s.remove());
-            
-            // Generate state for redirect path
-            const state = crypto.randomUUID();
-            sessionStorage.setItem('tg_oauth_state', state);
-            localStorage.setItem('tg_oauth_state_last', state);
-            
-            log('Generated state', { state });
-            
-            const origin = window.location.origin;
-            const authUrl = `${origin}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=${encodeURIComponent('/dashboard')}`;
-            
-            log('Widget setup', {
-                origin,
-                authUrl,
-                state
-            });
-            
-            // Create widget with both onauth and redirect
-            const script = document.createElement('script');
-            script.src = 'https://telegram.org/js/telegram-widget.js?22';
-            script.async = true;
-            script.setAttribute('data-telegram-login', 'ipokerstyle_bot'); // Replace with actual bot username
-            script.setAttribute('data-size', 'large');
-            script.setAttribute('data-auth-url', authUrl);
-            script.setAttribute('data-request-access', 'write');
-            script.setAttribute('data-lang', 'ru');
-            
-            document.getElementById('widget-container').appendChild(script);
-            
-            log('Widget script inserted');
-        }
-        
-        // Initialize widget when page loads
-        window.addEventListener('load', () => {
-            log('Window loaded event');
-            initTelegramWidget();
-        });
-        
-        // Track if we're returning from Telegram
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('state') || urlParams.has('id')) {
-            log('Detected callback parameters', Object.fromEntries(urlParams));
-        }
-    </script>
+
+    <div class="panel" style="margin:12px 0">
+      <div class="row">
+        <label>bot (username):
+          <input id="inpBot" type="text" placeholder="IPS_TheRightMove_bot" />
+        </label>
+        <label>bot_id (numeric):
+          <input id="inpBotId" type="text" placeholder="8034843044" />
+        </label>
+        <label><input id="chkSelf" type="checkbox" /> redirect back to this page (diagnostics)</label>
+      </div>
+      <div class="row">
+        <button id="btnInsertWidget">Insert Widget (onauth + redirect)</button>
+        <button id="btnOpenOAuth" class="alt">Open OAuth (direct, bot_id)</button>
+      </div>
+      <div class="small">
+        Подсказка: можно открыть с параметрами, напр. <span class="kbd">/tg-mobile-test.html?bot=IPS_TheRightMove_bot&bot_id=8034843044</span>.
+      </div>
+    </div>
+
+    <div id="widget" class="panel" style="text-align:center"></div>
+
+    <div class="panel" style="margin-top:12px">
+      <div class="small" style="margin-bottom:6px">Logs (latest on top)</div>
+      <div id="log" class="log"></div>
+    </div>
+
+    <p class="small" style="margin-top:10px">
+      Сценарий диагностики: нажми <b>Set State</b> → <b>Insert Widget</b> или <b>Open OAuth</b> →
+      подтверди вход в Telegram → вернись сюда. Нажми <b>Show Storage</b> и смотри, что уцелело:
+      <i>sessionStorage</i> (закладочный), <i>localStorage</i>, <i>cookie</i>. Если sessionStorage пропадает — это и есть причина «Ошибка безопасности» при возврате.
+    </p>
+  </div>
+
+  <script>
+    // ---------- helpers ----------
+    const $ = (id) => document.getElementById(id);
+    const logBox = $('log');
+    const params = Object.fromEntries(new URLSearchParams(location.search).entries());
+    const ORIGIN = location.origin;
+
+    const defaultBot = (params.bot || '').replace(/^@/, '') || 'IPS_TheRightMove_bot';
+    const defaultBotId = (params.bot_id || '').trim();
+
+    $('inpBot').value = defaultBot;
+    $('inpBotId').value = defaultBotId;
+
+    function ts(){ return new Date().toISOString(); }
+    function log(msg, data){
+      const line = `[${ts()}] ${msg}${data ? '\n' + format(data) : ''}`;
+      const div = document.createElement('div');
+      div.textContent = line;
+      div.style.margin = '8px 0';
+      logBox.prepend(div);
+      // дублируем в консоль на всякий
+      if (data) console.log(msg, data); else console.log(msg);
+    }
+    function format(obj){
+      try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+    }
+
+    function setCookie(name, value, maxAgeSec){
+      document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeSec}; Path=/; SameSite=Lax; Secure`;
+    }
+    function getCookie(name){
+      return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || null;
+    }
+    function uuid(){
+      if (crypto.randomUUID) return crypto.randomUUID();
+      const a = crypto.getRandomValues(new Uint8Array(16));
+      a[6] = (a[6] & 0x0f) | 0x40; a[8] = (a[8] & 0x3f) | 0x80;
+      return [...a].map((x,i)=> (i===4||i===6||i===8||i===10?'-':'') + x.toString(16).padStart(2,'0')).join('');
+    }
+
+    // ---------- storage ops ----------
+    function setStateAll(){
+      const state = uuid();
+      try { sessionStorage.setItem('tg_oauth_state', state); } catch {}
+      try { localStorage.setItem('tg_oauth_state_last', state); } catch {}
+      setCookie('tg_oauth_state', state, 600);
+      log('Set state to all storages', { state });
+      showStorage(false);
+    }
+    function clearAuthStorage(){
+      try { sessionStorage.removeItem('tg_oauth_state'); } catch {}
+      try { localStorage.removeItem('tg_oauth_state_last'); } catch {}
+      setCookie('tg_oauth_state', '', 0);
+      log('Cleared tg_* auth markers');
+    }
+    function showStorage(alsoLog=true){
+      let ss=null, ls=null, cs=null;
+      try { ss = sessionStorage.getItem('tg_oauth_state'); } catch {}
+      try { ls = localStorage.getItem('tg_oauth_state_last'); } catch {}
+      cs = getCookie('tg_oauth_state');
+      const snapshot = {
+        origin: location.origin,
+        referrer: document.referrer || '—',
+        visibility: document.visibilityState,
+        userAgent: navigator.userAgent,
+        sessionStorage_tg_oauth_state: ss || '—',
+        localStorage_tg_oauth_state_last: ls || '—',
+        cookie_tg_oauth_state: cs || '—',
+      };
+      if (alsoLog) log('Storage snapshot', snapshot); else console.log(snapshot);
+      return snapshot;
+    }
+
+    // ---------- widget & oauth ----------
+    function insertWidget(){
+      // cleanup previous
+      try { document.querySelectorAll('script[data-telegram-login]').forEach(n => n.remove()); } catch {}
+      $('widget').innerHTML = '';
+
+      const bot = ($('inpBot').value || '').trim().replace(/^@/, '');
+      if (!bot) { log('⚠️ bot (username) is required for widget'); return; }
+
+      // create state + choose redirect target
+      const state = uuid();
+      try { sessionStorage.setItem('tg_oauth_state', state); } catch {}
+      try { localStorage.setItem('tg_oauth_state_last', state); } catch {}
+      setCookie('tg_oauth_state', state, 600);
+
+      const redirectSelf = $('chkSelf').checked;
+      const selfUrl = new URL(location.href);
+      selfUrl.searchParams.set('from_oauth', '1');
+      selfUrl.searchParams.set('cb', Date.now().toString());
+      const authUrl = redirectSelf
+        ? `${selfUrl.origin}${selfUrl.pathname}?${selfUrl.searchParams.toString()}&state=${encodeURIComponent(state)}`
+        : `${ORIGIN}/auth/telegram/callback?state=${encodeURIComponent(state)}&return_to=%2Fdashboard`;
+
+      // unique onauth callback
+      const cbName = `onTelegramAuth_${Date.now()}`;
+      window[cbName] = (user) => {
+        log('ONAUTH callback', user || { user:false });
+      };
+
+      const s = document.createElement('script');
+      s.src = 'https://telegram.org/js/telegram-widget.js?22';
+      s.async = true;
+      s.setAttribute('data-telegram-login', bot);
+      s.setAttribute('data-size', 'large');
+      s.setAttribute('data-onauth', `${cbName}(user)`);
+      s.setAttribute('data-request-access', 'write');
+      s.setAttribute('data-auth-url', authUrl);
+      s.setAttribute('data-lang', 'ru');
+
+      $('widget').appendChild(s);
+      log('Widget inserted', { bot, authUrl, state, redirectSelf });
+    }
+
+    function openOAuthDirect(){
+      const botId = ($('inpBotId').value || '').trim();
+      if (!/^\d+$/.test(botId)) { log('⚠️ bot_id (numeric) is required for direct OAuth'); return; }
+      const url = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(botId)}&origin=${encodeURIComponent(ORIGIN)}&request_access=write&embed=1&lang=ru`;
+      log('Opening OAuth (direct)', { url });
+      location.href = url;
+    }
+
+    // ---------- ui wiring ----------
+    $('btnSetState').onclick = setStateAll;
+    $('btnShow').onclick = () => showStorage(true);
+    $('btnClearStor').onclick = clearAuthStorage;
+    $('btnClear').onclick = () => { $('log').innerHTML = ''; };
+    $('btnInsertWidget').onclick = insertWidget;
+    $('btnOpenOAuth').onclick = openOAuthDirect;
+
+    // ---------- lifecycle logs ----------
+    window.addEventListener('focus', () => log('Window focused'));
+    window.addEventListener('blur', () => log('Window blurred'));
+    document.addEventListener('visibilitychange', () => log('Visibility: ' + document.visibilityState));
+
+    // ---------- landing info ----------
+    (function boot(){
+      log('Page ready', {
+        origin: location.origin,
+        referrer: document.referrer || '—',
+        ua: navigator.userAgent,
+        qs: params
+      });
+
+      // если вернулись сюда через redirectSelf — покажем всё сразу
+      if (params.from_oauth === '1') {
+        log('Returned here after OAuth (diagnostics mode). URL params:', params);
+        showStorage(true);
+      }
+
+      // авто-инициализация полей
+      if (defaultBot || defaultBotId) {
+        log('Prefilled from URL', { bot: defaultBot || '—', bot_id: defaultBotId || '—' });
+      }
+    })();
+  </script>
 </body>
 </html>
