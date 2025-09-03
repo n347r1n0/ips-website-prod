@@ -60,7 +60,7 @@ export function TournamentResultsModal({ tournament, onClose }) {
               <div className="text-gray-400">Данных о результатах пока нет.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm results-table">
                   <thead className="text-left text-gray-400 border-b border-white/10">
                     <tr>
                       <th className="py-2 pr-4">Место</th>

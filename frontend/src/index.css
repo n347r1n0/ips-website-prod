@@ -93,7 +93,10 @@ body {
     text-shadow: none;
     letter-spacing: -0.05em;
   }
-  
+
+  .results-table { color:#fff; }
+  .results-table, .results-table * { -webkit-text-fill-color: initial; }
+
   /* === TELEGRAM WIDGET STYLING === */
   .telegram-widget-container iframe {
     border-radius: 8px;
