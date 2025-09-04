@@ -5,6 +5,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { Loader2 } from 'lucide-react';
 import { GlassPanel } from '@/components/ui/GlassPanel';
+import { iosSafariUtils } from '@/lib/iosSafariUtils';
+import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
 
 export function TelegramCallbackPage() {
   const [error, setError] = useState(null);
@@ -74,6 +76,24 @@ export function TelegramCallbackPage() {
       }
       
       console.log('🔍 [TG-CALLBACK] Storage state:', storageCheck);
+      
+      // iOS Safari specific context validation
+      if (iosSafariUtils.isIOSSafari) {
+        console.log('🍎 [TG-CALLBACK] iOS Safari detected');
+        const contextSuspicious = iosSafariUtils.isContextSuspicious();
+        const storageConsistency = iosSafariUtils.validateStorageConsistency();
+        
+        console.log('🍎 [TG-CALLBACK] iOS context check:', {
+          suspicious: contextSuspicious,
+          storageConsistent: storageConsistency.consistent,
+          reason: storageConsistency.reason
+        });
+
+        if (contextSuspicious || !storageConsistency.consistent) {
+          console.log('🍎 [TG-CALLBACK] iOS context issues detected, refreshing...');
+          iosSafariUtils.refreshContextIfNeeded();
+        }
+      }
       // === MOBILE DEBUG TELEMETRY END ===
 
       // "Быстрый путь": если сессия уже есть, немедленно уходим.
@@ -127,49 +147,44 @@ export function TelegramCallbackPage() {
       console.log('✅ [TG-CALLBACK] State validation passed');
 
       try {
-        console.log('🔄 [TG-CALLBACK] Calling edge function...');
-        const { data, error: invokeError } = await supabase.functions.invoke(
-          'telegram-auth-callback',
-          { body: { tgUserData: telegramAuthData } }
-        );
-
-        console.log('🔍 [TG-CALLBACK] Edge function response:', {
-          success: data?.success,
-          hasSessionToken: !!(data?.session_token),
-          hasAccessToken: !!(data?.session_token?.access_token),
-          hasRefreshToken: !!(data?.session_token?.refresh_token),
-          error: invokeError?.message || data?.error
+        console.log('🔄 [TG-CALLBACK] Using robust auth flow');
+        
+        // Use the robust authentication flow with retries and verification
+        const authResult = await completeTelegramAuthFlow(telegramAuthData, {
+          edgeFunction: {
+            maxAttempts: 3,
+            initialDelay: 1000,
+            timeoutPerAttempt: 15000 // Longer timeout for callback page
+          },
+          session: {
+            maxWaitTime: 20000, // Longer wait for callback context
+            verificationDelay: 300
+          }
         });
 
-        if (invokeError) throw invokeError;
-        if (!data.success) throw new Error(data.error || 'Произошла неизвестная ошибка на сервере');
-
-        console.log('🔄 [TG-CALLBACK] Setting session...');
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.session_token.access_token,
-          refresh_token: data.session_token.refresh_token,
-        });
-
-        if (sessionError) {
-          console.error('❌ [TG-CALLBACK] Session set error:', sessionError);
-          throw sessionError;
+        if (!authResult.success) {
+          throw new Error(authResult.error || 'Authentication flow failed');
         }
 
-        console.log('✅ [TG-CALLBACK] Session established successfully');
+        console.log(`✅ [TG-CALLBACK] Robust auth completed in ${authResult.duration}ms`);
 
-        // Verify session was actually set
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔍 [TG-CALLBACK] Final session check:', {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          expiresAt: session?.expires_at
-        });
-
-        navigate(return_to || '/dashboard', { replace: true });
+        // For callback page, we navigate immediately after successful auth
+        // The auth state change listener will handle the actual redirect
+        const redirectTarget = return_to || '/dashboard';
+        console.log(`🔄 [TG-CALLBACK] Navigating to: ${redirectTarget}`);
+        navigate(redirectTarget, { replace: true });
 
       } catch (err) {
-        console.error('❌ [TG-CALLBACK] Complete login error:', err);
-        setError(`Ошибка авторизации: ${err.message}. Вы будете перенаправлены.`);
+        console.error('❌ [TG-CALLBACK] Robust auth failed:', err);
+        
+        // Enhanced error message for iOS Safari issues
+        let errorMessage = `Ошибка авторизации: ${err.message}`;
+        
+        if (iosSafariUtils.isIOSSafari && err.message.includes('timeout')) {
+          errorMessage += '\n\nПопробуйте снова или используйте другой браузер.';
+        }
+        
+        setError(`${errorMessage}. Вы будете перенаправлены.`);
         setTimeout(() => navigate('/'), 5000);
       }
     };

@@ -56,12 +56,28 @@ class ValidatedStorage {
   }
 
   /**
+   * Detect iOS Safari for enhanced logout procedures
+   */
+  isIOSSafari() {
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS/.test(ua);
+    return isIOS && isSafari;
+  }
+
+  /**
    * Bulletproof logout - purges ALL auth artifacts from both storages
    * Used for logout scenarios where we need to ensure no rehydration
+   * Enhanced with iOS Safari specific clearing
    */
   purgeAllAuthArtifacts() {
     try {
       const removedKeys = [];
+      const isIOS = this.isIOSSafari();
+
+      if (isIOS) {
+        console.log('🍎 ValidatedStorage: iOS Safari detected, using enhanced clearing');
+      }
 
       // Clean localStorage - all sb-* keys and auth variations
       for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -70,7 +86,10 @@ class ValidatedStorage {
           key.startsWith('sb-') ||
           key.includes('supabase') ||
           key.includes('auth-token') ||
-          key === 'tg_oauth_state_last'
+          key === 'tg_oauth_state_last' ||
+          key.startsWith('tg_') ||
+          // iOS Safari specific keys
+          (isIOS && (key.includes('ios_') || key.includes('webkit')))
         )) {
           localStorage.removeItem(key);
           removedKeys.push(key);
@@ -85,7 +104,10 @@ class ValidatedStorage {
           if (key && (
             key.startsWith('sb-') ||
             key.includes('supabase') ||
-            key.includes('auth')
+            key.includes('auth') ||
+            key.startsWith('tg_') ||
+            // iOS Safari specific keys
+            (isIOS && (key.includes('ios_') || key.includes('webkit')))
           )) {
             sessionStorage.removeItem(key);
             removedKeys.push(`session:${key}`);
@@ -93,6 +115,33 @@ class ValidatedStorage {
         }
       } catch (e) {
         // sessionStorage might not be available in some contexts
+        console.warn('ValidatedStorage: sessionStorage clearing failed:', e);
+      }
+
+      // iOS Safari specific clearing
+      if (isIOS) {
+        try {
+          // Clear cookies that might interfere with auth
+          const cookiesToClear = ['tg_oauth_state', 'sb-access-token', 'sb-refresh-token'];
+          cookiesToClear.forEach(cookieName => {
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; domain=${location.hostname}`;
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/`;
+          });
+
+          // Force a storage write test to ensure clearing took effect
+          const testKey = 'logout_clear_test';
+          localStorage.setItem(testKey, 'test');
+          const readBack = localStorage.getItem(testKey);
+          localStorage.removeItem(testKey);
+          
+          if (readBack !== 'test') {
+            console.warn('🍎 ValidatedStorage: iOS storage consistency issue detected after clearing');
+          }
+
+          console.log('🍎 ValidatedStorage: iOS Safari enhanced clearing completed');
+        } catch (e) {
+          console.warn('🍎 ValidatedStorage: iOS Safari enhanced clearing failed:', e);
+        }
       }
 
       console.log(`ValidatedStorage: Purged ${removedKeys.length} auth artifacts for clean logout`);

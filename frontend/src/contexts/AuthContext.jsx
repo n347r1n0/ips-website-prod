@@ -3,6 +3,8 @@
 import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { supabase, authAPI, clubMembersAPI } from '@/lib/supabaseClient';
 import { validatedStorage } from '@/lib/validatedStorage';
+import { iosSafariUtils, addIOSVisibilityTracking } from '@/lib/iosSafariUtils';
+import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
 
 const AuthContext = createContext();
 
@@ -15,6 +17,7 @@ export function AuthProvider({ children }) {
   const profileController = useRef(null);
   const isLoggingOut = useRef(false);
   const lastUserId = useRef(null);
+  const visibilityCleanup = useRef(null);
 
   // Simple profile loading - no complex logic
   const loadUserProfile = async (user) => {
@@ -76,11 +79,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Ultra-simple logout - just clean everything
+  // Enhanced logout with iOS Safari specific handling
   const performCleanLogout = async () => {
     if (isLoggingOut.current) return;
     
-    console.log('🚪 Simple logout...');
+    console.log('🚪 Enhanced logout starting...');
     isLoggingOut.current = true;
 
     // Cancel any ongoing requests
@@ -93,8 +96,16 @@ export function AuthProvider({ children }) {
     lastUserId.current = null;
 
     try {
-      // Clean storage
-      validatedStorage.purgeAllAuthArtifacts();
+      // Enhanced storage cleanup with iOS-specific handling
+      const clearedCount = validatedStorage.purgeAllAuthArtifacts();
+      console.log(`🧹 Logout: Cleared ${clearedCount} storage artifacts`);
+
+      // iOS Safari specific context cleanup
+      if (iosSafariUtils.isIOSSafari) {
+        console.log('🍎 iOS Safari logout: Clearing context markers');
+        iosSafariUtils.clearContextMarkers();
+        iosSafariUtils.clearAuthArtifacts();
+      }
     } catch (e) {
       console.warn('Storage cleanup warning:', e);
     }
@@ -106,15 +117,29 @@ export function AuthProvider({ children }) {
       // Ignore errors
     }
 
-    // Simple page reload after a tiny delay
+    // iOS Safari gets longer delay for storage settling
+    const delay = iosSafariUtils.isIOSSafari ? 300 : 100;
+    
     setTimeout(() => {
-      window.location.replace('/');
-    }, 100);
+      if (iosSafariUtils.isIOSSafari) {
+        console.log('🍎 iOS Safari logout: Force reload with cache bust');
+        // Force reload with cache busting for iOS Safari
+        window.location.href = `${window.location.origin}/?_cb=${Date.now()}`;
+      } else {
+        window.location.replace('/');
+      }
+    }, delay);
   };
 
-  // Minimal auth state handler
+  // Enhanced auth state handler with iOS context tracking
   useEffect(() => {
     console.log('🔧 Auth listener starting...');
+    
+    // Add iOS Safari visibility tracking
+    if (iosSafariUtils.isIOSSafari) {
+      console.log('🍎 iOS Safari detected: Adding visibility tracking');
+      visibilityCleanup.current = addIOSVisibilityTracking();
+    }
     
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -124,13 +149,22 @@ export function AuthProvider({ children }) {
           hasSession: !!session,
           currentProfileId: profile?.id || 'none',
           isLoggingOut: isLoggingOut.current,
-          loading
+          loading,
+          isIOSSafari: iosSafariUtils.isIOSSafari
         });
 
         // Always ignore events during logout
         if (isLoggingOut.current) {
           console.log('🚫 [AUTH-CONTEXT] Ignoring event - logging out');
           return;
+        }
+
+        // iOS Safari: Check for context issues after backgrounding
+        if (iosSafariUtils.isIOSSafari && event === 'SIGNED_IN') {
+          const contextRefreshed = iosSafariUtils.refreshContextIfNeeded();
+          if (contextRefreshed) {
+            console.log('🍎 [AUTH-CONTEXT] iOS context was refreshed due to backgrounding');
+          }
         }
 
         const currentUser = session?.user ?? null;
@@ -178,6 +212,11 @@ export function AuthProvider({ children }) {
 
     return () => {
       authListener?.subscription.unsubscribe();
+      // Clean up iOS visibility tracking
+      if (visibilityCleanup.current) {
+        visibilityCleanup.current();
+        visibilityCleanup.current = null;
+      }
     };
   }, [loading, profile]); // Minimal dependencies
 
@@ -205,34 +244,49 @@ export function AuthProvider({ children }) {
 
   const signInWithTelegram = async (telegramUserData) => {
     setLoading(true);
+    setError(null);
+
     try {
-      setError(null);
+      console.log('🚀 [TG-SIGNIN] Starting reliable Telegram sign-in');
 
-      const { data, error: invokeError } = await supabase.functions.invoke(
-        'telegram-auth-callback',
-        { body: { tgUserData: telegramUserData } }
-      );
-
-      if (invokeError) throw new Error(invokeError.message || 'Telegram auth failed');
-      if (!data.success) throw new Error(data.error || 'Unknown error');
-
-      if (data.session_token) {
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.session_token.access_token,
-          refresh_token: data.session_token.refresh_token,
-        });
-
-        if (sessionError) throw new Error('Failed to set session');
-      } else {
-        setLoading(false);
-        throw new Error('No session token');
+      // iOS Safari: Check context before auth attempt
+      if (iosSafariUtils.isIOSSafari) {
+        console.log('🍎 [TG-SIGNIN] iOS Safari: Checking context before auth');
+        const storageConsistency = iosSafariUtils.validateStorageConsistency();
+        if (!storageConsistency.consistent) {
+          console.warn('🍎 [TG-SIGNIN] iOS Safari storage inconsistency detected:', storageConsistency);
+          iosSafariUtils.refreshContextIfNeeded();
+        }
       }
 
-      return { success: true, ...data };
+      // Use the robust auth flow with retries
+      const result = await completeTelegramAuthFlow(telegramUserData, {
+        edgeFunction: {
+          maxAttempts: 3,
+          initialDelay: 1000,
+          timeoutPerAttempt: 10000
+        },
+        session: {
+          maxWaitTime: 15000,
+          verificationDelay: 200
+        }
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Authentication flow failed');
+      }
+
+      console.log(`✅ [TG-SIGNIN] Reliable sign-in completed in ${result.duration}ms`);
+      
+      // Don't set loading to false here - let the auth state change handle it
+      return { success: true, session: result.session };
+
     } catch (error) {
-      setError(`Telegram error: ${error.message}`);
+      console.error('❌ [TG-SIGNIN] Sign-in failed:', error);
+      const errorMessage = `Telegram auth failed: ${error.message}`;
+      setError(errorMessage);
       setLoading(false);
-      throw error;
+      throw new Error(errorMessage);
     }
   };
 

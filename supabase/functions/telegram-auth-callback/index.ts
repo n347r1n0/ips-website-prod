@@ -9,6 +9,7 @@ const ALLOW_ORIGINS = [
   'https://www.ipoker.style',
   'https://ips-entertain.xyz',
   'https://www.ips-entertain.xyz',
+  'https://n347r1n0.github.io',
   'http://localhost:5173',
 ]
 function corsHeaders(req: Request) {
