@@ -131,21 +131,21 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
               </div>
 
               {/* Mobile navigation - 2x2 grid with icons */}
-              <div className="md:hidden flex items-center">
-                {/* 2x2 navigation grid */}
-                <div className="grid grid-cols-2 gap-3 mr-4">
+              <div className="md:hidden flex items-center justify-center">
+                {/* 2x2 navigation grid with consistent spacing */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 mr-6">
                   {mobileNavigationItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleNavClick(item.id)}
-                      className="text-sm font-medium text-gray-300 hover:text-gold-accent transition-colors duration-300 px-3 py-2 text-center min-w-[80px]"
+                      className="text-sm font-medium text-gray-300 hover:text-gold-accent transition-colors duration-300 px-2 py-1 text-center min-w-[80px]"
                     >
                       {item.label}
                     </button>
                   ))}
                 </div>
                 
-                {/* Right column icons */}
+                {/* Right column icons with consistent spacing */}
                 <div className="flex flex-col gap-3">
                   {/* Home icon */}
                   <button
