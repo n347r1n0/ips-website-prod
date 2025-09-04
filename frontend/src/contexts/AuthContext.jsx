@@ -6,6 +6,7 @@ import { validatedStorage } from '@/lib/validatedStorage';
 import { iosSafariUtils, addIOSVisibilityTracking } from '@/lib/iosSafariUtils';
 import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
 import { preAuthCleanup } from '@/lib/preAuthCleanup';
+import { isRussianMobileContext, russianMobilePreAuthCleanup, enhancedTelegramAuth } from '@/lib/russianMobileAuthFix';
 
 const AuthContext = createContext();
 
@@ -261,44 +262,68 @@ export function AuthProvider({ children }) {
     try {
       console.log('🚀 [TG-SIGNIN] Starting reliable Telegram sign-in');
 
-      // COMPREHENSIVE PRE-AUTH CLEANUP
-      console.log('🧹 [TG-SIGNIN] Running comprehensive pre-auth cleanup...');
-      await preAuthCleanup({ 
-        preserveGuestData: true,
-        preserveRedirectUrl: true 
-      });
+      // Check if Russian mobile context requires enhanced auth
+      const isRussianMobile = isRussianMobileContext();
+      console.log(`📱 [TG-SIGNIN] Russian mobile context: ${isRussianMobile}`);
 
-      // iOS Safari: Check context after cleanup
-      if (iosSafariUtils.isIOSSafari) {
-        console.log('🍎 [TG-SIGNIN] iOS Safari: Checking context after cleanup');
-        const storageConsistency = iosSafariUtils.validateStorageConsistency();
-        if (!storageConsistency.consistent) {
-          console.warn('🍎 [TG-SIGNIN] iOS Safari storage inconsistency detected:', storageConsistency);
-          iosSafariUtils.refreshContextIfNeeded();
+      if (isRussianMobile) {
+        // Use enhanced Russian mobile auth flow
+        console.log('🇷🇺 [TG-SIGNIN] Using enhanced Russian mobile auth...');
+        
+        // Enhanced pre-auth cleanup for Russian mobile
+        await russianMobilePreAuthCleanup();
+        
+        // Use enhanced Telegram auth with Russian mobile fixes
+        const result = await enhancedTelegramAuth(telegramUserData, {
+          maxRetries: 6,
+          baseDelay: 1500,
+          enableMobileWorkarounds: true
+        });
+
+        console.log(`✅ [TG-SIGNIN] Russian mobile auth completed in ${result.duration}ms`);
+        return { success: true, session: result.session };
+
+      } else {
+        // Standard auth flow for non-Russian mobile users
+        console.log('🌍 [TG-SIGNIN] Using standard auth flow...');
+        
+        // COMPREHENSIVE PRE-AUTH CLEANUP
+        console.log('🧹 [TG-SIGNIN] Running comprehensive pre-auth cleanup...');
+        await preAuthCleanup({ 
+          preserveGuestData: true,
+          preserveRedirectUrl: true 
+        });
+
+        // iOS Safari: Check context after cleanup
+        if (iosSafariUtils.isIOSSafari) {
+          console.log('🍎 [TG-SIGNIN] iOS Safari: Checking context after cleanup');
+          const storageConsistency = iosSafariUtils.validateStorageConsistency();
+          if (!storageConsistency.consistent) {
+            console.warn('🍎 [TG-SIGNIN] iOS Safari storage inconsistency detected:', storageConsistency);
+            iosSafariUtils.refreshContextIfNeeded();
+          }
         }
-      }
 
-      // Use the robust auth flow with retries
-      const result = await completeTelegramAuthFlow(telegramUserData, {
-        edgeFunction: {
-          maxAttempts: 3,
-          initialDelay: 1000,
-          timeoutPerAttempt: 10000
-        },
-        session: {
-          maxWaitTime: 15000,
-          verificationDelay: 200
+        // Use the robust auth flow with retries
+        const result = await completeTelegramAuthFlow(telegramUserData, {
+          edgeFunction: {
+            maxAttempts: 3,
+            initialDelay: 1000,
+            timeoutPerAttempt: 10000
+          },
+          session: {
+            maxWaitTime: 15000,
+            verificationDelay: 200
+          }
+        });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Authentication flow failed');
         }
-      });
 
-      if (!result.success) {
-        throw new Error(result.error || 'Authentication flow failed');
+        console.log(`✅ [TG-SIGNIN] Standard auth completed in ${result.duration}ms`);
+        return { success: true, session: result.session };
       }
-
-      console.log(`✅ [TG-SIGNIN] Reliable sign-in completed in ${result.duration}ms`);
-      
-      // Don't set loading to false here - let the auth state change handle it
-      return { success: true, session: result.session };
 
     } catch (error) {
       console.error('❌ [TG-SIGNIN] Sign-in failed:', error);

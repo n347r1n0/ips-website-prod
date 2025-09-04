@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { preAuthCleanup, generateFreshOAuthState } from '@/lib/preAuthCleanup';
+import { isRussianMobileContext, russianMobilePreAuthCleanup } from '@/lib/russianMobileAuthFix';
 
 export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
   const ref = useRef(null);
@@ -9,12 +10,22 @@ export function TelegramLoginRedirect({ returnTo = '/dashboard' }) {
   useEffect(() => {
     const initTelegramWidget = async () => {
       try {
-        // --- COMPREHENSIVE PRE-AUTH CLEANUP ---
-        console.log('🧹 [TG-WIDGET] Running comprehensive pre-auth cleanup...');
-        await preAuthCleanup({
-          preserveGuestData: true,
-          preserveRedirectUrl: true
-        });
+        // Check if Russian mobile context requires enhanced cleanup
+        const isRussianMobile = isRussianMobileContext();
+        console.log(`📱 [TG-WIDGET] Russian mobile context: ${isRussianMobile}`);
+
+        if (isRussianMobile) {
+          // --- ENHANCED RUSSIAN MOBILE PRE-AUTH CLEANUP ---
+          console.log('🇷🇺 [TG-WIDGET] Running enhanced Russian mobile pre-auth cleanup...');
+          await russianMobilePreAuthCleanup();
+        } else {
+          // --- COMPREHENSIVE PRE-AUTH CLEANUP ---
+          console.log('🧹 [TG-WIDGET] Running comprehensive pre-auth cleanup...');
+          await preAuthCleanup({
+            preserveGuestData: true,
+            preserveRedirectUrl: true
+          });
+        }
 
         // --- ШАГ 1: "ЭКЗОРЦИЗМ" ---
         // Принудительно удаляем ВСЕ старые экземпляры виджета со страницы,

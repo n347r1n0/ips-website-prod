@@ -8,6 +8,7 @@ import { GlassPanel } from '@/components/ui/GlassPanel';
 import { iosSafariUtils } from '@/lib/iosSafariUtils';
 import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
 import { verifyAndConsumeOAuthState } from '@/lib/preAuthCleanup';
+import { isRussianMobileContext, enhancedTelegramAuth, russianMobilePreAuthCleanup } from '@/lib/russianMobileAuthFix';
 
 export function TelegramCallbackPage() {
   const [error, setError] = useState(null);
@@ -154,26 +155,49 @@ export function TelegramCallbackPage() {
       }
 
       try {
-        console.log('🔄 [TG-CALLBACK] Using robust auth flow');
-        
-        // Use the robust authentication flow with retries and verification
-        const authResult = await completeTelegramAuthFlow(telegramAuthData, {
-          edgeFunction: {
-            maxAttempts: 3,
-            initialDelay: 1000,
-            timeoutPerAttempt: 15000 // Longer timeout for callback page
-          },
-          session: {
-            maxWaitTime: 20000, // Longer wait for callback context
-            verificationDelay: 300
-          }
-        });
+        // Check if Russian mobile context requires enhanced auth
+        const isRussianMobile = isRussianMobileContext();
+        console.log(`📱 [TG-CALLBACK] Russian mobile context: ${isRussianMobile}`);
+
+        let authResult;
+
+        if (isRussianMobile) {
+          // Use enhanced Russian mobile auth flow
+          console.log('🇷🇺 [TG-CALLBACK] Using enhanced Russian mobile auth...');
+          
+          // Enhanced pre-auth cleanup for Russian mobile (callback context)
+          await russianMobilePreAuthCleanup();
+          
+          // Use enhanced Telegram auth with Russian mobile fixes
+          authResult = await enhancedTelegramAuth(telegramAuthData, {
+            maxRetries: 6,
+            baseDelay: 2000, // Longer delay for callback context
+            enableMobileWorkarounds: true
+          });
+
+        } else {
+          // Standard robust auth flow for non-Russian mobile users
+          console.log('🌍 [TG-CALLBACK] Using standard robust auth flow');
+          
+          // Use the robust authentication flow with retries and verification
+          authResult = await completeTelegramAuthFlow(telegramAuthData, {
+            edgeFunction: {
+              maxAttempts: 3,
+              initialDelay: 1000,
+              timeoutPerAttempt: 15000 // Longer timeout for callback page
+            },
+            session: {
+              maxWaitTime: 20000, // Longer wait for callback context
+              verificationDelay: 300
+            }
+          });
+        }
 
         if (!authResult.success) {
           throw new Error(authResult.error || 'Authentication flow failed');
         }
 
-        console.log(`✅ [TG-CALLBACK] Robust auth completed in ${authResult.duration}ms`);
+        console.log(`✅ [TG-CALLBACK] Auth completed in ${authResult.duration}ms (Russian mobile: ${isRussianMobile})`);
 
         // For callback page, we navigate immediately after successful auth
         // The auth state change listener will handle the actual redirect
