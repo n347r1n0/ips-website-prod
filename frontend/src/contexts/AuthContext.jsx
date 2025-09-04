@@ -5,6 +5,7 @@ import { supabase, authAPI, clubMembersAPI } from '@/lib/supabaseClient';
 import { validatedStorage } from '@/lib/validatedStorage';
 import { iosSafariUtils, addIOSVisibilityTracking } from '@/lib/iosSafariUtils';
 import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
+import { preAuthCleanup } from '@/lib/preAuthCleanup';
 
 const AuthContext = createContext();
 
@@ -220,9 +221,12 @@ export function AuthProvider({ children }) {
     };
   }, [loading, profile]); // Minimal dependencies
 
-  // Simple auth functions
+  // Enhanced auth functions with pre-cleanup
   const signIn = async (data) => {
     try {
+      // Clean up any stale auth state before attempting login
+      await preAuthCleanup({ preserveGuestData: true });
+      
       const result = await supabase.auth.signInWithPassword(data);
       if (result.error) {
         setError(result.error.message);
@@ -235,11 +239,19 @@ export function AuthProvider({ children }) {
   };
 
   const signUp = async (data) => {
-    const result = await supabase.auth.signUp(data);
-    if (result.error) {
-      setError(result.error.message);
+    try {
+      // Clean up any stale auth state before attempting signup
+      await preAuthCleanup({ preserveGuestData: true });
+      
+      const result = await supabase.auth.signUp(data);
+      if (result.error) {
+        setError(result.error.message);
+      }
+      return result;
+    } catch (error) {
+      setError(error.message);
+      throw error;
     }
-    return result;
   };
 
   const signInWithTelegram = async (telegramUserData) => {
@@ -249,9 +261,16 @@ export function AuthProvider({ children }) {
     try {
       console.log('🚀 [TG-SIGNIN] Starting reliable Telegram sign-in');
 
-      // iOS Safari: Check context before auth attempt
+      // COMPREHENSIVE PRE-AUTH CLEANUP
+      console.log('🧹 [TG-SIGNIN] Running comprehensive pre-auth cleanup...');
+      await preAuthCleanup({ 
+        preserveGuestData: true,
+        preserveRedirectUrl: true 
+      });
+
+      // iOS Safari: Check context after cleanup
       if (iosSafariUtils.isIOSSafari) {
-        console.log('🍎 [TG-SIGNIN] iOS Safari: Checking context before auth');
+        console.log('🍎 [TG-SIGNIN] iOS Safari: Checking context after cleanup');
         const storageConsistency = iosSafariUtils.validateStorageConsistency();
         if (!storageConsistency.consistent) {
           console.warn('🍎 [TG-SIGNIN] iOS Safari storage inconsistency detected:', storageConsistency);

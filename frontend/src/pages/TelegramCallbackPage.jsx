@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { iosSafariUtils } from '@/lib/iosSafariUtils';
 import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
+import { verifyAndConsumeOAuthState } from '@/lib/preAuthCleanup';
 
 export function TelegramCallbackPage() {
   const [error, setError] = useState(null);
@@ -117,34 +118,40 @@ export function TelegramCallbackPage() {
         stateValue: state?.substring(0, 8) + '...' // Log partial state for debugging
       });
 
-      // Улучшенная проверка безопасности с "запасным ключом"
-      const expectedState = sessionStorage.getItem('tg_oauth_state');
-      const expectedStateBackup = localStorage.getItem('tg_oauth_state_last');
+      // Enhanced OAuth state validation with TTL and comprehensive cleanup
+      console.log('🔐 [TG-CALLBACK] Verifying OAuth state...');
+      const stateValid = verifyAndConsumeOAuthState(state);
+      
+      // Fallback to legacy state validation for backward compatibility
+      if (!stateValid) {
+        console.log('🔄 [TG-CALLBACK] TTL state failed, trying legacy validation...');
+        
+        const expectedState = sessionStorage.getItem('tg_oauth_state');
+        const expectedStateBackup = localStorage.getItem('tg_oauth_state_last');
 
-      console.log('🔍 [TG-CALLBACK] State validation:', {
-        providedState: state?.substring(0, 8) + '...',
-        expectedState: expectedState?.substring(0, 8) + '...',
-        expectedStateBackup: expectedStateBackup?.substring(0, 8) + '...',
-        stateMatches: state === expectedState,
-        backupMatches: state === expectedStateBackup,
-        hasState: !!state
-      });
-
-      sessionStorage.removeItem('tg_oauth_state');
-      localStorage.removeItem('tg_oauth_state_last');
-
-      if (!state || (state !== expectedState && state !== expectedStateBackup)) {
-        console.error('❌ [TG-CALLBACK] Invalid state parameter. CSRF attack suspected.', {
-          state: state?.substring(0, 8) + '...',
-          expected: expectedState?.substring(0, 8) + '...',
-          backup: expectedStateBackup?.substring(0, 8) + '...'
+        console.log('🔍 [TG-CALLBACK] Legacy state validation:', {
+          providedState: state?.substring(0, 8) + '...',
+          expectedState: expectedState?.substring(0, 8) + '...',
+          expectedStateBackup: expectedStateBackup?.substring(0, 8) + '...',
+          stateMatches: state === expectedState,
+          backupMatches: state === expectedStateBackup,
+          hasState: !!state
         });
-        setError('Ошибка безопасности. Пожалуйста, попробуйте войти снова.');
-        setTimeout(() => navigate('/'), 5000);
-        return;
-      }
 
-      console.log('✅ [TG-CALLBACK] State validation passed');
+        sessionStorage.removeItem('tg_oauth_state');
+        localStorage.removeItem('tg_oauth_state_last');
+
+        if (!state || (state !== expectedState && state !== expectedStateBackup)) {
+          console.error('❌ [TG-CALLBACK] Both TTL and legacy state validation failed. CSRF attack suspected.');
+          setError('Ошибка безопасности. Пожалуйста, попробуйте войти снова.');
+          setTimeout(() => navigate('/'), 5000);
+          return;
+        }
+        
+        console.log('✅ [TG-CALLBACK] Legacy state validation passed');
+      } else {
+        console.log('✅ [TG-CALLBACK] TTL OAuth state validation passed');
+      }
 
       try {
         console.log('🔄 [TG-CALLBACK] Using robust auth flow');

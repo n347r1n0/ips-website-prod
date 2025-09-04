@@ -6,7 +6,8 @@ import { Trophy, Star, Zap, Target } from 'lucide-react';
 
 export function EventMarker({ tournament }) {
   const getEventStyles = () => {
-    const tournamentType = tournament.settings_json?.tournament_type || tournament.type;
+    // Check the new database field first, then fall back to legacy settings_json
+    const tournamentType = tournament.tournament_type || tournament.settings_json?.tournament_type || tournament.type;
     switch (tournamentType) {
       case 'Стандартный':
         return {

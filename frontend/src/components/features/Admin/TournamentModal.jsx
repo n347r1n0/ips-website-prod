@@ -16,8 +16,10 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
     name: '',
     tournament_date: '',
     is_active_for_registration: true,
+    tournament_type: 'Стандартный', // Calendar visual type
+    is_major: false, // Special tournament flag
     settings_json: {
-      tournament_type: 'Freezeout',
+      tournament_format: 'Freezeout', // Poker play format (renamed from tournament_type)
       buy_in_cost: 0,
       blinds_structure: [],
       buy_in_settings: {}
@@ -43,8 +45,10 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
           name: tournament.name || '',
           tournament_date: localDate,
           is_active_for_registration: tournament.is_active_for_registration ?? true,
+          tournament_type: tournament.tournament_type || 'Стандартный', // Calendar visual type
+          is_major: tournament.is_major || false, // Special tournament flag
           settings_json: {
-            tournament_type: existingSettings.tournament_type || 'Freezeout',
+            tournament_format: existingSettings.tournament_format || existingSettings.tournament_type || 'Freezeout', // Poker format
             buy_in_cost: existingSettings.buy_in_cost || 0,
             blinds_structure: existingSettings.blinds_structure || [],
             buy_in_settings: existingSettings.buy_in_settings || {}
@@ -55,8 +59,10 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
           name: '',
           tournament_date: '',
           is_active_for_registration: true,
+          tournament_type: 'Стандартный', // Calendar visual type
+          is_major: false, // Special tournament flag
           settings_json: {
-            tournament_type: 'Freezeout',
+            tournament_format: 'Freezeout', // Poker format
             buy_in_cost: 0,
             blinds_structure: [],
             buy_in_settings: {}
@@ -100,6 +106,8 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
         name: formData.name.trim(),
         tournament_date: formData.tournament_date,
         is_active_for_registration: formData.is_active_for_registration,
+        tournament_type: formData.tournament_type, // Calendar visual type
+        is_major: formData.is_major, // Special tournament flag
         settings_json: formData.settings_json
       };
 
@@ -198,17 +206,48 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Tournament Type
+                Calendar Icon Type
               </label>
               <select
-                value={formData.settings_json.tournament_type}
-                onChange={(e) => handleSettingsChange({ tournament_type: e.target.value })}
+                value={formData.tournament_type}
+                onChange={(e) => handleInputChange('tournament_type', e.target.value)}
+                className="w-full glassmorphic-panel border border-white/30 rounded-xl px-4 py-3 text-white focus:border-gold-accent focus:ring-2 focus:ring-gold-accent/20 focus:outline-none"
+              >
+                <option value="Стандартный">🎯 Стандартный (Target Icon - Teal)</option>
+                <option value="Специальный">⭐ Специальный (Star Icon - Gold)</option>
+                <option value="Фриролл">⚡ Фриролл (Lightning Icon - Red)</option>
+                <option value="Рейтинговый">🏆 Рейтинговый (Trophy Icon - Gold)</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">Determines the icon and color shown on the calendar</p>
+            </div>
+
+            <div>
+              <label className="flex items-center space-x-3 text-gray-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.is_major}
+                  onChange={(e) => handleInputChange('is_major', e.target.checked)}
+                  className="w-4 h-4 text-gold-accent bg-transparent border-2 border-white/30 rounded focus:ring-gold-accent focus:ring-2"
+                />
+                <span>Major Tournament</span>
+              </label>
+              <p className="text-xs text-gray-400 mt-1 ml-7">Adds pulsing animation and special effects to calendar</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Poker Format
+              </label>
+              <select
+                value={formData.settings_json.tournament_format}
+                onChange={(e) => handleSettingsChange({ tournament_format: e.target.value })}
                 className="w-full glassmorphic-panel border border-white/30 rounded-xl px-4 py-3 text-white focus:border-gold-accent focus:ring-2 focus:ring-gold-accent/20 focus:outline-none"
               >
                 <option value="Freezeout">Freezeout</option>
                 <option value="Re-buy">Re-buy</option>
                 <option value="Re-entry">Re-entry</option>
               </select>
+              <p className="text-xs text-gray-400 mt-1">Poker play style (separate from calendar appearance)</p>
             </div>
 
             <div className="flex space-x-4">
