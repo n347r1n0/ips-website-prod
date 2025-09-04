@@ -19,7 +19,6 @@ export function TournamentCalendar() {
   const [highlightedTournamentId, setHighlightedTournamentId] = useState(null);
   const [selectedDayTournaments, setSelectedDayTournaments] = useState(null);
   const [showUpcomingModal, setShowUpcomingModal] = useState(false);
-  const [allUpcomingTournaments, setAllUpcomingTournaments] = useState([]);
   
   // Auth version that increments on any auth state change
   const authVersion = useAuthVersion();
@@ -42,8 +41,11 @@ export function TournamentCalendar() {
 
         const y = currentDate.getFullYear();
         const m = currentDate.getMonth();
+        
+        // Начало окна - 1-е число видимого месяца
         const start = new Date(y, m, 1).toISOString();
-        const end = new Date(m === 11 ? y + 1 : y, (m + 1) % 12, 1).toISOString();
+        // Конец окна - через 3 месяца вперед, чтобы всегда были данные для агрегатора
+        const end = new Date(y, m + 3, 1).toISOString();
 
         const { data, error } = await supabase
           .from('tournaments')
@@ -105,7 +107,7 @@ export function TournamentCalendar() {
         }
       }
     }
-  }, [searchParams, tournaments, allUpcomingTournaments]); // Remove currentDate from dependencies
+  }, [searchParams, tournaments, currentDate]); // Removed allUpcomingTournaments dependency to prevent loops
 
   const { month, year, firstDayOfMonth, daysInMonth } = useMemo(() => {
     const date = new Date(currentDate);
@@ -141,37 +143,14 @@ export function TournamentCalendar() {
     }
   };
 
-  const highlightedTournament = tournaments.find(t => t.id === highlightedTournamentId);
 
-  // Load upcoming tournaments beyond current month for the aggregator button
-  useEffect(() => {
-    const loadUpcomingTournaments = async () => {
-      try {
-        await supabase.auth.getSession();
-        
-        const now = new Date().toISOString();
-        const threeMonthsLater = new Date();
-        threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
-        const endDate = threeMonthsLater.toISOString();
-
-        const { data, error } = await supabase
-          .from('tournaments')
-          .select('id, name, tournament_date, status, settings_json, tournament_type, is_major')
-          .gte('tournament_date', now)
-          .lte('tournament_date', endDate)
-          .neq('status', 'completed')
-          .order('tournament_date', { ascending: true })
-          .limit(5);
-
-        if (error) throw error;
-        setAllUpcomingTournaments(data ?? []);
-      } catch (error) {
-        console.warn('Failed to load upcoming tournaments:', error);
-      }
-    };
-
-    loadUpcomingTournaments();
-  }, [authVersion]);
+  // --- ИЗМЕНЕНИЕ №2: Список ближайших турниров теперь ВЫЧИСЛЯЕТСЯ из уже загруженных данных ---
+  const allUpcomingTournaments = useMemo(() => {
+    const now = new Date();
+    return tournaments
+      .filter(t => new Date(t.tournament_date) >= now && t.status !== 'completed')
+      .slice(0, 5); // Сортировка не нужна, так как данные уже отсортированы из БД
+  }, [tournaments]);
 
   const hasUpcomingTournaments = allUpcomingTournaments.length > 0;
 

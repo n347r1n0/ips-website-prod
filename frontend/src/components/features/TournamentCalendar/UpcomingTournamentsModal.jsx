@@ -11,45 +11,51 @@ import { useToast } from '@/components/ui/Toast';
 
 export function UpcomingTournamentsModal({ tournaments, onClose }) {
   const [selectedTournament, setSelectedTournament] = useState(null);
-  const [userRegistrations, setUserRegistrations] = useState(new Set());
-  const [loading, setLoading] = useState(false);
+  const [userRegistrationIds, setUserRegistrationIds] = useState(new Set());
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { guestData } = useGuestStore();
   const toast = useToast();
 
-  // Load user's existing registrations
+  // --- ИЗМЕНЕНИЕ: Эффективная загрузка всех регистраций одним запросом ---
   useEffect(() => {
-    const loadRegistrations = async () => {
-      if (!user && !guestData) return;
+    let cancelled = false;
 
+    const loadRegistrations = async () => {
+      // Не запускаем, если нет турниров или данных о пользователе/госте
+      if (tournaments.length === 0 || (!user && !guestData?.name)) {
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
       try {
-        const registrations = new Set();
+        const tournamentIds = tournaments.map(t => t.id);
         
-        for (const tournament of tournaments) {
-          try {
-            const participants = await participantsAPI.getTournamentParticipants(tournament.id);
-            
-            const isRegistered = participants.some(p => 
-              (user && p.club_members?.[0] && p.player_id === user.id) ||
-              (!user && guestData && p.guest_name === guestData.name)
-            );
-            
-            if (isRegistered) {
-              registrations.add(tournament.id);
-            }
-          } catch (error) {
-            console.warn(`Failed to check registration for tournament ${tournament.id}:`, error);
-          }
+        // Один-единственный API-вызов для получения всех регистраций
+        const registeredIds = await participantsAPI.getMyUpcomingRegistrations(
+          tournamentIds,
+          user?.id,
+          guestData
+        );
+        
+        if (!cancelled) {
+          setUserRegistrationIds(new Set(registeredIds));
         }
-        
-        setUserRegistrations(registrations);
       } catch (error) {
         console.error('Error loading registrations:', error);
+        toast.error('Не удалось загрузить ваши регистрации.');
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadRegistrations();
-  }, [tournaments, user, guestData]);
+    
+    return () => { cancelled = true; };
+  }, [tournaments, user, guestData, toast]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -99,29 +105,28 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
   };
 
   const handleCancelRegistration = async (tournamentId, event) => {
-    event.stopPropagation(); // Prevent row click
+    event.stopPropagation();
     
-    setLoading(true);
+    setLoading(true); // Используем общий лоадер
     try {
-      const participants = await participantsAPI.getTournamentParticipants(tournamentId);
-      
-      const userParticipant = participants.find(p => 
-        (user && p.player_id === user.id) ||
-        (!user && guestData && p.guest_name === guestData.name)
+      const registration = await participantsAPI.checkRegistration(
+        tournamentId,
+        user?.id,
+        guestData
       );
 
-      if (userParticipant) {
-        await participantsAPI.removeParticipant(userParticipant.id);
+      if (registration) {
+        await participantsAPI.removeParticipant(registration.id);
         
-        // Update local state
-        setUserRegistrations(prev => {
+        setUserRegistrationIds(prev => {
           const updated = new Set(prev);
           updated.delete(tournamentId);
           return updated;
         });
         
         toast.success('Регистрация отменена');
-        // Note: Do NOT clear guest data here - preserve for re-registration
+      } else {
+        toast.warning('Регистрация не найдена.');
       }
     } catch (error) {
       console.error('Error canceling registration:', error);
@@ -142,9 +147,8 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
   };
 
   const handleRegistrationSuccess = () => {
-    // Update local registrations state
     if (selectedTournament) {
-      setUserRegistrations(prev => new Set([...prev, selectedTournament.id]));
+      setUserRegistrationIds(prev => new Set(prev).add(selectedTournament.id));
     }
     setSelectedTournament(null);
   };
@@ -183,7 +187,8 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
 
             <div className="space-y-3 h-[400px] overflow-y-auto">
               {tournaments.map((tournament) => {
-                const isRegistered = userRegistrations.has(tournament.id);
+                // --- ИЗМЕНЕНИЕ: Проверка регистрации теперь мгновенная ---
+                const isRegistered = userRegistrationIds.has(tournament.id);
                 const TypeIcon = getTournamentTypeIcon(tournament.settings_json?.tournament_type);
                 const typeColor = getTournamentTypeColor(tournament.settings_json?.tournament_type);
 

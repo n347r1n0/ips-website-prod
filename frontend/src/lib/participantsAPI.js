@@ -46,6 +46,51 @@ export const participantsAPI = {
   },
 
   /**
+   * --- НОВЫЙ МЕТОД ---
+   * Эффективно получает ID всех турниров, на которые пользователь/гость уже зарегистрирован,
+   * из переданного списка.
+   * @param {number[]} tournamentIds - Массив ID турниров для проверки.
+   * @param {string|null} userId - ID залогиненного пользователя.
+   * @param {Object|null} guestData - Данные гостя { name, contact }.
+   * @returns {Promise<number[]>} - Массив ID турниров, на которые есть регистрация.
+   */
+  async getMyUpcomingRegistrations(tournamentIds, userId, guestData) {
+    if (!tournamentIds || tournamentIds.length === 0) {
+      return [];
+    }
+    if (!userId && !guestData) {
+      return [];
+    }
+
+    let query = supabase
+      .from('tournament_participants')
+      .select('tournament_id')
+      .in('tournament_id', tournamentIds);
+
+    if (userId) {
+      query = query.eq('player_id', userId);
+    } else if (guestData?.name && guestData?.contact) {
+      // Используем надежную проверку по имени и контакту
+      query = query
+        .eq('guest_name', guestData.name)
+        .eq('guest_contact', guestData.contact);
+    } else {
+      // Недостаточно данных для проверки гостя
+      return [];
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching upcoming registrations:', error);
+      throw error;
+    }
+    
+    // Возвращаем просто массив ID для быстрой проверки
+    return data ? data.map(r => r.tournament_id) : [];
+  },
+
+  /**
    * Register a user or guest for a tournament
    * @param {Object} params - Registration parameters
    * @param {number} params.tournamentId - Tournament ID
@@ -205,8 +250,8 @@ export const participantsAPI = {
 
     if (userId) {
       query = query.eq('player_id', userId);
-    } else if (guestData) {
-      // For guests, check both name and contact for stronger uniqueness
+    } else if (guestData?.name && guestData?.contact) {
+      // --- ИСПРАВЛЕНИЕ: Используем надежную проверку по имени и контакту ---
       query = query
         .eq('guest_name', guestData.name)
         .eq('guest_contact', guestData.contact);

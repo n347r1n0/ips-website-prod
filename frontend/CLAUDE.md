@@ -24,6 +24,9 @@ ips-website/
 │   │   │   │   │   └── TournamentModal.jsx  
 │   │   │   │   ├── AtmosphereGallery/  
 │   │   │   │   ├── Auth/  
+│   │   │   │   │   ├── AuthModal.jsx  
+│   │   │   │   │   ├── TelegramLoginWidget.jsx  
+│   │   │   │   │   └── TelegramLoginRedirect.jsx  
 │   │   │   │   ├── FAQ/  
 │   │   │   │   ├── Hero/  
 │   │   │   │   ├── PlayerRatingWidget/  
@@ -35,16 +38,24 @@ ips-website/
 │   │   │   │   │   ├── RegistrationConfirmationModal.jsx  
 │   │   │   │   │   ├── TournamentCalendar.jsx  
 │   │   │   │   │   ├── TournamentListForDay.jsx  
-│   │   │   │   │   └── TournamentResultsModal.jsx  
-│   │   │   ├── layout/ (Header, Footer, etc.)  
+│   │   │   │   │   ├── TournamentResultsModal.jsx  
+│   │   │   │   │   └── UpcomingTournamentsModal.jsx  
+│   │   │   │   └── ValueProps/  
+│   │   │   ├── layout/ (Header, Footer, Section, etc.)  
 │   │   │   └── ui/ (AuthErrorDisplay, Button, GlassPanel, Toast)  
 │   │   ├── contexts/ (AuthContext.jsx)  
 │   │   ├── hooks/ (useAuthVersion.js, useMediaQuery.js)  
-│   │   ├── lib/ (supabaseClient.js, participantsAPI.js, etc.)  
-│   │   ├── pages/ (HomePage.jsx, AdminDashboardPage.jsx, etc.)  
+│   │   ├── lib/  
+│   │   │   ├── supabaseClient.js  
+│   │   │   ├── authSynchronizer.js (NEW - auth state sync)  
+│   │   │   ├── sessionUtils.js  
+│   │   │   ├── preAuthCleanup.js  
+│   │   │   ├── validatedStorage.js  
+│   │   │   └── iosSafariUtils.js  
+│   │   ├── pages/ (HomePage, AdminDashboardPage, DashboardPage, TelegramCallbackPage)  
 │   │   ├── App.jsx, main.jsx, index.css  
 │   ├── tailwind.config.js, postcss.config.js, vite.config.js  
-│   ├── AUTH-SYSTEM.md, CLAUDE.md  
+│   ├── AUTH-SYSTEM.md, CLAUDE.md, README.md  
 │   └── .env.local, .env.development.local  
 └── supabase/  
     ├── functions/  
@@ -126,24 +137,43 @@ Auth methods supported:
     * email \= tg\_\<telegram\_id\>@telegram.user, password is deterministic from telegram\_id.  
   * Function returns session tokens; client sets them via supabase.auth.setSession(tokens).
 
-**Auth State Management**
+**Auth State Management & Synchronization**
 
 * **AuthContext.jsx** provides:  
   * user, profile (from club\_members), loading, isAdmin, and auth helpers (signIn, signUp, signOut, signInWithTelegram).  
   * Profile loading is asynchronous/non-blocking inside auth change handlers, so auth events complete immediately.  
+  * **NEW**: Integrated with AuthSynchronizer for race condition prevention.
+* **authSynchronizer.js** (NEW): 
+  * Prevents concurrent auth attempts for the same user/device.
+  * Device fingerprinting to distinguish auth sources.
+  * Session deduplication and conflict resolution.
+  * Graceful handling of multi-device scenarios.
 * **useAuthVersion:** a global bus that increments on any auth state change; includes initial session check for post-OAuth mounts. Components that depend on auth should subscribe to authVersion.
 
-### **7.3. Tournament Calendar Implementation (key points)**
+**Enhanced Session Management**
 
+* **sessionUtils.js**: Uses synchronized session establishment to prevent race conditions.
+* **preAuthCleanup.js**: Comprehensive cleanup before auth attempts, with iOS Safari specific handling.
+* **Mobile Network Resilience**: Special handling for high-latency networks (Russian mobile carriers).
+
+### **7.3. Tournament System Implementation**
+
+**Calendar Implementation**
 * Single focused useEffect with deps \[currentDate, authVersion\].  
 * UTC month window:  
   * start \= new Date(Date.UTC(y, m, 1)).toISOString()  
   * end \= new Date(Date.UTC(m \=== 11 ? y \+ 1 : y, (m \+ 1\) % 12, 1)).toISOString()  
-* Query (example):  
-  select('id, name, tournament\_date, status, settings\_json')  
+* Query includes visual fields:  
+  select('id, name, tournament\_date, status, settings\_json, tournament\_type, is\_major')  
   .gte('tournament\_date', start).lt('tournament\_date', end)  
   .order('tournament\_date', { ascending: true })  
 * Proper loading/error states; avoid multiple clients; call await supabase.auth.getSession() before querying.
+
+**Tournament Types & Visual System**
+* **tournament\_type**: Configurable types (Стандартный, Специальный, Фриролл, Рейтинговый) with corresponding icons and colors.
+* **is\_major**: Boolean flag for major tournaments with special visual treatment.
+* **EventMarker.jsx**: Dynamic icon rendering based on tournament type.
+* **Admin Panel**: Full CRUD operations with tournament type configuration.
 
 ## **8\. Common Patterns & Best Practices**
 
@@ -159,6 +189,14 @@ if (\!isAdmin) {
 import { supabase } from '@/lib/supabaseClient';  
 await supabase.auth.getSession();  
 const { data, error } \= await supabase.from('tournaments').select('\*');
+
+**Synchronized Auth Operations**
+
+import { synchronizedTelegramAuth, isAuthInProgress } from '@/lib/authSynchronizer';  
+if (isAuthInProgress(userId)) {  
+  // Handle concurrent auth attempt  
+}  
+const result \= await synchronizedTelegramAuth(telegramData, authFunction);
 
 **Two-Client Pattern (edge function)**
 
@@ -189,27 +227,45 @@ if (\!me || me.role \!== 'admin') return new Response('Forbidden', { status: 403
 * **Telegram Auth tournament visibility**  
   * **Root cause:** blocking await loadUserProfile() in auth handler prevented authVersion increment.  
   * **Fix:** make profile loading async/non-blocking; let auth events finish immediately.  
-* **Admin delete tournament (“j is not a function”)**  
+* **Admin delete tournament ("j is not a function")**  
   * **Root cause:** legacy validateSession() references.  
   * **Fix:** remove legacy calls; use isAdmin from AuthContext.  
 * **AuthVersion after OAuth redirect**  
-  * **Root cause:** components mounted post-SIGNED\_IN didn’t increment version.  
+  * **Root cause:** components mounted post-SIGNED\_IN didn't increment version.  
   * **Fix:** initial session check on bus creation.
+* **Tournament Creation Error: "public.app_settings does not exist"**
+  * **Root cause:** Leftover references to dropped session ticket tables.
+  * **Fix:** Clean database migration to remove orphaned functions and restore proper get_user_role().
+* **Russian Mobile Auth Race Conditions (PARTIALLY FIXED)**
+  * **Root cause:** Concurrent auth attempts from multiple devices/sessions causing state desynchronization.
+  * **Fix:** Implemented AuthSynchronizer with device fingerprinting, session deduplication, and controlled state changes.
+  * **Status:** Significantly improved but may need further refinement for edge cases.
 
 ## **10\. Current System Status**
 
 **✅ Working:**
 
-* Email & Telegram auth  
-* Tournament calendar display  
-* Admin tournament management (create / edit / delete / simulate completion)  
+* Email & Telegram auth with race condition prevention
+* Tournament calendar display with visual tournament types
+* Admin tournament management (create / edit / delete / simulate completion)
+* Tournament type configuration (Стандартный, Специальный, Фриролл, Рейтинговый)
 * Tournament registration flow  
 * Per-tournament results modal (reads tournament\_participants)  
 * Profile management
+* Mobile navigation with 2x2 grid layout
+* Personal dashboard with admin panel integration
+* Auth state synchronization for multi-device scenarios
 
 **🔧 Guidelines:**
 
 * Always import Supabase via @/lib/supabaseClient (single client).  
 * Use useAuthVersion for auth-dependent effects.  
+* For auth operations, prefer synchronized methods from authSynchronizer.js.
+* Check isAuthInProgress() before starting new auth operations.
 * All DB changes via migrations.  
 * In edge functions, use the Two-Client Pattern.
+
+**⚠️ Known Issues:**
+
+* Russian mobile auth: Partially fixed with synchronization, but may still have edge cases.
+* Mobile network timeouts: Enhanced retry logic helps but high-latency networks may still cause issues.
