@@ -184,5 +184,38 @@ export const participantsAPI = {
       console.error('Error removing participant:', error);
       throw error;
     }
+  },
+
+  /**
+   * Check if a user or guest is registered for a tournament
+   * @param {number} tournamentId - Tournament ID
+   * @param {string} [userId] - User ID for registered users
+   * @param {string} [guestName] - Guest name for guest users
+   * @returns {Promise<Object|null>} Participant record if registered, null otherwise
+   */
+  async checkRegistration(tournamentId, userId = null, guestName = null) {
+    if (!userId && !guestName) {
+      throw new Error('Either userId or guestName is required');
+    }
+
+    let query = supabase
+      .from('tournament_participants')
+      .select('*')
+      .eq('tournament_id', tournamentId);
+
+    if (userId) {
+      query = query.eq('player_id', userId);
+    } else {
+      query = query.eq('guest_name', guestName);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      console.error('Error checking registration:', error);
+      throw error;
+    }
+
+    return data;
   }
 };

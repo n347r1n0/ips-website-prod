@@ -6,7 +6,8 @@ import { Trophy, Star, Zap, Target } from 'lucide-react';
 
 export function EventMarker({ tournament }) {
   const getEventStyles = () => {
-    switch (tournament.type) {
+    const tournamentType = tournament.settings_json?.tournament_type || tournament.type;
+    switch (tournamentType) {
       case 'Стандартный':
         return {
           Icon: Target,

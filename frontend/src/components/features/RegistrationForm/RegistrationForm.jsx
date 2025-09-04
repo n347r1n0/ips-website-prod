@@ -134,10 +134,11 @@ export function RegistrationForm({ onSuccess }) {
         <div className="space-y-2 text-left">
           <label htmlFor="contact" className="text-white/80 text-sm font-medium">Контакт (Telegram или Телефон) *</label>
           <input
-            name="contact" type="text" placeholder="@ ваш_ник или +7..." value={formData.contact} onChange={handleChange}
+            name="contact" type="text" placeholder="@username или +7..." value={formData.contact} onChange={handleChange}
             className={`w-full bg-white/10 border rounded-lg p-3 text-white focus:outline-none focus:ring-2
               ${errors.contact ? 'border-red-400/50 focus:ring-red-400/50' : 'border-white/20 focus:ring-deep-teal'}`}
           />
+          <p className="text-white/60 text-xs">Введите @username в Telegram или номер телефона (+7…)</p>
           {errors.contact && <p className="text-red-400 text-sm">{errors.contact}</p>}
         </div>
 

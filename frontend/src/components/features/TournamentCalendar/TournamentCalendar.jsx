@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { EventMarker } from './EventMarker.jsx';
 import { TournamentListForDay } from './TournamentListForDay.jsx';
+import { UpcomingTournamentsModal } from './UpcomingTournamentsModal.jsx';
 import { supabase } from '@/lib/supabaseClient';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthVersion } from '@/hooks/useAuthVersion';
@@ -17,6 +18,7 @@ export function TournamentCalendar() {
   const [error, setError] = useState(null);
   const [highlightedTournamentId, setHighlightedTournamentId] = useState(null);
   const [selectedDayTournaments, setSelectedDayTournaments] = useState(null);
+  const [showUpcomingModal, setShowUpcomingModal] = useState(false);
   
   // Auth version that increments on any auth state change
   const authVersion = useAuthVersion();
@@ -122,8 +124,43 @@ export function TournamentCalendar() {
   const highlightedTournament = tournaments.find(t => t.id === highlightedTournamentId);
   const showHighlightHint = highlightedTournament && highlightedTournamentId;
 
+  // Upcoming tournaments state
+  const [allUpcomingTournaments, setAllUpcomingTournaments] = useState([]);
+
+  // Load upcoming tournaments beyond current month for the aggregator button
+  useEffect(() => {
+    const loadUpcomingTournaments = async () => {
+      try {
+        await supabase.auth.getSession();
+        
+        const now = new Date().toISOString();
+        const threeMonthsLater = new Date();
+        threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+        const endDate = threeMonthsLater.toISOString();
+
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('id, name, tournament_date, status, settings_json')
+          .gte('tournament_date', now)
+          .lte('tournament_date', endDate)
+          .neq('status', 'completed')
+          .order('tournament_date', { ascending: true })
+          .limit(5);
+
+        if (error) throw error;
+        setAllUpcomingTournaments(data ?? []);
+      } catch (error) {
+        console.warn('Failed to load upcoming tournaments:', error);
+      }
+    };
+
+    loadUpcomingTournaments();
+  }, [authVersion]);
+
+  const hasUpcomingTournaments = allUpcomingTournaments.length > 0;
+
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
+    <div id="calendar" className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
       {/* === ШАПКА КАЛЕНДАРЯ === */}
       <div className="flex items-center justify-between mb-6">
         <motion.button onClick={() => changeMonth(-1)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="p-2 rounded-full hover:bg-white/10 transition-colors">
@@ -190,7 +227,7 @@ export function TournamentCalendar() {
               onClick={() => isClickable && handleDayClick(day)}
               className={`relative aspect-square rounded-lg transition-all duration-300 ${
                 hasHighlightedTournament 
-                  ? 'bg-gold-accent/20 border-2 border-gold-accent animate-pulse cursor-pointer hover:bg-gold-accent/30' 
+                  ? 'bg-gold-accent/20 border-2 border-gold-accent shadow-[0_0_20px_rgba(212,175,55,0.4)] cursor-pointer hover:bg-gold-accent/30' 
                   : isWeekend 
                     ? `bg-gold-accent/5 border-2 border-gold-accent/20 ${isClickable ? 'cursor-pointer hover:bg-gold-accent/20' : 'hover:bg-gold-accent/10'}` 
                     : `bg-black/20 border border-white/25 ${isClickable ? 'cursor-pointer hover:bg-white/25' : 'hover:bg-white/15'}`
@@ -221,11 +258,34 @@ export function TournamentCalendar() {
         })}
       </div>
 
+      {/* Ближайшие турниры button */}
+      {hasUpcomingTournaments && (
+        <div className="absolute bottom-6 right-6">
+          <motion.button
+            onClick={() => setShowUpcomingModal(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gold-accent/20 border-2 border-gold-accent shadow-[0_0_20px_rgba(212,175,55,0.4)] text-gold-accent font-medium px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 hover:bg-gold-accent/30 flex items-center space-x-2"
+          >
+            <Calendar className="w-5 h-5" />
+            <span>Ближайшие турниры</span>
+          </motion.button>
+        </div>
+      )}
+
       {/* Tournament List Modal */}
       {selectedDayTournaments && (
         <TournamentListForDay
           tournaments={selectedDayTournaments}
           onClose={() => setSelectedDayTournaments(null)}
+        />
+      )}
+
+      {/* Upcoming Tournaments Modal */}
+      {showUpcomingModal && (
+        <UpcomingTournamentsModal
+          tournaments={allUpcomingTournaments}
+          onClose={() => setShowUpcomingModal(false)}
         />
       )}
     </div>
