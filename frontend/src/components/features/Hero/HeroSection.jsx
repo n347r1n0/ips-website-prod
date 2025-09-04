@@ -6,7 +6,7 @@ import { ChevronDown, Play } from 'lucide-react';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Button } from '@/components/ui/Button';
 
-export function HeroSection({ videoSources, currentVideoIndex, scrollToRegistration }) {
+export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths }) {
 
   function GoldLine() {
     return <div className="art-deco-divider" />;
@@ -59,7 +59,7 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToRegistrat
               "Следующий турнир: 6 августа"
             </p>
             <Button
-              onClick={scrollToRegistration}
+              onClick={scrollToUserPaths}
               className="luxury-button px-6 py-3 text-base md:text-lg rounded-xl font-bold tracking-wide transform hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2 inline-block" />
