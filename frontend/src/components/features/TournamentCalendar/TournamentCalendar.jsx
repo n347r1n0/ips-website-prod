@@ -78,8 +78,14 @@ export function TournamentCalendar() {
     }
 
     setHighlightedTournamentId(targetTournamentId);
-    
-    if (targetTournamentId) {
+  }, [searchParams, allUpcomingTournaments]);
+
+  // Separate effect to handle month jumping to highlighted tournament (only when URL param changes)
+  useEffect(() => {
+    const highlightParam = searchParams.get('highlightTournament');
+    if (highlightParam) {
+      const targetTournamentId = parseInt(highlightParam);
+      
       // Find the tournament in current month view or upcoming list
       let highlightedTournament = tournaments.find(t => t.id === targetTournamentId);
       if (!highlightedTournament) {
@@ -90,15 +96,16 @@ export function TournamentCalendar() {
         const tournamentDate = new Date(highlightedTournament.tournament_date);
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-        const tournamentMonth = tournamentDate.getUTCMonth();
-        const tournamentYear = tournamentDate.getUTCFullYear();
+        const tournamentMonth = tournamentDate.getMonth(); // Use local month
+        const tournamentYear = tournamentDate.getFullYear(); // Use local year
         
+        // Only jump to tournament month if we're not already there
         if (currentMonth !== tournamentMonth || currentYear !== tournamentYear) {
           setCurrentDate(new Date(tournamentYear, tournamentMonth, 1));
         }
       }
     }
-  }, [searchParams, tournaments, allUpcomingTournaments, currentDate]);
+  }, [searchParams, tournaments, allUpcomingTournaments]); // Remove currentDate from dependencies
 
   const { month, year, firstDayOfMonth, daysInMonth } = useMemo(() => {
     const date = new Date(currentDate);
