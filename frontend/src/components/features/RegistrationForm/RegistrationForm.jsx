@@ -6,6 +6,7 @@ import { Button } from '../../ui/Button.jsx';
 import { Loader2 } from 'lucide-react';
 import { useGuestStore } from '@/lib/guestStore';
 import { tournamentsAPI } from '@/lib/supabaseClient';
+import { validateContact, validateName } from '@/lib/validationUtils';
 
 // REPURPOSED: Простая форма для гостевого бронирования (альтернатива боту)
 // Этот компонент НЕ записывает данные в базу.
@@ -20,28 +21,6 @@ export function RegistrationForm({ onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
-  
-  const validateContact = (contact) => {
-    const trimmed = contact.trim();
-    if (!trimmed) return { valid: false, message: 'Контактные данные обязательны' };
-    
-    // Check for Telegram username
-    if (trimmed.startsWith('@')) {
-      if (trimmed.length < 4) return { valid: false, message: 'Telegram username слишком короткий' };
-      if (!/^@[a-zA-Z0-9_]{3,}$/.test(trimmed)) return { valid: false, message: 'Неверный формат Telegram username' };
-      return { valid: true };
-    }
-    
-    // Check for phone number
-    if (trimmed.startsWith('+7') || trimmed.startsWith('8') || /^\d/.test(trimmed)) {
-      const digits = trimmed.replace(/\D/g, '');
-      if (digits.length < 10) return { valid: false, message: 'Номер телефона слишком короткий' };
-      if (digits.length > 12) return { valid: false, message: 'Номер телефона слишком длинный' };
-      return { valid: true };
-    }
-    
-    return { valid: false, message: 'Введите @username или номер телефона (+7...)' };
-  };
   
   // Computed properties for form state
   const isFormValid = formData.name.trim().length >= 2 && 
@@ -73,18 +52,12 @@ export function RegistrationForm({ onSuccess }) {
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Имя обязательно';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Имя слишком короткое';
-    }
-    
+    const nameValidation = validateName(formData.name);
     const contactValidation = validateContact(formData.contact);
-    if (!contactValidation.valid) {
-      newErrors.contact = contactValidation.message;
-    }
+    
+    const newErrors = {};
+    if (!nameValidation.valid) newErrors.name = nameValidation.message;
+    if (!contactValidation.valid) newErrors.contact = contactValidation.message;
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
