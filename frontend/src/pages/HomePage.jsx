@@ -93,13 +93,6 @@ export function HomePage({ onAuthModalOpen }) {
           />
         </div>
         <GoldLine />
-        <div id="user-paths-section">
-          <UserPathsSection
-            onAuthModalOpen={onAuthModalOpen}
-            onGuestModalOpen={openGuestModal}
-          />
-        </div>
-        <GoldLine />
         <div id="about">
           <Section><ValuePropsSection /></Section>
         </div>
@@ -107,6 +100,14 @@ export function HomePage({ onAuthModalOpen }) {
         <div id="rating">
           <Section><div className="max-w-2xl mx-auto px-4"><PlayerRatingWidget /></div></Section>
         </div>
+        <GoldLine />
+        <div id="user-paths-section">
+          <UserPathsSection
+            onAuthModalOpen={onAuthModalOpen}
+            onGuestModalOpen={openGuestModal}
+          />
+        </div>
+        <GoldLine />
         <div id="calendar">
           <Section><div className="max-w-4xl mx-auto px-4"><TournamentCalendar /></div></Section>
         </div>

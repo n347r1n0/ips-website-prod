@@ -40,10 +40,10 @@ export function TournamentCalendar() {
         // Make sure the client is aware of the session (important after OAuth redirect)
         await supabase.auth.getSession();
 
-        const y = currentDate.getUTCFullYear();
-        const m = currentDate.getUTCMonth();
-        const start = new Date(Date.UTC(y, m, 1)).toISOString();
-        const end = new Date(Date.UTC(m === 11 ? y + 1 : y, (m + 1) % 12, 1)).toISOString();
+        const y = currentDate.getFullYear();
+        const m = currentDate.getMonth();
+        const start = new Date(y, m, 1).toISOString();
+        const end = new Date(m === 11 ? y + 1 : y, (m + 1) % 12, 1).toISOString();
 
         const { data, error } = await supabase
           .from('tournaments')
@@ -113,8 +113,8 @@ export function TournamentCalendar() {
   const tournamentsByDay = useMemo(() => {
     // Группируем турниры в массивы по дням
     return tournaments.reduce((acc, t) => {
-      // TZ-safe: new Date() с ISO строкой корректно работает с UTC
-      const day = new Date(t.tournament_date).getUTCDate();
+      // Use local date to match calendar display
+      const day = new Date(t.tournament_date).getDate();
       if (!acc[day]) {
         acc[day] = [];
       }
