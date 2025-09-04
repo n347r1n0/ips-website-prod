@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button.jsx";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { User, LogOut, Home, Key } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +10,6 @@ import { AuthModal } from "@/components/features/Auth/AuthModal";
 
 export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { user, signOut, nickname, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -23,8 +22,6 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
   }, []);
 
   const handleNavClick = (sectionId) => {
-    setIsMobileMenuOpen(false);
-    
     if (location.pathname !== '/') {
       // Если не на главной странице, переходим с hash
       navigate(`/#${sectionId}`);
@@ -45,9 +42,16 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
     { label: 'Галерея', id: 'gallery' },
   ];
 
+  // Mobile navigation items (without "Главная")
+  const mobileNavigationItems = [
+    { label: 'О клубе', id: 'about' },
+    { label: 'Календарь', id: 'calendar' },
+    { label: 'Рейтинг', id: 'rating' },
+    { label: 'Галерея', id: 'gallery' },
+  ];
+
   const handleSignOut = async () => {
     await signOut();
-    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -126,64 +130,54 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
                 )}
               </div>
 
-              <button
-                className="md:hidden p-2 glassmorphic-panel rounded-xl"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                {isMobileMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-              </button>
+              {/* Mobile navigation - 2x2 grid with icons */}
+              <div className="md:hidden flex items-center">
+                {/* 2x2 navigation grid */}
+                <div className="grid grid-cols-2 gap-2 mr-3">
+                  {mobileNavigationItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavClick(item.id)}
+                      className="text-xs text-gray-300 hover:text-gold-accent transition-colors duration-300 px-2 py-1 text-center min-w-[70px]"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Right column icons */}
+                <div className="flex flex-col gap-2">
+                  {/* Home icon */}
+                  <button
+                    onClick={() => handleNavClick('hero')}
+                    className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300"
+                    aria-label="Главная"
+                  >
+                    <Home className="w-5 h-5 text-white hover:text-gold-accent" />
+                  </button>
+                  
+                  {/* Auth icon */}
+                  {user ? (
+                    <Link to="/dashboard">
+                      <button className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300">
+                        <User className="w-5 h-5 text-white hover:text-gold-accent" />
+                      </button>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setIsAuthModalOpen(true)}
+                      className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300"
+                      aria-label="Вход / Регистрация"
+                    >
+                      <Key className="w-5 h-5 text-white hover:text-gold-accent" />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden glassmorphic-panel border-t border-white/10"
-            >
-              <div className="px-6 py-4 space-y-4">
-                {navigationItems.map((item) => (
-                  <button key={item.id} onClick={() => handleNavClick(item.id)}
-                    className="block w-full text-left text-gray-300 hover:text-white py-2 font-body text-lg"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-                <div className="pt-4 border-t border-white/10">
-                  {user ? (
-                    <div className="space-y-3">
-                       {isAdmin && (
-                         <Link to="/admin" className="w-full">
-                           <Button className="w-full luxury-button py-3 rounded-xl" onClick={() => setIsMobileMenuOpen(false)}>
-                             Админ-панель
-                           </Button>
-                         </Link>
-                       )}
-                       <Link to="/dashboard" className="w-full">
-                         <Button className="w-full luxury-button py-3 rounded-xl" onClick={() => setIsMobileMenuOpen(false)}>
-                           <User className="w-4 h-4 mr-2" />
-                           Личный кабинет
-                         </Button>
-                       </Link>
-                       <Button onClick={handleSignOut} className="w-full luxury-button py-3 rounded-xl">
-                         <LogOut className="w-4 h-4 mr-2" />
-                         Выйти
-                       </Button>
-                    </div>
-                  ) : (
-                    <Button onClick={() => { setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }} className="w-full luxury-button py-3 rounded-xl">
-                      <User className="w-4 h-4 mr-2" />
-                      Вход / Регистрация
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.header>
 
       <div className="h-20" />
