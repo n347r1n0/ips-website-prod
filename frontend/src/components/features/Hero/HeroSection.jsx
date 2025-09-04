@@ -59,7 +59,18 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths
               "Следующий турнир: 6 августа"
             </p>
             <Button
-              onClick={scrollToUserPaths}
+              onClick={() => {
+                // Direct call to the passed prop function
+                if (scrollToUserPaths) {
+                  scrollToUserPaths();
+                } else {
+                  // Fallback: scroll directly
+                  const element = document.getElementById('user-paths-section');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }
+              }}
               className="luxury-button px-6 py-3 text-base md:text-lg rounded-xl font-bold tracking-wide transform hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2 inline-block" />
