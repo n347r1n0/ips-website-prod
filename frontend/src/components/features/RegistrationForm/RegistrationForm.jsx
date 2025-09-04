@@ -3,9 +3,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/Button.jsx';
-import { GlassPanel } from '../../ui/GlassPanel.jsx';
-import { CheckCircle, Loader2, MessageCircle, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 import { useGuestStore } from '@/lib/guestStore';
 import { tournamentsAPI } from '@/lib/supabaseClient';
 
@@ -20,19 +18,74 @@ export function RegistrationForm({ onSuccess }) {
     contact: '' // Единое поле для Telegram/Телефона
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  const validateContact = (contact) => {
+    const trimmed = contact.trim();
+    if (!trimmed) return { valid: false, message: 'Контактные данные обязательны' };
+    
+    // Check for Telegram username
+    if (trimmed.startsWith('@')) {
+      if (trimmed.length < 4) return { valid: false, message: 'Telegram username слишком короткий' };
+      if (!/^@[a-zA-Z0-9_]{3,}$/.test(trimmed)) return { valid: false, message: 'Неверный формат Telegram username' };
+      return { valid: true };
+    }
+    
+    // Check for phone number
+    if (trimmed.startsWith('+7') || trimmed.startsWith('8') || /^\d/.test(trimmed)) {
+      const digits = trimmed.replace(/\D/g, '');
+      if (digits.length < 10) return { valid: false, message: 'Номер телефона слишком короткий' };
+      if (digits.length > 12) return { valid: false, message: 'Номер телефона слишком длинный' };
+      return { valid: true };
+    }
+    
+    return { valid: false, message: 'Введите @username или номер телефона (+7...)' };
+  };
+  
+  // Computed properties for form state
+  const isFormValid = formData.name.trim().length >= 2 && 
+                     validateContact(formData.contact).valid &&
+                     Object.keys(errors).length === 0;
+  const isSubmitDisabled = !isFormValid || isSubmitting;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    
+    // Clear existing error for this field
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    
+    // Real-time validation for contact field
+    if (name === 'contact' && value.trim()) {
+      const contactValidation = validateContact(value);
+      if (!contactValidation.valid) {
+        setErrors(prev => ({ ...prev, contact: contactValidation.message }));
+      }
+    }
+    
+    // Real-time validation for name field
+    if (name === 'name' && value.trim() && value.trim().length < 2) {
+      setErrors(prev => ({ ...prev, name: 'Имя слишком короткое' }));
+    }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Имя обязательно';
-    if (!formData.contact.trim()) newErrors.contact = 'Контактные данные обязательны';
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Имя обязательно';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Имя слишком короткое';
+    }
+    
+    const contactValidation = validateContact(formData.contact);
+    if (!contactValidation.valid) {
+      newErrors.contact = contactValidation.message;
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,41 +137,10 @@ export function RegistrationForm({ onSuccess }) {
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center"
-      >
-        <div className="art-deco-divider mb-8" />
-        <div className="p-6 glassmorphic-panel rounded-3xl mb-8 inline-block">
-          <CheckCircle className="w-20 h-20 text-gold-accent mx-auto animate-pulse" />
-        </div>
-        <h3 className="text-3xl font-bold text-white mb-6 tracking-wider">
-          Заявка принята!
-        </h3>
-        <p className="text-lg text-gray-300 leading-relaxed mb-8">
-          Мы свяжемся с вами для подтверждения участия в турнире.
-        </p>
-        <a href="https://t.me/your_bot_username" target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-3 rounded-xl">
-             <MessageCircle className="w-5 h-5 mr-3" />
-             Или записаться мгновенно через Telegram
-             <ExternalLink className="w-4 h-4 ml-2 opacity-70" />
-          </Button>
-        </a>
-        <div className="art-deco-divider mt-8" />
-      </motion.div>
-    );
-  }
+  // Success state removed - form just closes and navigates
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, delay: 0.2 }}
-    >
+    <div>
       <div className="art-deco-divider mb-8" />
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2 text-left">
@@ -144,10 +166,16 @@ export function RegistrationForm({ onSuccess }) {
 
         {errors.submit && <p className="text-red-400 text-center">{errors.submit}</p>}
         <div className="art-deco-divider my-6" />
-        <Button type="submit" disabled={isSubmitting} className="w-full luxury-button py-4 text-lg rounded-xl">
+        <Button 
+          type="submit" 
+          disabled={isSubmitDisabled} 
+          className={`w-full luxury-button py-4 text-lg rounded-xl transition-opacity ${
+            isSubmitDisabled ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
           {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : "Забронировать место"}
         </Button>
       </form>
-    </motion.div>
+    </div>
   );
 }

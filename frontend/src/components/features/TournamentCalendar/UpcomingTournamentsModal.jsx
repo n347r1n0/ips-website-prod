@@ -132,9 +132,9 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
   };
 
   const handleTournamentClick = (tournament) => {
-    // If user/guest has no data, close this modal and let the main flow handle it
+    // If user/guest has no data, close this modal and funnel to guest form
     if (!user && !guestData) {
-      onClose();
+      onClose(); // This should trigger opening guest form in the parent
       return;
     }
     

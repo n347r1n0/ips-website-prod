@@ -190,12 +190,12 @@ export const participantsAPI = {
    * Check if a user or guest is registered for a tournament
    * @param {number} tournamentId - Tournament ID
    * @param {string} [userId] - User ID for registered users
-   * @param {string} [guestName] - Guest name for guest users
+   * @param {Object} [guestData] - Guest data with name and contact
    * @returns {Promise<Object|null>} Participant record if registered, null otherwise
    */
-  async checkRegistration(tournamentId, userId = null, guestName = null) {
-    if (!userId && !guestName) {
-      throw new Error('Either userId or guestName is required');
+  async checkRegistration(tournamentId, userId = null, guestData = null) {
+    if (!userId && !guestData) {
+      throw new Error('Either userId or guestData is required');
     }
 
     let query = supabase
@@ -205,8 +205,11 @@ export const participantsAPI = {
 
     if (userId) {
       query = query.eq('player_id', userId);
-    } else {
-      query = query.eq('guest_name', guestName);
+    } else if (guestData) {
+      // For guests, check both name and contact for stronger uniqueness
+      query = query
+        .eq('guest_name', guestData.name)
+        .eq('guest_contact', guestData.contact);
     }
 
     const { data, error } = await query.maybeSingle();

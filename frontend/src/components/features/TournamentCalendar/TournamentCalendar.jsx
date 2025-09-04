@@ -19,6 +19,7 @@ export function TournamentCalendar() {
   const [highlightedTournamentId, setHighlightedTournamentId] = useState(null);
   const [selectedDayTournaments, setSelectedDayTournaments] = useState(null);
   const [showUpcomingModal, setShowUpcomingModal] = useState(false);
+  const [allUpcomingTournaments, setAllUpcomingTournaments] = useState([]);
   
   // Auth version that increments on any auth state change
   const authVersion = useAuthVersion();
@@ -135,9 +136,6 @@ export function TournamentCalendar() {
 
   const highlightedTournament = tournaments.find(t => t.id === highlightedTournamentId);
 
-  // Upcoming tournaments state
-  const [allUpcomingTournaments, setAllUpcomingTournaments] = useState([]);
-
   // Load upcoming tournaments beyond current month for the aggregator button
   useEffect(() => {
     const loadUpcomingTournaments = async () => {
@@ -171,15 +169,16 @@ export function TournamentCalendar() {
   const hasUpcomingTournaments = allUpcomingTournaments.length > 0;
 
   return (
-    <div id="calendar" className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
+    <div className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
       {/* === ШАПКА КАЛЕНДАРЯ === */}
       <div className="flex items-center justify-between mb-6 relative z-40">
         <motion.button 
           onClick={() => changeMonth(-1)} 
           whileHover={{ scale: 1.1 }} 
           whileTap={{ scale: 0.9 }} 
-          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50"
+          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50 min-w-[44px] min-h-[44px]"
           type="button"
+          aria-label="Предыдущий месяц"
         >
           <ChevronLeft className="w-6 h-6 text-white" />
         </motion.button>
@@ -190,8 +189,9 @@ export function TournamentCalendar() {
           onClick={() => changeMonth(1)} 
           whileHover={{ scale: 1.1 }} 
           whileTap={{ scale: 0.9 }} 
-          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50"
+          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50 min-w-[44px] min-h-[44px]"
           type="button"
+          aria-label="Следующий месяц"
         >
           <ChevronRight className="w-6 h-6 text-white" />
         </motion.button>
@@ -232,9 +232,11 @@ export function TournamentCalendar() {
               className={`relative aspect-square rounded-lg transition-all duration-300 ${
                 hasHighlightedTournament 
                   ? 'bg-gold-accent/20 border-2 border-gold-accent shadow-[0_0_20px_rgba(212,175,55,0.4)] cursor-pointer hover:bg-gold-accent/30' 
-                  : isWeekend 
-                    ? `bg-gold-accent/5 border-2 border-gold-accent/20 ${isClickable ? 'cursor-pointer hover:bg-gold-accent/20' : 'hover:bg-gold-accent/10'}` 
-                    : `bg-black/20 border border-white/25 ${isClickable ? 'cursor-pointer hover:bg-white/25' : 'hover:bg-white/15'}`
+                  : new Date(year, month, day).toDateString() === new Date().toDateString()
+                    ? 'bg-white/10 border-2 border-white/30 hover:bg-white/15' // Today's styling
+                    : isWeekend 
+                      ? `bg-gold-accent/5 border-2 border-gold-accent/20 ${isClickable ? 'cursor-pointer hover:bg-gold-accent/20' : 'hover:bg-gold-accent/10'}` 
+                      : `bg-black/20 border border-white/25 ${isClickable ? 'cursor-pointer hover:bg-white/25' : 'hover:bg-white/15'}`
               }`}
             >
               <div className={`absolute inset-0 flex justify-center transition-all duration-300 ${tournament ? 'items-start pt-1' : 'items-center'}`}>
