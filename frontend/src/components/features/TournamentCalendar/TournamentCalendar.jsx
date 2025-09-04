@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthVersion } from '@/hooks/useAuthVersion';
 
 export function TournamentCalendar() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -134,7 +134,6 @@ export function TournamentCalendar() {
   };
 
   const highlightedTournament = tournaments.find(t => t.id === highlightedTournamentId);
-  const showHighlightHint = highlightedTournament && highlightedTournamentId;
 
   // Upcoming tournaments state
   const [allUpcomingTournaments, setAllUpcomingTournaments] = useState([]);
