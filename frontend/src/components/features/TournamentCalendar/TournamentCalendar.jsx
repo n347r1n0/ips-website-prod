@@ -64,15 +64,27 @@ export function TournamentCalendar() {
     return () => { cancelled = true; };
   }, [currentDate, authVersion]); // ✅ only these two
 
-  // Handle URL parameter for highlighting tournament
+  // Handle URL parameter for highlighting tournament + fallback to nearest
   useEffect(() => {
     const highlightParam = searchParams.get('highlightTournament');
+    let targetTournamentId = null;
+
     if (highlightParam) {
-      const tournamentId = parseInt(highlightParam);
-      setHighlightedTournamentId(tournamentId);
+      targetTournamentId = parseInt(highlightParam);
+    } else if (allUpcomingTournaments.length > 0) {
+      // Fallback: highlight nearest upcoming tournament for all users
+      targetTournamentId = allUpcomingTournaments[0].id;
+    }
+
+    setHighlightedTournamentId(targetTournamentId);
+    
+    if (targetTournamentId) {
+      // Find the tournament in current month view or upcoming list
+      let highlightedTournament = tournaments.find(t => t.id === targetTournamentId);
+      if (!highlightedTournament) {
+        highlightedTournament = allUpcomingTournaments.find(t => t.id === targetTournamentId);
+      }
       
-      // Find the tournament and navigate to its month if needed
-      const highlightedTournament = tournaments.find(t => t.id === tournamentId);
       if (highlightedTournament) {
         const tournamentDate = new Date(highlightedTournament.tournament_date);
         const currentMonth = currentDate.getMonth();
@@ -85,7 +97,7 @@ export function TournamentCalendar() {
         }
       }
     }
-  }, [searchParams, tournaments, currentDate]);
+  }, [searchParams, tournaments, allUpcomingTournaments, currentDate]);
 
   const { month, year, firstDayOfMonth, daysInMonth } = useMemo(() => {
     const date = new Date(currentDate);
@@ -162,38 +174,31 @@ export function TournamentCalendar() {
   return (
     <div id="calendar" className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
       {/* === ШАПКА КАЛЕНДАРЯ === */}
-      <div className="flex items-center justify-between mb-6">
-        <motion.button onClick={() => changeMonth(-1)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+      <div className="flex items-center justify-between mb-6 relative z-40">
+        <motion.button 
+          onClick={() => changeMonth(-1)} 
+          whileHover={{ scale: 1.1 }} 
+          whileTap={{ scale: 0.9 }} 
+          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50"
+          type="button"
+        >
           <ChevronLeft className="w-6 h-6 text-white" />
         </motion.button>
         <h2 className="text-2xl md:text-3xl font-bold font-brand text-white tracking-wider first-letter:uppercase">
           {currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
         </h2>
-        <motion.button onClick={() => changeMonth(1)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+        <motion.button 
+          onClick={() => changeMonth(1)} 
+          whileHover={{ scale: 1.1 }} 
+          whileTap={{ scale: 0.9 }} 
+          className="p-2 rounded-full hover:bg-white/10 transition-colors relative z-50"
+          type="button"
+        >
           <ChevronRight className="w-6 h-6 text-white" />
         </motion.button>
       </div>
 
 
-      {/* === HIGHLIGHT HINT MESSAGE === */}
-      {showHighlightHint && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 glassmorphic-panel border border-gold-accent/50 rounded-xl text-center"
-        >
-          <p className="text-white text-lg">
-            Ближайший турнир{' '}
-            <span className="text-gold-accent font-bold">
-              {new Date(highlightedTournament.tournament_date).toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'long'
-              })}
-            </span>
-            . Чтобы зарегистрироваться, нажмите на дату с турниром.
-          </p>
-        </motion.div>
-      )}
 
       {/* === ИНДИКАТОР ЗАГРУЗКИ И ОШИБОК === */}
       {loading && <div className="text-center text-white/80 p-4">Загрузка событий...</div>}
@@ -258,17 +263,23 @@ export function TournamentCalendar() {
         })}
       </div>
 
-      {/* Ближайшие турниры button */}
-      {hasUpcomingTournaments && (
-        <div className="absolute bottom-6 right-6">
+      {/* Ближайшие турниры button - responsive design */}
+      {hasUpcomingTournaments && !selectedDayTournaments && !showUpcomingModal && (
+        <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-30">
           <motion.button
             onClick={() => setShowUpcomingModal(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gold-accent/20 border-2 border-gold-accent shadow-[0_0_20px_rgba(212,175,55,0.4)] text-gold-accent font-medium px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 hover:bg-gold-accent/30 flex items-center space-x-2"
+            aria-label="Ближайшие турниры"
+            className={`
+              bg-gold-accent/20 border-2 border-gold-accent shadow-[0_0_20px_rgba(212,175,55,0.4)] 
+              text-gold-accent font-medium backdrop-blur-sm transition-all duration-300 hover:bg-gold-accent/30
+              md:px-4 md:py-3 md:rounded-xl md:flex md:items-center md:space-x-2
+              w-12 h-12 rounded-full flex items-center justify-center md:w-auto md:h-auto
+            `}
           >
-            <Calendar className="w-5 h-5" />
-            <span>Ближайшие турниры</span>
+            <Calendar className="w-5 h-5 md:w-5 md:h-5" />
+            <span className="hidden md:inline">Ближайшие турниры</span>
           </motion.button>
         </div>
       )}

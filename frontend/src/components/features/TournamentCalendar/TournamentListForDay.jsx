@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Users, Settings } from 'lucide-react';
+import { X, Clock, Trophy, Star, Zap, Target } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
 import { TournamentResultsModal } from './TournamentResultsModal';
@@ -29,6 +29,36 @@ export function TournamentListForDay({ tournaments, onClose }) {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getTournamentTypeIcon = (tournamentType) => {
+    switch (tournamentType) {
+      case 'Стандартный':
+        return Target;
+      case 'Специальный':
+        return Star;
+      case 'Фриролл':
+        return Zap;
+      case 'Рейтинговый':
+        return Trophy;
+      default:
+        return Target;
+    }
+  };
+
+  const getTournamentTypeColor = (tournamentType) => {
+    switch (tournamentType) {
+      case 'Стандартный':
+        return 'text-deep-teal';
+      case 'Специальный':
+        return 'text-gold-accent';
+      case 'Фриролл':
+        return 'text-ips-red';
+      case 'Рейтинговый':
+        return 'text-gold-accent';
+      default:
+        return 'text-white';
+    }
   };
 
   return (
@@ -81,7 +111,11 @@ export function TournamentListForDay({ tournaments, onClose }) {
                         </div>
                         {tournament.settings_json?.tournament_type && (
                           <div className="flex items-center">
-                            <Settings className="w-4 h-4 mr-2 text-gold-accent" />
+                            {(() => {
+                              const TypeIcon = getTournamentTypeIcon(tournament.settings_json.tournament_type);
+                              const typeColor = getTournamentTypeColor(tournament.settings_json.tournament_type);
+                              return <TypeIcon className={`w-4 h-4 mr-2 ${typeColor}`} />;
+                            })()}
                             <span>{tournament.settings_json.tournament_type}</span>
                           </div>
                         )}

@@ -121,6 +121,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
         });
         
         toast.success('Регистрация отменена');
+        // Note: Do NOT clear guest data here - preserve for re-registration
       }
     } catch (error) {
       console.error('Error canceling registration:', error);
@@ -180,7 +181,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
               <div className="h-px bg-gradient-to-r from-transparent via-gold-accent to-transparent" />
             </div>
 
-            <div className="space-y-3 max-h-[50vh] overflow-y-auto">
+            <div className="space-y-3 h-[400px] overflow-y-auto">
               {tournaments.map((tournament) => {
                 const isRegistered = userRegistrations.has(tournament.id);
                 const TypeIcon = getTournamentTypeIcon(tournament.settings_json?.tournament_type);
@@ -192,52 +193,54 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleTournamentClick(tournament)}
-                    className={`glassmorphic-panel border rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                    className={`glassmorphic-panel border rounded-xl cursor-pointer transition-all duration-300 ${
                       isRegistered 
                         ? 'border-gold-accent/50 bg-gold-accent/10' 
                         : 'border-white/30 hover:border-gold-accent/50 hover:bg-white/5'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <TypeIcon className={`w-5 h-5 ${typeColor}`} />
-                          <h3 className="text-white font-medium">{tournament.name}</h3>
+                    <div className="flex items-center justify-between h-20 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-3 mb-1">
+                          <TypeIcon className={`w-5 h-5 ${typeColor} flex-shrink-0`} />
+                          <h3 className="text-white font-medium truncate">{tournament.name}</h3>
                           {tournament.settings_json?.tournament_type && (
-                            <span className={`text-xs px-2 py-1 rounded-full bg-black/20 ${typeColor}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full bg-black/20 ${typeColor} flex-shrink-0`}>
                               {tournament.settings_json.tournament_type}
                             </span>
                           )}
                         </div>
                         
-                        <div className="flex items-center space-x-4 text-sm text-white/70">
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{formatDate(tournament.tournament_date)}</span>
-                            <span>•</span>
-                            <span>{formatTime(tournament.tournament_date)}</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-sm text-white/70">
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{formatDate(tournament.tournament_date)}</span>
+                              <span>•</span>
+                              <span>{formatTime(tournament.tournament_date)}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            {isRegistered && (
+                              <span className="text-xs text-gold-accent font-medium">
+                                ✓ Уже записаны
+                              </span>
+                            )}
+                            
+                            {/* Cancel button for registered tournaments */}
+                            {isRegistered && (
+                              <button
+                                onClick={(e) => handleCancelRegistration(tournament.id, e)}
+                                disabled={loading}
+                                className="px-3 py-1 text-xs text-red-300 border border-red-300/50 rounded-lg hover:bg-red-300/10 transition-colors disabled:opacity-50 flex-shrink-0"
+                              >
+                                Отменить
+                              </button>
+                            )}
                           </div>
                         </div>
-                        
-                        {isRegistered && (
-                          <div className="mt-2">
-                            <span className="text-xs text-gold-accent font-medium">
-                              ✓ Уже записаны
-                            </span>
-                          </div>
-                        )}
                       </div>
-
-                      {/* Cancel button for registered tournaments */}
-                      {isRegistered && (
-                        <button
-                          onClick={(e) => handleCancelRegistration(tournament.id, e)}
-                          disabled={loading}
-                          className="ml-4 px-3 py-1.5 text-xs text-red-300 border border-red-300/50 rounded-lg hover:bg-red-300/10 transition-colors disabled:opacity-50"
-                        >
-                          Отменить
-                        </button>
-                      )}
                     </div>
                   </motion.div>
                 );

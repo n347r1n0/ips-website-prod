@@ -57,10 +57,7 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
 
       await participantsAPI.registerForTournament(registrationData);
       
-      // Clear guest data after successful registration
-      if (guestData && !user) {
-        clearGuestData();
-      }
+      // Note: Do NOT clear guest data here - preserve for re-registration
 
       // Show success message
       const playerName = profile?.nickname || guestData?.name || 'Игрок';
