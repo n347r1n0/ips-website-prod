@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { isAuthInProgress } from '@/lib/authSynchronizer';
 
 export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +34,14 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
           throw new Error('Неполные данные авторизации от Telegram');
         }
 
+        // Check if auth is already in progress for this user
+        const userId = `tg_${user.id}`;
+        if (isAuthInProgress(userId)) {
+          console.log('⏳ [TG-WIDGET] Auth already in progress, showing user-friendly message');
+          setError('Вход уже выполняется... Пожалуйста, подождите.');
+          return;
+        }
+
         // Use AuthContext method for Telegram authentication
         const result = await signInWithTelegram(user);
 
@@ -41,7 +50,15 @@ export function TelegramLoginWidget({ onAuthSuccess, onAuthError, onAuthDecline 
 
       } catch (err) {
         console.error('Telegram auth error:', err);
-        const errorMessage = err.message || 'Произошла ошибка при авторизации через Telegram';
+        let errorMessage = err.message || 'Произошла ошибка при авторизации через Telegram';
+        
+        // Provide user-friendly messages for common sync issues
+        if (errorMessage.includes('Authentication already in progress')) {
+          errorMessage = 'Вход уже выполняется с другого устройства. Пожалуйста, подождите или попробуйте снова через несколько секунд.';
+        } else if (errorMessage.includes('cancelled')) {
+          errorMessage = 'Авторизация была отменена из-за нового запроса входа. Попробуйте снова.';
+        }
+        
         setError(errorMessage);
         onAuthError?.(errorMessage);
       } finally {

@@ -3,48 +3,9 @@
  */
 
 import { supabase } from './supabaseClient';
+import { synchronizedSetSession, synchronizedTelegramAuth } from './authSynchronizer';
 
-/**
- * Wait for a condition to be true with exponential backoff
- */
-async function waitForCondition(conditionFn, options = {}) {
-  const {
-    maxAttempts = 10,
-    initialDelay = 100,
-    maxDelay = 3000,
-    backoffMultiplier = 2,
-    timeoutMs = 30000
-  } = options;
-
-  const startTime = Date.now();
-  let attempt = 0;
-  let delay = initialDelay;
-
-  while (attempt < maxAttempts) {
-    // Check timeout
-    if (Date.now() - startTime > timeoutMs) {
-      throw new Error(`Condition timeout after ${timeoutMs}ms`);
-    }
-
-    try {
-      const result = await conditionFn();
-      if (result) {
-        return result;
-      }
-    } catch (error) {
-      console.warn(`waitForCondition attempt ${attempt + 1} failed:`, error);
-    }
-
-    attempt++;
-    
-    if (attempt < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, delay));
-      delay = Math.min(delay * backoffMultiplier, maxDelay);
-    }
-  }
-
-  throw new Error(`Condition not met after ${maxAttempts} attempts`);
-}
+// waitForCondition function removed - now handled by synchronizer
 
 /**
  * Retry a function call with exponential backoff
@@ -54,7 +15,7 @@ async function retryWithBackoff(fn, options = {}) {
     maxAttempts = 3,
     initialDelay = 1000,
     backoffMultiplier = 2,
-    shouldRetry = (error) => true
+    shouldRetry = () => true
   } = options;
 
   let lastError;
@@ -120,54 +81,23 @@ export async function verifySessionEstablished(expectedUserId = null) {
 
 /**
  * Set session tokens and wait for them to be properly established
+ * Now uses synchronization to prevent race conditions
  */
 export async function setSessionWithVerification(tokens, options = {}) {
   const { 
     maxWaitTime = 15000,
-    verificationDelay = 200 
+    verificationDelay = 200,
+    userId = tokens.user?.id || 'unknown'
   } = options;
 
-  console.log('🔄 [SESSION] Setting session tokens...');
+  console.log('🔄 [SESSION] Setting session tokens with synchronization...');
   
-  // Set the session
-  const { error: setError } = await supabase.auth.setSession({
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
+  // Use synchronized session setting to prevent conflicts
+  return await synchronizedSetSession(tokens, {
+    maxWaitTime,
+    verificationDelay,
+    userId
   });
-
-  if (setError) {
-    console.error('❌ [SESSION] Failed to set session:', setError);
-    throw new Error(`Failed to set session: ${setError.message}`);
-  }
-
-  console.log('✅ [SESSION] Session tokens set, verifying establishment...');
-
-  // Wait for session to be properly established
-  try {
-    const result = await waitForCondition(
-      async () => {
-        const verification = await verifySessionEstablished();
-        if (verification.verified) {
-          console.log('✅ [SESSION] Session verified successfully');
-          return verification.session;
-        }
-        console.log('🔄 [SESSION] Session not yet established, retrying...', verification.error);
-        return null;
-      },
-      {
-        maxAttempts: Math.ceil(maxWaitTime / verificationDelay),
-        initialDelay: verificationDelay,
-        maxDelay: verificationDelay,
-        backoffMultiplier: 1, // Linear retry for session checks
-        timeoutMs: maxWaitTime
-      }
-    );
-
-    return { success: true, session: result, error: null };
-  } catch (error) {
-    console.error('❌ [SESSION] Session verification timeout:', error);
-    return { success: false, session: null, error: error.message };
-  }
 }
 
 /**
@@ -218,63 +148,77 @@ export async function invokeEdgeFunctionWithRetry(functionName, payload, options
 
 /**
  * Complete Telegram authentication flow with all reliability measures
+ * Now uses synchronization to prevent race conditions
  */
 export async function completeTelegramAuthFlow(telegramAuthData, options = {}) {
-  const startTime = Date.now();
+  const userId = `tg_${telegramAuthData?.id || 'unknown'}`;
 
-  try {
-    console.log('🚀 [TG-AUTH] Starting reliable Telegram auth flow');
+  console.log('🚀 [TG-AUTH] Starting synchronized Telegram auth flow');
 
-    // Step 1: Call edge function with retry
-    console.log('🔄 [TG-AUTH] Step 1: Edge function call with retry');
-    const { data, error: invokeError } = await invokeEdgeFunctionWithRetry(
-      'telegram-auth-callback',
-      { body: { tgUserData: telegramAuthData } },
-      options.edgeFunction
-    );
+  // Use synchronized auth to prevent conflicts with other auth attempts
+  return await synchronizedTelegramAuth(
+    telegramAuthData,
+    async () => {
+      const startTime = Date.now();
 
-    if (invokeError) {
-      throw new Error(`Edge function error: ${invokeError.message}`);
+      try {
+        console.log('🔄 [TG-AUTH] Step 1: Edge function call with retry');
+        const { data, error: invokeError } = await invokeEdgeFunctionWithRetry(
+          'telegram-auth-callback',
+          { body: { tgUserData: telegramAuthData } },
+          options.edgeFunction
+        );
+
+        if (invokeError) {
+          throw new Error(`Edge function error: ${invokeError.message}`);
+        }
+
+        if (!data.success) {
+          throw new Error(`Auth failed: ${data.error || 'Unknown error'}`);
+        }
+
+        if (!data.session_token?.access_token || !data.session_token?.refresh_token) {
+          throw new Error('Invalid session tokens received from server');
+        }
+
+        // Step 2: Set session with verification (also synchronized)
+        console.log('🔄 [TG-AUTH] Step 2: Setting session with verification');
+        const sessionResult = await setSessionWithVerification(
+          data.session_token, 
+          {
+            ...options.session,
+            userId
+          }
+        );
+
+        if (!sessionResult.success) {
+          throw new Error(`Session establishment failed: ${sessionResult.error}`);
+        }
+
+        const duration = Date.now() - startTime;
+        console.log(`✅ [TG-AUTH] Complete auth flow successful in ${duration}ms`);
+
+        return {
+          success: true,
+          session: sessionResult.session,
+          duration,
+          error: null
+        };
+
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        console.error(`❌ [TG-AUTH] Auth flow failed after ${duration}ms:`, error);
+
+        return {
+          success: false,
+          session: null,
+          duration,
+          error: error.message
+        };
+      }
+    },
+    {
+      timeout: (options.edgeFunction?.timeoutPerAttempt || 10000) + (options.session?.maxWaitTime || 15000) + 10000
     }
-
-    if (!data.success) {
-      throw new Error(`Auth failed: ${data.error || 'Unknown error'}`);
-    }
-
-    if (!data.session_token?.access_token || !data.session_token?.refresh_token) {
-      throw new Error('Invalid session tokens received from server');
-    }
-
-    // Step 2: Set session with verification
-    console.log('🔄 [TG-AUTH] Step 2: Setting session with verification');
-    const sessionResult = await setSessionWithVerification(
-      data.session_token, 
-      options.session
-    );
-
-    if (!sessionResult.success) {
-      throw new Error(`Session establishment failed: ${sessionResult.error}`);
-    }
-
-    const duration = Date.now() - startTime;
-    console.log(`✅ [TG-AUTH] Complete auth flow successful in ${duration}ms`);
-
-    return {
-      success: true,
-      session: sessionResult.session,
-      duration,
-      error: null
-    };
-
-  } catch (error) {
-    const duration = Date.now() - startTime;
-    console.error(`❌ [TG-AUTH] Auth flow failed after ${duration}ms:`, error);
-
-    return {
-      success: false,
-      session: null,
-      duration,
-      error: error.message
-    };
-  }
+  );
 }

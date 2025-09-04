@@ -6,6 +6,7 @@ import { validatedStorage } from '@/lib/validatedStorage';
 import { iosSafariUtils, addIOSVisibilityTracking } from '@/lib/iosSafariUtils';
 import { completeTelegramAuthFlow } from '@/lib/sessionUtils';
 import { preAuthCleanup } from '@/lib/preAuthCleanup';
+import { authSynchronizer, isAuthInProgress, cancelAllPendingAuths } from '@/lib/authSynchronizer';
 
 const AuthContext = createContext();
 
@@ -87,6 +88,10 @@ export function AuthProvider({ children }) {
     console.log('🚪 Enhanced logout starting...');
     isLoggingOut.current = true;
 
+    // Cancel any pending auth operations to prevent race conditions
+    await cancelAllPendingAuths();
+    console.log('🚫 [AUTH-CONTEXT] Cancelled all pending auths during logout');
+
     // Cancel any ongoing requests
     profileController.current?.abort();
 
@@ -132,87 +137,106 @@ export function AuthProvider({ children }) {
     }, delay);
   };
 
-  // Enhanced auth state handler with iOS context tracking
+  // Enhanced auth state handler with iOS context tracking and synchronization
   useEffect(() => {
-    console.log('🔧 Auth listener starting...');
+    console.log('🔧 Auth listener starting with synchronization...');
     
     // Add iOS Safari visibility tracking
     if (iosSafariUtils.isIOSSafari) {
       console.log('🍎 iOS Safari detected: Adding visibility tracking');
       visibilityCleanup.current = addIOSVisibilityTracking();
     }
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log(`🔔 [AUTH-CONTEXT] ${event} - User:`, {
-          userId: session?.user?.id || 'none',
-          userEmail: session?.user?.email || 'none',
-          hasSession: !!session,
-          currentProfileId: profile?.id || 'none',
-          isLoggingOut: isLoggingOut.current,
-          loading,
-          isIOSSafari: iosSafariUtils.isIOSSafari
+
+    // Register synchronized auth state change handler
+    const handleAuthStateChange = async (event, session) => {
+      console.log(`🔔 [AUTH-CONTEXT] ${event} - User:`, {
+        userId: session?.user?.id || 'none',
+        userEmail: session?.user?.email || 'none',
+        hasSession: !!session,
+        currentProfileId: profile?.id || 'none',
+        isLoggingOut: isLoggingOut.current,
+        loading,
+        pendingAuthsCount: authSynchronizer.getPendingAuthCount(),
+        isIOSSafari: iosSafariUtils.isIOSSafari
+      });
+
+      // Always ignore events during logout
+      if (isLoggingOut.current) {
+        console.log('🚫 [AUTH-CONTEXT] Ignoring event - logging out');
+        return;
+      }
+
+      // Check if we should ignore this event due to ongoing auth operations
+      if (event === 'SIGNED_OUT' && isAuthInProgress()) {
+        console.log('🚫 [AUTH-CONTEXT] Ignoring SIGNED_OUT - auth in progress');
+        return;
+      }
+
+      // iOS Safari: Check for context issues after backgrounding
+      if (iosSafariUtils.isIOSSafari && event === 'SIGNED_IN') {
+        const contextRefreshed = iosSafariUtils.refreshContextIfNeeded();
+        if (contextRefreshed) {
+          console.log('🍎 [AUTH-CONTEXT] iOS context was refreshed due to backgrounding');
+        }
+      }
+
+      const currentUser = session?.user ?? null;
+      
+      // Simple state updates
+      console.log('📝 [AUTH-CONTEXT] Setting user state:', !!currentUser);
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Only load profile on SIGNED_IN or if we don't have one
+        const shouldLoadProfile = event === 'SIGNED_IN' || !profile || lastUserId.current !== currentUser.id;
+        console.log('🔍 [AUTH-CONTEXT] Profile loading decision:', {
+          event,
+          shouldLoad: shouldLoadProfile,
+          hasProfile: !!profile,
+          lastUserId: lastUserId.current,
+          currentUserId: currentUser.id
         });
-
-        // Always ignore events during logout
-        if (isLoggingOut.current) {
-          console.log('🚫 [AUTH-CONTEXT] Ignoring event - logging out');
-          return;
-        }
-
-        // iOS Safari: Check for context issues after backgrounding
-        if (iosSafariUtils.isIOSSafari && event === 'SIGNED_IN') {
-          const contextRefreshed = iosSafariUtils.refreshContextIfNeeded();
-          if (contextRefreshed) {
-            console.log('🍎 [AUTH-CONTEXT] iOS context was refreshed due to backgrounding');
-          }
-        }
-
-        const currentUser = session?.user ?? null;
         
-        // Simple state updates
-        console.log('📝 [AUTH-CONTEXT] Setting user state:', !!currentUser);
-        setUser(currentUser);
-
-        if (currentUser) {
-          // Only load profile on SIGNED_IN or if we don't have one
-          const shouldLoadProfile = event === 'SIGNED_IN' || !profile || lastUserId.current !== currentUser.id;
-          console.log('🔍 [AUTH-CONTEXT] Profile loading decision:', {
-            event,
-            shouldLoad: shouldLoadProfile,
-            hasProfile: !!profile,
-            lastUserId: lastUserId.current,
-            currentUserId: currentUser.id
+        if (shouldLoadProfile) {
+          console.log('⏳ [AUTH-CONTEXT] Starting async profile load for user:', currentUser.id);
+          // DON'T AWAIT - let profile loading happen in parallel
+          loadUserProfile(currentUser).catch(error => {
+            console.error('❌ [AUTH-CONTEXT] Profile loading failed:', error);
           });
-          
-          if (shouldLoadProfile) {
-            console.log('⏳ [AUTH-CONTEXT] Starting async profile load for user:', currentUser.id);
-            // DON'T AWAIT - let profile loading happen in parallel
-            loadUserProfile(currentUser).catch(error => {
-              console.error('❌ [AUTH-CONTEXT] Profile loading failed:', error);
-            });
-          } else {
-            console.log('⏭️ [AUTH-CONTEXT] Skipping profile load');
-          }
         } else {
-          // No user - clear everything
-          console.log('🧹 [AUTH-CONTEXT] Clearing user data');
-          setProfile(null);
-          lastUserId.current = null;
+          console.log('⏭️ [AUTH-CONTEXT] Skipping profile load');
         }
+      } else {
+        // No user - clear everything
+        console.log('🧹 [AUTH-CONTEXT] Clearing user data');
+        setProfile(null);
+        lastUserId.current = null;
+      }
 
-        // Turn off loading after first event
-        if (loading) {
-          console.log('✅ [AUTH-CONTEXT] Turning off loading state');
-          setLoading(false);
-        }
-        
-        console.log('🏁 [AUTH-CONTEXT] Event processing complete');
+      // Turn off loading after first event
+      if (loading) {
+        console.log('✅ [AUTH-CONTEXT] Turning off loading state');
+        setLoading(false);
+      }
+      
+      console.log('🏁 [AUTH-CONTEXT] Event processing complete');
+    };
+
+    // Register with auth synchronizer for controlled state changes
+    const unregisterSyncHandler = authSynchronizer.onAuthStateChange(handleAuthStateChange);
+    
+    // Standard Supabase auth listener - now routes through synchronizer
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // Route through synchronizer for controlled emission
+        authSynchronizer.emitAuthStateChange(event, session);
       }
     );
 
     return () => {
       authListener?.subscription.unsubscribe();
+      unregisterSyncHandler();
+      
       // Clean up iOS visibility tracking
       if (visibilityCleanup.current) {
         visibilityCleanup.current();
@@ -258,8 +282,16 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
 
+    const userId = `tg_${telegramUserData?.id || 'unknown'}`;
+
     try {
-      console.log('🚀 [TG-SIGNIN] Starting reliable Telegram sign-in');
+      console.log('🚀 [TG-SIGNIN] Starting synchronized Telegram sign-in');
+
+      // Check if auth is already in progress for this user
+      if (isAuthInProgress(userId)) {
+        console.log('⏳ [TG-SIGNIN] Auth already in progress for user, waiting...');
+        throw new Error('Authentication already in progress for this user');
+      }
 
       // COMPREHENSIVE PRE-AUTH CLEANUP
       console.log('🧹 [TG-SIGNIN] Running comprehensive pre-auth cleanup...');
@@ -278,7 +310,7 @@ export function AuthProvider({ children }) {
         }
       }
 
-      // Use the robust auth flow with retries
+      // Use the synchronized auth flow with retries
       const result = await completeTelegramAuthFlow(telegramUserData, {
         edgeFunction: {
           maxAttempts: 3,
@@ -295,7 +327,7 @@ export function AuthProvider({ children }) {
         throw new Error(result.error || 'Authentication flow failed');
       }
 
-      console.log(`✅ [TG-SIGNIN] Reliable sign-in completed in ${result.duration}ms`);
+      console.log(`✅ [TG-SIGNIN] Synchronized sign-in completed in ${result.duration}ms`);
       
       // Don't set loading to false here - let the auth state change handle it
       return { success: true, session: result.session };
