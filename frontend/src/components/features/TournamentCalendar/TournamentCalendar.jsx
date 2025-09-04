@@ -47,7 +47,7 @@ export function TournamentCalendar() {
 
         const { data, error } = await supabase
           .from('tournaments')
-          .select('id, name, tournament_date, status, settings_json')
+          .select('id, name, tournament_date, status, settings_json, tournament_type, is_major')
           .gte('tournament_date', start)
           .lt('tournament_date', end)
           .order('tournament_date', { ascending: true });
@@ -156,7 +156,7 @@ export function TournamentCalendar() {
 
         const { data, error } = await supabase
           .from('tournaments')
-          .select('id, name, tournament_date, status, settings_json')
+          .select('id, name, tournament_date, status, settings_json, tournament_type, is_major')
           .gte('tournament_date', now)
           .lte('tournament_date', endDate)
           .neq('status', 'completed')

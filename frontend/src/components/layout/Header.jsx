@@ -133,12 +133,12 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
               {/* Mobile navigation - 2x2 grid with icons */}
               <div className="md:hidden flex items-center">
                 {/* 2x2 navigation grid */}
-                <div className="grid grid-cols-2 gap-2 mr-3">
+                <div className="grid grid-cols-2 gap-3 mr-4">
                   {mobileNavigationItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleNavClick(item.id)}
-                      className="text-xs text-gray-300 hover:text-gold-accent transition-colors duration-300 px-2 py-1 text-center min-w-[70px]"
+                      className="text-sm font-medium text-gray-300 hover:text-gold-accent transition-colors duration-300 px-3 py-2 text-center min-w-[80px]"
                     >
                       {item.label}
                     </button>
@@ -146,30 +146,30 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
                 </div>
                 
                 {/* Right column icons */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   {/* Home icon */}
                   <button
                     onClick={() => handleNavClick('hero')}
-                    className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300"
+                    className="p-2 hover:bg-white/10 transition-colors duration-300 rounded-lg"
                     aria-label="Главная"
                   >
-                    <Home className="w-5 h-5 text-white hover:text-gold-accent" />
+                    <Home className="w-6 h-6 text-white hover:text-gold-accent transition-colors duration-300" />
                   </button>
                   
-                  {/* Auth icon */}
+                  {/* Auth icon - signature color with yellow on click */}
                   {user ? (
                     <Link to="/dashboard">
-                      <button className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300">
-                        <User className="w-5 h-5 text-white hover:text-gold-accent" />
+                      <button className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg group">
+                        <User className="w-6 h-6 text-deep-teal group-hover:text-gold-accent group-active:text-yellow-400 transition-colors duration-300" />
                       </button>
                     </Link>
                   ) : (
                     <button
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="p-2 glassmorphic-panel rounded-lg hover:bg-white/10 transition-colors duration-300"
+                      className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg group"
                       aria-label="Вход / Регистрация"
                     >
-                      <Key className="w-5 h-5 text-white hover:text-gold-accent" />
+                      <Key className="w-6 h-6 text-deep-teal group-hover:text-gold-accent group-active:text-yellow-400 transition-colors duration-300" />
                     </button>
                   )}
                 </div>

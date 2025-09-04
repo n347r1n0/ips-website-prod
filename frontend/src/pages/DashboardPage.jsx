@@ -5,12 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/layout/Section';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { LogOut, User, Trophy, Calendar } from 'lucide-react';
+import { LogOut, User, Trophy, Calendar, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom'; // Импортируем Link для навигации
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   // Плейсхолдер для статистики, позже будем брать реальные данные
   const stats = [
@@ -67,6 +67,36 @@ export function DashboardPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Админ-панель (только для администраторов) */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-8"
+          >
+            <GlassPanel className="border-gold-accent/30">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-brand text-gold-accent flex items-center">
+                    <Settings className="w-5 h-5 mr-2" />
+                    Панель администратора
+                  </h2>
+                </div>
+                <p className="text-white/70 mb-6 text-sm">
+                  Управление турнирами, участниками и настройками клуба
+                </p>
+                <Link to="/admin">
+                  <Button className="luxury-button px-6 py-3 rounded-xl flex items-center">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Открыть админ-панель
+                  </Button>
+                </Link>
+              </div>
+            </GlassPanel>
+          </motion.div>
+        )}
 
         {/* Быстрые действия */}
         <motion.div
