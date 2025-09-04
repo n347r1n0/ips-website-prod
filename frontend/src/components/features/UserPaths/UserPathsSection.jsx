@@ -198,29 +198,6 @@ function GuestRegistrationCard() {
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-white/20"></div>
-              <span className="px-3 text-white/60 text-sm">или</span>
-              <div className="flex-1 h-px bg-white/20"></div>
-            </div>
-
-            {/* Secondary Telegram button */}
-            <a
-              href="https://t.me/your_bot_username"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button 
-                className="w-full glassmorphic-panel border border-white/30 text-white hover:bg-white/10 py-3 rounded-xl font-medium min-h-[44px]"
-                aria-label="Записаться в Telegram"
-              >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Записаться в Telegram
-                <ExternalLink className="w-4 h-4 ml-2" />
-              </Button>
-            </a>
           </div>
         )}
       </div>
@@ -262,26 +239,11 @@ export function UserPathsSection({ onAuthModalOpen, onGuestModalOpen }) {
         </motion.div>
 
         <div className={`grid gap-8 ${user ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-2'}`}>
-          {/* Guest Registration Card - show only if user is not logged in */}
-          {!user && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0 }}
-              viewport={{ once: true }}
-              className="relative group"
-            >
-              <div className="transition-all duration-300 group-hover:scale-105">
-                <GuestRegistrationCard />
-              </div>
-            </motion.div>
-          )}
-
           {/* Member Registration Card */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: user ? 0 : 0.2 }}
+            transition={{ duration: 0.8, delay: 0 }}
             viewport={{ once: true }}
             className="relative group"
           >
@@ -333,6 +295,21 @@ export function UserPathsSection({ onAuthModalOpen, onGuestModalOpen }) {
               </div>
             </GlassPanel>
           </motion.div>
+
+          {/* Guest Registration Card - show only if user is not logged in */}
+          {!user && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="relative group"
+            >
+              <div className="transition-all duration-300 group-hover:scale-105">
+                <GuestRegistrationCard />
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
