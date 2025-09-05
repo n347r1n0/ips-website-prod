@@ -107,7 +107,7 @@ export function TournamentCalendar() {
         }
       }
     }
-  }, [searchParams, tournaments, currentDate]); // Removed allUpcomingTournaments dependency to prevent loops
+  }, [searchParams, tournaments]); // Removed currentDate to prevent infinite loops
 
   const { month, year, firstDayOfMonth, daysInMonth } = useMemo(() => {
     const date = new Date(currentDate);
