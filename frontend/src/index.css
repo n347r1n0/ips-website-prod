@@ -73,15 +73,15 @@ body {
     @apply rounded-full text-white border-0;
     background: linear-gradient(145deg, #2c2c30, #1c1c1e);
     box-shadow: 
-      inset 0 2px 4px rgba(255,255,255,0.1),
-      inset 0 -2px 4px rgba(0,0,0,0.3),
+      inset 0 2px 4px rgba(255,255,255,0.05),
+      inset 0 -2px 4px rgba(0,0,0,0.4),
       0 4px 8px rgba(0,0,0,0.3),
       0 2px 4px rgba(0,0,0,0.2);
   }
   .btn-neo:hover {
     box-shadow: 
-      inset 0 2px 6px rgba(255,255,255,0.15),
-      inset 0 -2px 6px rgba(0,0,0,0.4),
+      inset 0 2px 6px rgba(255,255,255,0.08),
+      inset 0 -2px 6px rgba(0,0,0,0.5),
       0 6px 12px rgba(0,0,0,0.4),
       0 3px 6px rgba(0,0,0,0.3);
     transform: translateY(-1px);
@@ -89,8 +89,8 @@ body {
   .btn-neo:active {
     @apply scale-95;
     box-shadow: 
-      inset 0 1px 3px rgba(255,255,255,0.08),
-      inset 0 -1px 3px rgba(0,0,0,0.4),
+      inset 0 1px 3px rgba(255,255,255,0.04),
+      inset 0 -1px 3px rgba(0,0,0,0.5),
       0 2px 4px rgba(0,0,0,0.2);
     transform: translateY(0);
   }
@@ -117,7 +117,7 @@ body {
     background: linear-gradient(145deg, #3c3c40, #2c2c30);
     box-shadow: 
       0 4px 0 rgba(0,0,0,0.4),
-      inset 0 1px 0 rgba(255,255,255,0.1);
+      inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .btn-clay:hover {
     @apply brightness-110;
@@ -125,13 +125,13 @@ body {
     box-shadow: 
       0 5px 0 rgba(0,0,0,0.4),
       0 2px 8px rgba(0,0,0,0.2),
-      inset 0 1px 0 rgba(255,255,255,0.12);
+      inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .btn-clay:active {
     transform: translateY(2px);
     box-shadow: 
       0 1px 0 rgba(0,0,0,0.5),
-      inset 0 1px 0 rgba(255,255,255,0.08);
+      inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   /* === GRADIENT MODIFIERS (color only) === */

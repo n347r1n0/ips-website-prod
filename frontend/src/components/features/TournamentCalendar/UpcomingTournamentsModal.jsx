@@ -1,8 +1,10 @@
 // src/components/features/TournamentCalendar/UpcomingTournamentsModal.jsx
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Trophy, Star, Zap, Target } from 'lucide-react';
+import { Clock, Trophy, Star, Zap, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ModalBase } from '@/components/ui/ModalBase';
+import { Button } from '@/components/ui/Button';
 import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
 import { participantsAPI } from '@/lib/participantsAPI';
 import { useAuth } from '@/contexts/AuthContext';
@@ -154,38 +156,15 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-        onClick={onClose}
+    <>
+      <ModalBase
+        isOpen={true}
+        onClose={onClose}
+        title="Ближайшие турниры"
+        subtitle={`${tournaments.length} турнир${tournaments.length === 1 ? '' : tournaments.length < 5 ? 'а' : 'ов'} в ближайшее время`}
+        contentClassName="p-6"
       >
-        <motion.div
-          initial={{ scale: 0.8, y: 50, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.8, y: 50, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-2xl max-h-[80vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="glassmorphic-panel rounded-2xl p-6">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="mb-6">
-              <h2 className="text-2xl font-heading text-white mb-2">
-                Ближайшие турниры
-              </h2>
-              <div className="h-px bg-gradient-to-r from-transparent via-gold-accent to-transparent" />
-            </div>
-
-            <div className="space-y-3 h-[400px] overflow-y-auto">
+        <div className="space-y-3">
               {tournaments.map((tournament) => {
                 // --- ИЗМЕНЕНИЕ: Проверка регистрации теперь мгновенная ---
                 const isRegistered = userRegistrationIds.has(tournament.id);
@@ -235,13 +214,15 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                             
                             {/* Cancel button for registered tournaments */}
                             {isRegistered && (
-                              <button
+                              <Button
+                                variant="glass"
+                                size="sm"
                                 onClick={(e) => handleCancelRegistration(tournament.id, e)}
                                 disabled={loading}
-                                className="px-3 py-1 text-xs text-red-300 border border-red-300/50 rounded-lg hover:bg-red-300/10 transition-colors disabled:opacity-50 flex-shrink-0"
+                                className="text-red-300 border-red-300/50 hover:bg-red-300/10 text-xs flex-shrink-0"
                               >
                                 Отменить
-                              </button>
+                              </Button>
                             )}
                           </div>
                         </div>
@@ -250,16 +231,14 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                   </motion.div>
                 );
               })}
-            </div>
+        </div>
 
-            {tournaments.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-white/60">Нет предстоящих турниров</p>
-              </div>
-            )}
+        {tournaments.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-white/60">Нет предстоящих турниров</p>
           </div>
-        </motion.div>
-      </motion.div>
+        )}
+      </ModalBase>
 
       {/* Registration confirmation modal */}
       {selectedTournament && (
@@ -269,6 +248,6 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
           onSuccess={handleRegistrationSuccess}
         />
       )}
-    </AnimatePresence>
+    </>
   );
 }
