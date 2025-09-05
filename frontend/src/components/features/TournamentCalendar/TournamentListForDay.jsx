@@ -67,7 +67,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
         isOpen={true}
         onClose={onClose}
         title={`Турниры на ${dateString}`}
-        fullScreen={true}
+        fullScreen={false}
       >
         <div className="spacing-content">
           {tournaments.map((tournament) => {
