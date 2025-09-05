@@ -166,9 +166,9 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
               <Button
                 onClick={handleConfirmRegistration}
                 disabled={loading || (!user && !guestData)}
-                className={`flex-1 luxury-button px-8 py-4 rounded-xl flex items-center justify-center ${
-                  loading || (!user && !guestData) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                variant="primary"
+                size="lg"
+                className="flex-1"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -181,7 +181,8 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
               <Button
                 onClick={onClose}
                 disabled={loading}
-                className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-xl"
+                variant="neutral"
+                size="lg"
               >
                 Отмена
               </Button>

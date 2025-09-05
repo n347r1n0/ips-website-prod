@@ -287,7 +287,7 @@ export function UserPathsSection({ onAuthModalOpen, onGuestModalOpen }) {
                   disabled={memberPath.disabled}
                   variant={memberPath.primary ? "primary" : memberPath.disabled ? "neutral" : "secondary"}
                   size="lg"
-                  className={`w-full ${memberPath.disabled ? 'bg-green-500/20 text-green-400 cursor-not-allowed' : ''}`}
+                  className="w-full"
                 >
                   {memberPath.cta}
                 </Button>
