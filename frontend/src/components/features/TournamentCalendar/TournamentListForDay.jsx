@@ -78,7 +78,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
           className="relative w-full max-w-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="neumorphic-panel rounded-2xl p-8">
+          <div className="glassmorphic-panel rounded-2xl p-8 border border-white/15">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
@@ -97,7 +97,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
               {tournaments.map((tournament) => (
                 <div
                   key={tournament.id}
-                  className="neumorphic-panel rounded-xl p-6 transition-colors"
+                  className="glassmorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>

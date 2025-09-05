@@ -39,14 +39,15 @@ body {
 @layer components {
   /* === CLEAN BUTTON SYSTEM === */
   
-  /* Base button foundation */
+  /* Base button foundation with Syne font */
   .btn {
-    @apply inline-flex items-center justify-center font-medium transition-all duration-200;
+    @apply inline-flex items-center justify-center font-syne font-semibold transition-all duration-200;
     @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     min-height: 44px;
     font-size: 0.9rem;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   /* Button sizes */
@@ -54,76 +55,77 @@ body {
   .btn-md { @apply text-base px-6 py-3 min-h-[48px]; }
   .btn-lg { @apply text-lg px-8 py-4 min-h-[56px]; }
 
-  /* Primary claymorphic action button */
+  /* Primary claymorphic action button with Syne styling */
   .btn-primary {
-    @apply rounded-2xl text-white font-medium;
+    @apply rounded-2xl text-white;
     background: linear-gradient(145deg, #007193, #00A29C);
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 2px 8px rgba(0, 113, 147, 0.3);
+      0 6px 0 rgba(0, 0, 0, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.1),
+      0 4px 12px rgba(0, 113, 147, 0.3);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 6px 0 rgba(0, 0, 0, 0.3),
-      0 4px 12px rgba(0, 113, 147, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      0 8px 0 rgba(0, 0, 0, 0.3),
+      0 6px 16px rgba(0, 113, 147, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15);
     background: linear-gradient(145deg, #1985a3, #1ab3ac);
   }
   .btn-primary:active {
-    transform: translateY(2px);
+    transform: translateY(3px);
     box-shadow: 
-      0 1px 0 rgba(0, 0, 0, 0.4),
+      0 2px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  /* Secondary claymorphic button */
+  /* Secondary claymorphic button with Syne styling */
   .btn-secondary {
-    @apply rounded-xl text-white font-medium;
+    @apply rounded-xl text-white/90;
     background: linear-gradient(145deg, #3c3c40, #2c2c30);
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 
-      0 3px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 2px 6px rgba(0, 0, 0, 0.2);
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.25);
   }
   .btn-secondary:hover {
+    @apply text-white;
     transform: translateY(-1px);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.3),
-      0 3px 8px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 5px 0 rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
     background: linear-gradient(145deg, #434347, #323236);
   }
   .btn-secondary:active {
-    transform: translateY(1px);
+    transform: translateY(2px);
     box-shadow: 
       0 1px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
-  /* Danger claymorphic button */
+  /* Danger claymorphic button with Syne styling */
   .btn-danger {
-    @apply rounded-xl text-white font-medium;
+    @apply rounded-xl text-white;
     background: linear-gradient(145deg, #dc2626, #b91c1c);
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 
-      0 3px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 2px 6px rgba(220, 38, 38, 0.3);
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 2px 8px rgba(220, 38, 38, 0.3);
   }
   .btn-danger:hover {
     transform: translateY(-1px);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.3),
-      0 3px 8px rgba(220, 38, 38, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      0 5px 0 rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(220, 38, 38, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
     background: linear-gradient(145deg, #ef4444, #dc2626);
   }
   .btn-danger:active {
-    transform: translateY(1px);
+    transform: translateY(2px);
     box-shadow: 
       0 1px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -146,12 +148,16 @@ body {
       0 6px 16px rgba(0, 0, 0, 0.25);
   }
 
-  /* Keep glassmorphic only for specific cases */
+    /* Glassmorphic panels for content areas (auth, tournament cards, etc.) */
   .glassmorphic-panel {
     @apply bg-black/40 backdrop-blur-xl border border-white/10;
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .glassmorphic-panel:hover {
+    @apply border-white/15;
+    background: rgba(0, 0, 0, 0.35);
   }
 
     /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */

@@ -57,21 +57,22 @@ export function ModalBase({
           {/* Fixed Header */}
           {(title || headerActions) && (
             <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1 pr-4">
                   {title && (
-                    <h1 className="heading-lg mb-2">{title}</h1>
+                    <h1 className="heading-lg mb-2 leading-tight">{title}</h1>
                   )}
                   {subtitle && (
                     <p className="text-secondary">{subtitle}</p>
                   )}
                 </div>
                 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-start space-x-3 flex-shrink-0">
                   {headerActions}
                   <button
                     onClick={onClose}
                     className="btn btn-secondary btn-sm p-2 aspect-square"
+                    aria-label="Закрыть"
                   >
                     <X className="w-5 h-5" />
                   </button>

@@ -175,10 +175,10 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     onClick={() => handleTournamentClick(tournament)}
-                    className={`neumorphic-panel rounded-xl cursor-pointer transition-all duration-200 p-5 ${
+                    className={`glassmorphic-panel rounded-xl cursor-pointer transition-all duration-200 p-5 border ${
                       isRegistered 
-                        ? 'border-gold-accent/30' 
-                        : 'hover:border-gold-accent/20'
+                        ? 'border-gold-accent/40 bg-gold-accent/5' 
+                        : 'border-white/15 hover:border-gold-accent/30'
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -233,7 +233,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
               })}
 
           {tournaments.length === 0 && (
-            <div className="neumorphic-panel rounded-xl p-8 text-center">
+            <div className="glassmorphic-panel rounded-xl p-8 text-center border border-white/15">
               <p className="text-secondary">Нет предстоящих турниров</p>
             </div>
           )}
