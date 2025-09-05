@@ -272,12 +272,42 @@ body {
   .luxury-button-linear3:hover,
   .luxury-button-conic:hover,
   .luxury-button-elliptic:hover {
-    @apply -translate-y-0.5 shadow-[0_8px_25px_theme(colors.deep-teal/40%)];
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 0 rgba(0, 0, 0, 0.3),
+      0 6px 16px rgba(0, 113, 147, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  }
+  
+  .luxury-button:active,
+  .luxury-button-linear:active,
+  .luxury-button-linear3:active,
+  .luxury-button-conic:active,
+  .luxury-button-elliptic:active {
+    transform: translateY(3px);
+    box-shadow: 
+      0 2px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
+  /* Enhanced claymorphic blue-green buttons with Syne font */
+  .luxury-button,
+  .luxury-button-linear,
+  .luxury-button-linear3,
+  .luxury-button-conic,
+  .luxury-button-elliptic {
+    @apply font-syne font-semibold text-white rounded-2xl;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+      0 6px 0 rgba(0, 0, 0, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.1),
+      0 4px 12px rgba(0, 113, 147, 0.3);
+    transition: all 0.2s ease;
+  }
+  
   /* Градиенты (только background) — меняешь имя класса и всё */
   .luxury-button {                           /* твой текущий дефолт */
-    background: linear-gradient(90deg, #00A29C, #007193);
+    background: linear-gradient(145deg, #00A29C, #007193);
   }
   .luxury-button-linear {                    /* обычный линейный */
     background: linear-gradient(135deg, #00A29C, #007193);

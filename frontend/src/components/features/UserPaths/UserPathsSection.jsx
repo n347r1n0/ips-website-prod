@@ -137,7 +137,9 @@ function GuestRegistrationCard() {
             </div>
             <Button
               onClick={scrollToCalendar}
-              className="w-full luxury-button py-3 rounded-xl font-medium"
+              variant="primary"
+              size="lg"
+              className="w-full"
             >
               Перейти к календарю
             </Button>
@@ -189,12 +191,13 @@ function GuestRegistrationCard() {
 
               <Button 
                 type="submit" 
-                disabled={isSubmitDisabled} 
-                className={`w-full luxury-button py-3 rounded-xl font-medium transition-opacity ${
-                  isSubmitDisabled ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                disabled={isSubmitDisabled}
+                variant="primary"
+                size="lg"
+                loading={isSubmitting}
+                className="w-full"
               >
-                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Забронировать место'}
+                Забронировать место
               </Button>
             </form>
 
@@ -282,13 +285,9 @@ export function UserPathsSection({ onAuthModalOpen, onGuestModalOpen }) {
                 <Button
                   onClick={memberPath.action}
                   disabled={memberPath.disabled}
-                  className={`w-full py-3 rounded-xl font-medium tracking-wide transition-all ${
-                    memberPath.primary 
-                      ? 'luxury-button' 
-                      : memberPath.disabled
-                      ? 'bg-green-500/20 text-green-400 cursor-not-allowed border border-green-400/30'
-                      : 'glassmorphic-panel border border-white/30 text-white hover:bg-white/10'
-                  }`}
+                  variant={memberPath.primary ? "primary" : memberPath.disabled ? "neutral" : "secondary"}
+                  size="lg"
+                  className={`w-full ${memberPath.disabled ? 'bg-green-500/20 text-green-400 cursor-not-allowed' : ''}`}
                 >
                   {memberPath.cta}
                 </Button>
