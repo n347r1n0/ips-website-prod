@@ -261,118 +261,90 @@ function PlayerModal({ player, isOpen, onClose }) {
   if (!player) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 25 }}
-            className="relative max-w-2xl w-full glassmorphic-panel rounded-3xl p-8 border border-white/15"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button
-              variant="neutral"
-              size="sm"
-              onClick={onClose}
-              className="absolute -top-2 -right-2 p-2 aspect-square"
-              aria-label="Закрыть"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+    <ModalBase
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${player.name} ${player.surname[0]}.`}
+      subtitle={`"${player.nickname}"`}
+    >
+      <div className="spacing-content max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          {/* Аватар */}
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full neumorphic-inset flex items-center justify-center overflow-hidden">
+            {player.avatar_url ? (
+              <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-3xl font-bold text-white/80 font-syne">
+                {player.name[0]}{player.surname[0]}
+              </span>
+            )}
+          </div>
+          
+          {/* Статус цитата */}
+          <div className="relative mb-6 p-4 glassmorphic-panel rounded-2xl">
+            <Quote className="absolute top-2 left-2 w-4 h-4 text-gold-accent/50" />
+            <p className="italic text-white/80 text-lg leading-relaxed pt-2">
+              {player.status}
+            </p>
+          </div>
+        </div>
 
-            <div className="text-center mb-8">
-              {/* Аватар */}
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full neumorphic-inset flex items-center justify-center overflow-hidden">
-                {player.avatar_url ? (
-                  <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-bold text-white/80 font-syne">
-                    {player.name[0]}{player.surname[0]}
-                  </span>
-                )}
-              </div>
-              
-              {/* Основная информация */}
-              <h2 className="text-3xl font-bold text-white mb-2 font-syne">
-                {player.name} {player.surname[0]}.
-              </h2>
-              <p className="text-xl text-gold-accent mb-4 font-mono">"{player.nickname}"</p>
-              
-              {/* Статус цитата */}
-              <div className="relative mb-6 p-4 glassmorphic-panel rounded-2xl">
-                <Quote className="absolute top-2 left-2 w-4 h-4 text-gold-accent/50" />
-                <p className="italic text-white/80 text-lg leading-relaxed pt-2">
-                  {player.status}
-                </p>
-              </div>
-            </div>
+        {/* Статистика */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="text-center p-3 glassmorphic-panel rounded-xl">
+            <div className="text-2xl font-bold text-gold-accent">{player.points.toLocaleString()}</div>
+            <div className="text-xs text-white/60 uppercase">очков</div>
+          </div>
+          <div className="text-center p-3 glassmorphic-panel rounded-xl">
+            <div className="text-2xl font-bold text-deep-teal">{player.games_played}</div>
+            <div className="text-xs text-white/60 uppercase">игр</div>
+          </div>
+          <div className="text-center p-3 glassmorphic-panel rounded-xl">
+            <div className="text-2xl font-bold text-white">{player.winRate}%</div>
+            <div className="text-xs text-white/60 uppercase">побед</div>
+          </div>
+          <div className="text-center p-3 glassmorphic-panel rounded-xl">
+            <div className="text-2xl font-bold text-ips-red">#{player.rank}</div>
+            <div className="text-xs text-white/60 uppercase">место</div>
+          </div>
+        </div>
 
-            {/* Статистика */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-3 glassmorphic-panel rounded-xl">
-                <div className="text-2xl font-bold text-gold-accent">{player.points.toLocaleString()}</div>
-                <div className="text-xs text-white/60 uppercase">очков</div>
-              </div>
-              <div className="text-center p-3 glassmorphic-panel rounded-xl">
-                <div className="text-2xl font-bold text-deep-teal">{player.games_played}</div>
-                <div className="text-xs text-white/60 uppercase">игр</div>
-              </div>
-              <div className="text-center p-3 glassmorphic-panel rounded-xl">
-                <div className="text-2xl font-bold text-white">{player.winRate}%</div>
-                <div className="text-xs text-white/60 uppercase">побед</div>
-              </div>
-              <div className="text-center p-3 glassmorphic-panel rounded-xl">
-                <div className="text-2xl font-bold text-ips-red">#{player.rank}</div>
-                <div className="text-xs text-white/60 uppercase">место</div>
-              </div>
-            </div>
+        {/* Дополнительная информация */}
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div className="flex items-center gap-3 p-3 glassmorphic-panel rounded-xl">
+            <MapPin className="w-5 h-5 text-gold-accent" />
+            <span className="text-white">{player.location}</span>
+          </div>
+          <div className="flex items-center gap-3 p-3 glassmorphic-panel rounded-xl">
+            <Calendar className="w-5 h-5 text-deep-teal" />
+            <span className="text-white">В клубе с {player.joinDate}</span>
+          </div>
+        </div>
 
-            {/* Дополнительная информация */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="flex items-center gap-3 p-3 glassmorphic-panel rounded-xl">
-                <MapPin className="w-5 h-5 text-gold-accent" />
-                <span className="text-white">{player.location}</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 glassmorphic-panel rounded-xl">
-                <Calendar className="w-5 h-5 text-deep-teal" />
-                <span className="text-white">В клубе с {player.joinDate}</span>
-              </div>
-            </div>
-
-            {/* Достижения */}
-            <div className="p-4 glassmorphic-panel rounded-2xl">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-gold-accent" />
-                Достижения
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {player.achievements.map(achievement => {
-                  const data = achievementsList[achievement];
-                  const IconComponent = data.icon;
-                  return (
-                    <div key={achievement} className="flex items-center gap-3 p-2 rounded-lg bg-black/20">
-                      <IconComponent className={`w-5 h-5 ${data.color}`} />
-                      <div>
-                        <div className="text-white font-medium">{data.name}</div>
-                        <div className="text-white/60 text-sm">{data.description}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Достижения */}
+        <div className="p-4 glassmorphic-panel rounded-2xl">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Award className="w-5 h-5 text-gold-accent" />
+            Достижения
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {player.achievements.map(achievement => {
+              const data = achievementsList[achievement];
+              const IconComponent = data.icon;
+              return (
+                <div key={achievement} className="flex items-center gap-3 p-2 rounded-lg bg-black/20">
+                  <IconComponent className={`w-5 h-5 ${data.color}`} />
+                  <div>
+                    <div className="text-white font-medium">{data.name}</div>
+                    <div className="text-white/60 text-sm">{data.description}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </ModalBase>
   );
 }
 
