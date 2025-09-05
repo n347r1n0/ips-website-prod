@@ -164,7 +164,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
         subtitle={`${tournaments.length} турнир${tournaments.length === 1 ? '' : tournaments.length < 5 ? 'а' : 'ов'} в ближайшее время`}
       >
         <div className="spacing-content">
-              {tournaments.map((tournament) => {
+          {tournaments.map((tournament) => {
                 const isRegistered = userRegistrationIds.has(tournament.id);
                 const TypeIcon = getTournamentTypeIcon(tournament.settings_json?.tournament_type);
                 const typeColor = getTournamentTypeColor(tournament.settings_json?.tournament_type);
@@ -231,7 +231,6 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                   </motion.div>
                 );
               })}
-          </div>
 
           {tournaments.length === 0 && (
             <div className="glassmorphic-panel rounded-xl p-8 text-center">
