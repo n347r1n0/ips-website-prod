@@ -206,9 +206,9 @@ body {
 
 
   /* Typography and spacing system */
-  .heading-lg { @apply text-2xl font-heading text-white leading-tight; }
-  .heading-md { @apply text-xl font-heading text-white leading-snug; }
-  .heading-sm { @apply text-lg font-heading text-white leading-normal; }
+  .heading-lg { @apply text-2xl font-brand text-white leading-tight; }
+  .heading-md { @apply text-xl font-brand text-white leading-snug; }
+  .heading-sm { @apply text-lg font-brand text-white leading-normal; }
   
   .text-body { @apply text-base text-white/90 leading-relaxed; }
   .text-secondary { @apply text-sm text-white/70 leading-normal; }
