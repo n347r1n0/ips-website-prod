@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Trophy, Star, Zap, Target } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import ButtonNeo from '@/components/ui/Button.neo.jsx';
 import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
 import { TournamentResultsModal } from './TournamentResultsModal';
 
@@ -130,12 +131,13 @@ export function TournamentListForDay({ tournaments, onClose }) {
                         Результаты
                       </Button>
                     ) : (
-                      <Button
+
+                      <ButtonNeo type="button"
+                        label="Записаться"
                         onClick={() => setSelectedTournament(tournament)}
-                        className="luxury-button px-6 py-2 rounded-xl"
-                      >
-                        Записаться
-                      </Button>
+                        className="luxury-button-elliptic"
+                        style={{ '--radius': '166px' }}
+                      />
                     )}
 
                   </div>
