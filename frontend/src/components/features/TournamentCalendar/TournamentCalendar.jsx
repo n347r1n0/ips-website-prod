@@ -67,6 +67,14 @@ export function TournamentCalendar() {
     return () => { cancelled = true; };
   }, [currentDate, authVersion]); // ✅ only these two
 
+  // --- ИЗМЕНЕНИЕ №2: Список ближайших турниров теперь ВЫЧИСЛЯЕТСЯ из уже загруженных данных ---
+  const allUpcomingTournaments = useMemo(() => {
+    const now = new Date();
+    return tournaments
+      .filter(t => new Date(t.tournament_date) >= now && t.status !== 'completed')
+      .slice(0, 5); // Сортировка не нужна, так как данные уже отсортированы из БД
+  }, [tournaments]);
+
   // Handle URL parameter for highlighting tournament + fallback to nearest
   useEffect(() => {
     const highlightParam = searchParams.get('highlightTournament');
@@ -142,15 +150,6 @@ export function TournamentCalendar() {
       setSelectedDayTournaments(dayEvents);
     }
   };
-
-
-  // --- ИЗМЕНЕНИЕ №2: Список ближайших турниров теперь ВЫЧИСЛЯЕТСЯ из уже загруженных данных ---
-  const allUpcomingTournaments = useMemo(() => {
-    const now = new Date();
-    return tournaments
-      .filter(t => new Date(t.tournament_date) >= now && t.status !== 'completed')
-      .slice(0, 5); // Сортировка не нужна, так как данные уже отсортированы из БД
-  }, [tournaments]);
 
   const hasUpcomingTournaments = allUpcomingTournaments.length > 0;
 
