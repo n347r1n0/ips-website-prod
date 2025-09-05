@@ -71,7 +71,7 @@ export function ModalBase({
                   {headerActions}
                   <button
                     onClick={onClose}
-                    className="btn btn-secondary btn-sm p-2 aspect-square"
+                    className="btn btn-neutral btn-sm p-2 aspect-square"
                     aria-label="Закрыть"
                   >
                     <X className="w-5 h-5" />

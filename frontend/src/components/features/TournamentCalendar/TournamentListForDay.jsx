@@ -78,7 +78,8 @@ export function TournamentListForDay({ tournaments, onClose }) {
           className="relative w-full max-w-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="glassmorphic-panel rounded-2xl p-8 border border-white/15">
+          {/* Large container with multiple tournaments → neumorphic */}
+          <div className="neumorphic-container rounded-2xl p-8">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
@@ -154,7 +155,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
 
             <div className="mt-8 text-center">
               <Button
-                variant="secondary"
+                variant="neutral"
                 size="lg"
                 onClick={onClose}
               >

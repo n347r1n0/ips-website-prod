@@ -8,6 +8,8 @@ import {
   Clock, MapPin, Hash, Quote, Maximize2, Table
 } from 'lucide-react';
 import { GlassPanel } from '../../ui/GlassPanel.jsx';
+import { ModalBase } from '../../ui/ModalBase';
+import { Button } from '../../ui/Button';
 
 // Расширенные данные игроков с достижениями
 const achievementsList = {
@@ -123,39 +125,15 @@ function FullRatingModal({ isOpen, onClose, players, onPlayerClick, onAchievemen
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 25 }}
-            className="relative w-full max-w-6xl max-h-[90vh] glassmorphic-panel rounded-3xl p-6 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={onClose}
-              className="absolute top-1 -right-3 p-3 glassmorphic-panel rounded-full text-white hover:bg-white/20 transition-colors z-10"
-            >
-              <X className="w-6 h-6" />
-            </button>
+    <ModalBase
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Полный рейтинг клуба"
+      subtitle="Кликните на заголовок столбца для сортировки"
+    >
 
-            <div className="text-center mb-6">
-              <h2 className="text-4xl font-brand text-white mb-2 gold-highlight font-syne">
-                Полный рейтинг клуба
-              </h2>
-              <p className="text-white/70">Кликните на заголовок столбца для сортировки</p>
-            </div>
-
-            <div className="overflow-auto max-h-[60vh]">
-              <table className="w-full">
+        <div className="overflow-auto">
+          <table className="w-full">
                 <thead className="sticky top-0 bg-black/70 backdrop-blur-sm">
                   <tr className="text-left text-white/80 border-b border-white/20">
                     <th 
@@ -272,12 +250,9 @@ function FullRatingModal({ isOpen, onClose, players, onPlayerClick, onAchievemen
                     );
                   })}
                 </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </table>
+        </div>
+    </ModalBase>
   );
 }
 
@@ -300,15 +275,18 @@ function PlayerModal({ player, isOpen, onClose }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
-            className="relative max-w-2xl w-full glassmorphic-panel rounded-3xl p-8"
+            className="relative max-w-2xl w-full glassmorphic-panel rounded-3xl p-8 border border-white/15"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
+            <Button
+              variant="neutral"
+              size="sm"
               onClick={onClose}
-              className="absolute -top-4 -right-4 p-3 glassmorphic-panel rounded-full text-white hover:bg-white/20 transition-colors"
+              className="absolute -top-2 -right-2 p-2 aspect-square"
+              aria-label="Закрыть"
             >
-              <X className="w-6 h-6" />
-            </button>
+              <X className="w-4 h-4" />
+            </Button>
 
             <div className="text-center mb-8">
               {/* Аватар */}

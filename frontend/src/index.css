@@ -37,23 +37,36 @@ body {
 
 /* === НАШИ КАСТОМНЫЕ КОМПОНЕНТЫ === */
 @layer components {
-  /* === CLEAN BUTTON SYSTEM === */
+  /* === IPS CLAYMORPHIC BUTTON SYSTEM === */
   
-  /* Base button foundation with Syne font */
+  /* Base button foundation with Syne font and proper padding */
   .btn {
     @apply inline-flex items-center justify-center font-syne font-semibold transition-all duration-200;
     @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: 44px;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
   }
 
-  /* Button sizes */
-  .btn-sm { @apply text-sm px-4 py-2 min-h-[40px]; }
-  .btn-md { @apply text-base px-6 py-3 min-h-[48px]; }
-  .btn-lg { @apply text-lg px-8 py-4 min-h-[56px]; }
+  /* Button sizes with proper padding */
+  .btn-sm { 
+    @apply text-xs;
+    padding: 0.5rem 1rem;
+    min-height: 36px;
+  }
+  .btn-md { 
+    @apply text-sm;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+  }
+  .btn-lg { 
+    @apply text-base;
+    padding: 1rem 2rem;
+    min-height: 52px;
+  }
 
   /* Primary claymorphic action button with Syne styling */
   .btn-primary {
@@ -129,6 +142,32 @@ body {
     box-shadow: 
       0 1px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Neutral Gray - Utility actions (close, back) */
+  .btn-neutral {
+    @apply rounded-xl text-white/90;
+    background: linear-gradient(145deg, #3c3c40, #2c2c30);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+      0 3px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+  .btn-neutral:hover {
+    @apply text-white;
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      0 3px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    background: linear-gradient(145deg, #434347, #323236);
+  }
+  .btn-neutral:active {
+    transform: translateY(1px);
+    box-shadow: 
+      0 1px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   /* Opaque neumorphic panels for content areas */

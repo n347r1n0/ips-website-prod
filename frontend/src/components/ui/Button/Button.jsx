@@ -16,7 +16,7 @@ function cn(...inputs) {
 const Button = forwardRef(({
   children,
   className = '',
-  variant = 'primary', // 'primary' | 'secondary' | 'danger'
+  variant = 'primary', // 'primary' | 'secondary' | 'danger' | 'neutral'
   size = 'md', // 'sm' | 'md' | 'lg'
   loading = false,
   disabled = false,
