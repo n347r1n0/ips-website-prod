@@ -77,23 +77,25 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
       0 8px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15);
-    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5)) drop-shadow(0 4px 15px rgba(0, 113, 147, 0.3));
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      0 4px 15px rgba(0, 113, 147, 0.3);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 
       0 10px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2);
-    filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.6)) drop-shadow(0 6px 20px rgba(0, 113, 147, 0.4));
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      0 8px 25px rgba(0, 0, 0, 0.6),
+      0 6px 20px rgba(0, 113, 147, 0.4);
     background: linear-gradient(145deg, #1985a3, #1ab3ac);
   }
   .btn-primary:active {
     transform: translateY(4px);
     box-shadow: 
       0 4px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 10px rgba(0, 0, 0, 0.4);
   }
 
   /* Gold Secondary - Important secondary actions */
@@ -103,15 +105,17 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
       0 6px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 12px rgba(212, 175, 55, 0.3));
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 4px 15px rgba(0, 0, 0, 0.4),
+      0 2px 12px rgba(212, 175, 55, 0.3);
   }
   .btn-secondary:hover {
     transform: translateY(-1px);
     box-shadow: 
       0 7px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    filter: drop-shadow(0 5px 20px rgba(0, 0, 0, 0.5)) drop-shadow(0 3px 15px rgba(212, 175, 55, 0.4));
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 5px 20px rgba(0, 0, 0, 0.5),
+      0 3px 15px rgba(212, 175, 55, 0.4);
     background: linear-gradient(145deg, #E6C14D, #D4AF37);
   }
   .btn-secondary:active {
@@ -293,8 +297,9 @@ body {
     transform: translateY(-2px);
     box-shadow: 
       0 10px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2);
-    filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.6)) drop-shadow(0 6px 20px rgba(0, 113, 147, 0.4));
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      0 8px 25px rgba(0, 0, 0, 0.6),
+      0 6px 20px rgba(0, 113, 147, 0.4);
   }
   
   .luxury-button:active,
@@ -305,8 +310,8 @@ body {
     transform: translateY(4px);
     box-shadow: 
       0 4px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 10px rgba(0, 0, 0, 0.4);
   }
 
   /* Enhanced claymorphic blue-green buttons with Inter font and proper shadows */
@@ -321,8 +326,9 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
       0 8px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15);
-    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5)) drop-shadow(0 4px 15px rgba(0, 113, 147, 0.3));
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      0 4px 15px rgba(0, 113, 147, 0.3);
     transition: all 0.2s ease;
     padding: 0.75rem 1.5rem;
     min-height: 44px;
