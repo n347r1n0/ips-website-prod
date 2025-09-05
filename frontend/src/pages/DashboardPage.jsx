@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
+import ButtonNeo from '@/components/ui/Button.neo.jsx';
 import { Section } from '@/components/layout/Section';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { LogOut, User, Trophy, Calendar, Settings } from 'lucide-react';
@@ -38,10 +38,10 @@ export function DashboardPage() {
                   Добро пожаловать, {user?.user_metadata?.nickname || user?.email.split('@')[0]}!
                 </p>
               </div>
-              <Button onClick={signOut} className="luxury-button px-6 py-2 rounded-xl">
+              <ButtonNeo onClick={signOut} className="luxury-button px-6 py-2 rounded-xl">
                 <LogOut className="w-4 h-4 mr-2" />
                 Выйти
-              </Button>
+              </ButtonNeo>
             </div>
           </GlassPanel>
         </motion.div>
@@ -88,10 +88,10 @@ export function DashboardPage() {
                   Управление турнирами, участниками и настройками клуба
                 </p>
                 <Link to="/admin">
-                  <Button className="luxury-button px-6 py-3 rounded-xl flex items-center">
+                  <ButtonNeo className="luxury-button px-6 py-3 rounded-xl flex items-center">
                     <Settings className="w-4 h-4 mr-2" />
                     Открыть админ-панель
-                  </Button>
+                  </ButtonNeo>
                 </Link>
               </div>
             </GlassPanel>
