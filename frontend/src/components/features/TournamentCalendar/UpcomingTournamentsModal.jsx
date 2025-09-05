@@ -210,20 +210,28 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                       </div>
                       
                       <div className="flex flex-col items-end space-y-2">
-                        {isRegistered && (
-                          <span className="text-xs text-gold-accent font-medium px-2 py-1 bg-gold-accent/10 rounded">
-                            ✓ Зарегистрированы
-                          </span>
-                        )}
-                        
-                        {isRegistered && (
+                        {isRegistered ? (
+                          <>
+                            <span className="text-xs text-gold-accent font-medium px-2 py-1 bg-gold-accent/10 rounded">
+                              ✓ Зарегистрированы
+                            </span>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={(e) => handleCancelRegistration(tournament.id, e)}
+                              disabled={loading}
+                            >
+                              Отменить
+                            </Button>
+                          </>
+                        ) : (
                           <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={(e) => handleCancelRegistration(tournament.id, e)}
+                            variant="primary"
+                            size="md"
+                            onClick={() => handleTournamentClick(tournament)}
                             disabled={loading}
                           >
-                            Отменить
+                            Записаться
                           </Button>
                         )}
                       </div>

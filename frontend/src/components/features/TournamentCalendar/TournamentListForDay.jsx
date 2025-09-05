@@ -63,38 +63,44 @@ export function TournamentListForDay({ tournaments, onClose }) {
 
   return (
     <AnimatePresence>
+      {/* Full-screen neumorphic container */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-        onClick={onClose}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="neumorphic-container flex flex-col"
       >
-        <motion.div
-          initial={{ scale: 0.8, y: 50, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.8, y: 50, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Large container with multiple tournaments → neumorphic */}
-          <div className="neumorphic-container rounded-2xl p-8">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="mb-6">
-              <h2 className="text-2xl font-heading text-white mb-2">
+        {/* Header */}
+        <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1 pr-4">
+              <h1 className="heading-lg mb-2 leading-tight">
                 Турниры на {dateString}
-              </h2>
-              <div className="h-px bg-gradient-to-r from-transparent via-gold-accent to-transparent" />
+              </h1>
             </div>
-
-            <div className="space-y-4">
+            
+            <div className="flex items-start space-x-3 flex-shrink-0">
+              <Button
+                variant="neutral"
+                size="sm"
+                onClick={onClose}
+                className="p-2 aspect-square"
+                aria-label="Закрыть"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Elegant divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-gold-accent/30 to-transparent" />
+        </div>
+        
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-6">
+          <div className="py-6 spacing-content">
+            <div className="spacing-content">
               {tournaments.map((tournament) => (
                 <div
                   key={tournament.id}
@@ -152,18 +158,8 @@ export function TournamentListForDay({ tournaments, onClose }) {
                 </div>
               ))}
             </div>
-
-            <div className="mt-8 text-center">
-              <Button
-                variant="neutral"
-                size="lg"
-                onClick={onClose}
-              >
-                Закрыть
-              </Button>
-            </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       {selectedTournament && (
