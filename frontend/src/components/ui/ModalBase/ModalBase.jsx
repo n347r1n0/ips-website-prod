@@ -48,26 +48,28 @@ export function ModalBase({
     <>
       {/* Fixed Header */}
       {(title || headerActions) && (
-        <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-white/5">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex-1 pr-4">
+            <div className="flex-1 pr-3 sm:pr-4">
               {title && (
-                <h1 className="heading-lg mb-2 leading-tight">{title}</h1>
+                <h1 className="text-lg sm:text-2xl font-brand text-white mb-2 leading-tight">{title}</h1>
               )}
               {subtitle && (
-                <p className="text-secondary">{subtitle}</p>
+                <p className="text-secondary text-sm sm:text-base">{subtitle}</p>
               )}
             </div>
             
-            <div className="flex items-start space-x-3 flex-shrink-0">
+            <div className="flex items-start space-x-2 sm:space-x-3 flex-shrink-0">
               {headerActions}
-              <button
+              <Button
                 onClick={onClose}
-                className="btn btn-neutral btn-sm p-2 aspect-square"
+                variant="neutral"
+                size="sm"
+                className="p-2 aspect-square min-w-[40px] min-h-[40px]"
                 aria-label="Закрыть"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
           </div>
           
@@ -114,7 +116,7 @@ export function ModalBase({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-40"
           onClick={onClose}
         >
           {/* Rounded neumorphic mother panel */}

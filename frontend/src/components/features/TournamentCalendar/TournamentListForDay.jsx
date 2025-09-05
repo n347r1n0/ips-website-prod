@@ -1,9 +1,9 @@
 // src/components/features/TournamentCalendar/TournamentListForDay.jsx
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Trophy, Star, Zap, Target } from 'lucide-react';
+import { Clock, Trophy, Star, Zap, Target } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ModalBase } from '@/components/ui/ModalBase';
 import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
 import { TournamentResultsModal } from './TournamentResultsModal';
 
@@ -62,101 +62,74 @@ export function TournamentListForDay({ tournaments, onClose }) {
   };
 
   return (
-    <AnimatePresence>
-      {/* Full-screen neumorphic container - NO glassmorphic wrapper */}
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="neumorphic-container flex flex-col"
+    <>
+      <ModalBase
+        isOpen={true}
+        onClose={onClose}
+        title={`Турниры на ${dateString}`}
+        fullScreen={true}
       >
-        {/* Header */}
-        <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1 pr-4">
-              <h1 className="heading-lg mb-2 leading-tight">
-                Турниры на {dateString}
-              </h1>
-            </div>
-            
-            <div className="flex items-start space-x-3 flex-shrink-0">
-              <Button
-                variant="neutral"
-                size="sm"
-                onClick={onClose}
-                className="p-2 aspect-square"
-                aria-label="Закрыть"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-          
-          {/* Elegant divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-gold-accent/30 to-transparent" />
-        </div>
-        
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-6">
-          <div className="py-6 spacing-content">
-            {tournaments.map((tournament) => (
+        <div className="spacing-content">
+          {tournaments.map((tournament) => {
+            const TypeIcon = getTournamentTypeIcon(tournament.settings_json?.tournament_type || tournament.tournament_type);
+            const typeColor = getTournamentTypeColor(tournament.settings_json?.tournament_type || tournament.tournament_type);
+
+            return (
               <div
                 key={tournament.id}
-                className="glassmorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
+                className="glassmorphic-panel rounded-xl p-5 border border-white/15 hover:border-gold-accent/30 transition-all duration-200"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-brand text-white mb-2">
-                      {tournament.name}
-                    </h3>
-                    <div className="flex items-center space-x-4 text-gray-300 text-sm">
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2 text-gold-accent" />
-                        <span>{formatTime(tournament.tournament_date)}</span>
-                      </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <TypeIcon className={`w-5 h-5 ${typeColor} flex-shrink-0`} />
+                      <h3 className="heading-sm truncate">{tournament.name}</h3>
                       {tournament.settings_json?.tournament_type && (
-                        <div className="flex items-center">
-                          {(() => {
-                            const TypeIcon = getTournamentTypeIcon(tournament.settings_json.tournament_type);
-                            const typeColor = getTournamentTypeColor(tournament.settings_json.tournament_type);
-                            return <TypeIcon className={`w-4 h-4 mr-2 ${typeColor}`} />;
-                          })()}
-                          <span>{tournament.settings_json.tournament_type}</span>
-                        </div>
+                        <span className={`text-xs px-3 py-1 rounded-full bg-black/20 ${typeColor} flex-shrink-0`}>
+                          {tournament.settings_json.tournament_type}
+                        </span>
                       )}
                     </div>
+                    
+                    <div className="flex items-center space-x-4 text-secondary mb-3">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4" />
+                        <span>{formatTime(tournament.tournament_date)}</span>
+                      </div>
+                    </div>
+                    
+                    {tournament.settings_json?.buy_in_cost && (
+                      <div className="text-gold-accent font-medium text-sm">
+                        Вступительный взнос: ${tournament.settings_json.buy_in_cost}
+                      </div>
+                    )}
                   </div>
-
-                  {tournament.status === 'completed' ? (
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={() => setResultsTournament(tournament)}
-                    >
-                      Результаты
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={() => setSelectedTournament(tournament)}
-                    >
-                      Записаться
-                    </Button>
-                  )}
+                  
+                  <div className="flex flex-col items-end space-y-2">
+                    {tournament.status === 'completed' ? (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={() => setResultsTournament(tournament)}
+                      >
+                        Результаты
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => setSelectedTournament(tournament)}
+                      >
+                        Записаться
+                      </Button>
+                    )}
+                  </div>
                 </div>
-
-                {tournament.settings_json?.buy_in_cost && (
-                  <div className="text-gold-accent font-medium">
-                    Вступительный взнос: ${tournament.settings_json.buy_in_cost}
-                  </div>
-                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </motion.div>
+      </ModalBase>
 
       {selectedTournament && (
         <RegistrationConfirmationModal
@@ -175,6 +148,6 @@ export function TournamentListForDay({ tournaments, onClose }) {
           onClose={() => setResultsTournament(null)}
         />
       )}
-    </AnimatePresence>
+    </>
   );
 }

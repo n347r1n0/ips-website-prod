@@ -39,12 +39,12 @@ body {
 @layer components {
   /* === IPS CLAYMORPHIC BUTTON SYSTEM === */
   
-  /* Base button foundation with Syne font and proper padding */
+  /* Base button foundation with Inter font for proper Cyrillic support */
   .btn {
     @apply inline-flex items-center justify-center transition-all duration-200;
     @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    font-family: 'Syne', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 600;
     font-size: 0.875rem;
     letter-spacing: 0.05em;
@@ -70,47 +70,53 @@ body {
     min-height: 52px;
   }
 
-  /* Primary claymorphic action button with Syne styling */
+  /* Primary claymorphic action button with Inter styling */
   .btn-primary {
     @apply rounded-2xl text-white;
     background: linear-gradient(145deg, #007193, #00A29C);
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
-      0 6px 0 rgba(0, 0, 0, 0.2),
-      inset 0 2px 0 rgba(255, 255, 255, 0.1),
-      0 4px 20px rgba(0, 113, 147, 0.15);
+      0 8px 0 rgba(0, 0, 0, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      0 4px 15px rgba(0, 113, 147, 0.3);
+    filter: blur(0px);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 0 rgba(0, 0, 0, 0.2),
-      0 6px 25px rgba(0, 113, 147, 0.2),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15);
+      0 10px 0 rgba(0, 0, 0, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      0 8px 25px rgba(0, 0, 0, 0.6),
+      0 6px 20px rgba(0, 113, 147, 0.4);
     background: linear-gradient(145deg, #1985a3, #1ab3ac);
   }
   .btn-primary:active {
-    transform: translateY(3px);
+    transform: translateY(4px);
     box-shadow: 
-      0 2px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 4px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 10px rgba(0, 0, 0, 0.4);
   }
 
   /* Gold Secondary - Important secondary actions */
   .btn-secondary {
     @apply rounded-xl text-white;
     background: linear-gradient(145deg, #D4AF37, #B8941F);
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 2px 15px rgba(212, 175, 55, 0.2);
+      0 6px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 4px 15px rgba(0, 0, 0, 0.4),
+      0 2px 12px rgba(212, 175, 55, 0.3);
   }
   .btn-secondary:hover {
     transform: translateY(-1px);
     box-shadow: 
-      0 5px 0 rgba(0, 0, 0, 0.2),
-      0 4px 20px rgba(212, 175, 55, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      0 7px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 5px 20px rgba(0, 0, 0, 0.5),
+      0 3px 15px rgba(212, 175, 55, 0.4);
     background: linear-gradient(145deg, #E6C14D, #D4AF37);
   }
   .btn-secondary:active {
@@ -120,29 +126,32 @@ body {
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  /* Danger claymorphic button with Syne styling */
+  /* Danger claymorphic button with Inter styling */
   .btn-danger {
     @apply rounded-xl text-white;
     background: linear-gradient(145deg, #dc2626, #b91c1c);
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 0.3);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 2px 8px rgba(220, 38, 38, 0.3);
+      0 6px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 4px 15px rgba(0, 0, 0, 0.4),
+      0 2px 10px rgba(220, 38, 38, 0.4);
   }
   .btn-danger:hover {
     transform: translateY(-1px);
     box-shadow: 
-      0 5px 0 rgba(0, 0, 0, 0.3),
-      0 4px 12px rgba(220, 38, 38, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      0 7px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 5px 20px rgba(0, 0, 0, 0.5),
+      0 3px 15px rgba(220, 38, 38, 0.5);
     background: linear-gradient(145deg, #ef4444, #dc2626);
   }
   .btn-danger:active {
-    transform: translateY(2px);
+    transform: translateY(3px);
     box-shadow: 
-      0 1px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 3px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 1px 8px rgba(0, 0, 0, 0.4);
   }
 
   /* Neutral Gray - Utility actions (close, back) */
@@ -231,7 +240,7 @@ body {
     width: 100vw;
     height: 100vh;
     height: 100dvh; /* Dynamic viewport height for mobile */
-    z-index: 9999;
+    z-index: 40; /* Lower z-index so registration modals can appear on top */
     border-radius: 0; /* Full screen modals have no border radius */
     box-shadow: 
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
