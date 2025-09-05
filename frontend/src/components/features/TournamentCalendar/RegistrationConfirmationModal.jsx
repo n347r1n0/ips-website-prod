@@ -166,9 +166,7 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
               <Button
                 onClick={handleConfirmRegistration}
                 disabled={loading || (!user && !guestData)}
-                variant="primary"
-                size="lg"
-                className="flex-1"
+                className="btn-clay luxury-button flex-1"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -181,8 +179,7 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
               <Button
                 onClick={onClose}
                 disabled={loading}
-                variant="neutral"
-                size="lg"
+                className="btn-glass"
               >
                 Отмена
               </Button>

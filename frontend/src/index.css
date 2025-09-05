@@ -37,12 +37,14 @@ body {
 
 /* === НАШИ КАСТОМНЫЕ КОМПОНЕНТЫ === */
 @layer components {
-  /* === IPS CLAYMORPHIC BUTTON SYSTEM === */
+  /* === DUMB BUTTON SYSTEM === */
   
-  /* Base button foundation with Inter font for proper Cyrillic support */
-  .btn {
-    @apply inline-flex items-center justify-center transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
+  /* Base Shapes - Form Only */
+  
+  /* Claymorphic shape - 3D depth with box-shadow blur */
+  .btn-clay {
+    @apply inline-flex items-center justify-center;
+    @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 600;
@@ -51,6 +53,78 @@ body {
     text-transform: uppercase;
     padding: 0.75rem 1.5rem;
     min-height: 44px;
+    border-radius: 1rem; /* medium radius */
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    /* 3D claymorphic depth with box-shadow blur */
+    box-shadow: 
+      0 8px 0 rgba(0, 0, 0, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .btn-clay:hover {
+    /* No transforms - avoid mobile jitter */
+    box-shadow: 
+      0 10px 0 rgba(0, 0, 0, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      0 8px 25px rgba(0, 0, 0, 0.6);
+  }
+  
+  .btn-clay:active {
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 10px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Glass shape - translucent with backdrop-filter */
+  .btn-glass {
+    @apply inline-flex items-center justify-center;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    border-radius: 0.5rem; /* squarer */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    color: white;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .btn-glass:active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  /* Colors/Gradients - Color Only (use on top of base shapes) */
+  
+  /* Primary luxury button - blue-green linear gradient */
+  .luxury-button {
+    background: linear-gradient(145deg, #007193, #00A29C) !important;
+    color: white;
+  }
+  
+  /* Conic gradient variant */
+  .luxury-button-conic {
+    background: conic-gradient(from 210deg at 50% 50%, #00A29C, #2dd4bf 50%, #007193) !important;
+    color: white;
+  }
+  
+  /* Elliptic radial gradient variant */
+  .luxury-button-elliptic {
+    background: radial-gradient(120% 80% at 50% 50%, #00A29C 0%, #007193 100%) !important;
+    color: white;
   }
 
   /* Button sizes with proper padding */

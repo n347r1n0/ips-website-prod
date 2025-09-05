@@ -214,8 +214,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                           ✓ Зарегистрированы
                         </span>
                         <Button
-                          variant="danger"
-                          size="sm"
+                          className="btn-clay"
                           onClick={(e) => handleCancelRegistration(tournament.id, e)}
                           disabled={loading}
                         >
@@ -224,8 +223,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                       </>
                     ) : (
                       <Button
-                        variant="primary"
-                        size="md"
+                        className="btn-clay luxury-button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleTournamentClick(tournament);

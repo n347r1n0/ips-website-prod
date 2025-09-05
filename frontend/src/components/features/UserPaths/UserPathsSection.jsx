@@ -137,9 +137,7 @@ function GuestRegistrationCard() {
             </div>
             <Button
               onClick={scrollToCalendar}
-              variant="primary"
-              size="lg"
-              className="w-full"
+              className="btn-clay luxury-button w-full"
             >
               Перейти к календарю
             </Button>
@@ -192,12 +190,16 @@ function GuestRegistrationCard() {
               <Button 
                 type="submit" 
                 disabled={isSubmitDisabled}
-                variant="primary"
-                size="lg"
-                loading={isSubmitting}
-                className="w-full"
+                className="btn-clay luxury-button w-full"
               >
-                Забронировать место
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Загрузка...
+                  </>
+                ) : (
+                  'Забронировать место'
+                )}
               </Button>
             </form>
 
@@ -285,9 +287,7 @@ export function UserPathsSection({ onAuthModalOpen, onGuestModalOpen }) {
                 <Button
                   onClick={memberPath.action}
                   disabled={memberPath.disabled}
-                  variant={memberPath.primary ? "primary" : memberPath.disabled ? "neutral" : "secondary"}
-                  size="lg"
-                  className="w-full"
+                  className={`w-full ${memberPath.primary ? 'btn-clay luxury-button' : memberPath.disabled ? 'btn-glass' : 'btn-clay'}`}
                 >
                   {memberPath.cta}
                 </Button>

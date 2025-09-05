@@ -12,6 +12,7 @@ import { HeroSection } from '@/components/features/Hero/HeroSection';
 import { UserPathsSection } from '@/components/features/UserPaths/UserPathsSection';
 import { GuestFormModal } from '@/components/features/RegistrationForm/GuestFormModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery'; // 👈 1. ИМПОРТИРУЕМ НАШ ХУК
+import { Button } from '@/components/ui/Button';
 
 // 👇 2. СОЗДАЕМ ДВА НАБОРА ИСТОЧНИКОВ 👇
 const desktopVideoSources = [
@@ -92,6 +93,21 @@ export function HomePage({ onAuthModalOpen }) {
             scrollToUserPaths={scrollToUserPaths}
           />
         </div>
+        
+        {/* Button Smoke Test - Remove after testing */}
+        <div className="py-8 bg-black/20">
+          <div className="max-w-4xl mx-auto px-6">
+            <h3 className="text-white text-xl mb-4 text-center">Button Test</h3>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button className="btn-clay luxury-button">Primary Clay</Button>
+              <Button className="btn-clay">Gray Clay</Button>
+              <Button className="btn-glass">Glass</Button>
+              <Button className="btn-clay luxury-button-conic">Conic</Button>
+              <Button className="btn-clay luxury-button-elliptic">Elliptic</Button>
+            </div>
+          </div>
+        </div>
+        
         <GoldLine />
         <div id="about">
           <Section><ValuePropsSection /></Section>

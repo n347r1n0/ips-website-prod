@@ -108,16 +108,14 @@ export function TournamentListForDay({ tournaments, onClose }) {
                   <div className="flex flex-col items-end space-y-2">
                     {tournament.status === 'completed' ? (
                       <Button
-                        variant="secondary"
-                        size="md"
+                        className="btn-clay"
                         onClick={() => setResultsTournament(tournament)}
                       >
                         Результаты
                       </Button>
                     ) : (
                       <Button
-                        variant="primary"
-                        size="md"
+                        className="btn-clay luxury-button"
                         onClick={() => setSelectedTournament(tournament)}
                       >
                         Записаться
