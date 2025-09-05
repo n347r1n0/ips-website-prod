@@ -13,10 +13,9 @@ import { DashboardPage } from './pages/DashboardPage.jsx';
 import { AdminDashboardPage } from './pages/AdminDashboardPage.jsx';
 import { AdminRoute } from './components/features/Admin/AdminRoute.jsx';
 import { ToastProvider } from './components/ui/Toast.jsx';
-// --- ИЗМЕНЕНИЕ №1: Импортируем страницу колбэка Telegram ---
+// --- ИЗМЕНЕНИЕ №1: Импортируем новую страницу ---
 import { TelegramCallbackPage } from './pages/TelegramCallbackPage.jsx';
-// --- ИЗМЕНЕНИЕ №2: Импортируем dev-демо модалки (используется только в DEV) ---
-import DevModalDemo from './pages/DevModalDemo.jsx';
+
 
 function PrivateRoute({ children }) {
   const auth = useAuth();
@@ -26,6 +25,7 @@ function PrivateRoute({ children }) {
   const { user } = auth;
   return user ? children : <Navigate to="/" />;
 }
+
 
 function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -41,6 +41,7 @@ function App() {
 
           {/* --- Роуты для аутентификации --- */}
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* --- ИЗМЕНЕНИЕ №2: Добавляем роут для колбэка Telegram --- */}
           <Route path="/auth/telegram/callback" element={<TelegramCallbackPage />} />
 
           {/* --- Приватный роут (защищенный "охранником") --- */}
@@ -62,11 +63,6 @@ function App() {
               </AdminRoute>
             }
           />
-
-          {/* --- DEV-маршрут: демонстрация новой модалки (только в режиме разработки) --- */}
-          {import.meta.env.DEV && (
-            <Route path="/dev/modal" element={<DevModalDemo />} />
-          )}
 
           {/* --- Запасной роут (если страница не найдена) --- */}
           <Route path="*" element={<Navigate to="/" />} />
