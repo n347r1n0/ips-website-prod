@@ -73,7 +73,7 @@ body {
       text-shadow: 0 0 15px theme('colors.gold-accent/50%');
   }
   .luxury-button {
-      @apply bg-gradient-to-r from-deep-teal to-[#4fb3bc] text-white font-bold uppercase tracking-wider border border-white/20 transition-all duration-300;
+      @apply bg-gradient-to-r from-[#4277C4] to-[#38F2C4] text-white font-bold uppercase tracking-wider border border-white/20 transition-all duration-300;
   }
   /* 👇 ЗАМЕНЯЕМ СТАРЫЙ HOVER НА НОВЫЙ, БОЛЕЕ ПРОДВИНУТЫЙ */
   .luxury-button:hover {
