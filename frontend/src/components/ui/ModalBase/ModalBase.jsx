@@ -13,6 +13,7 @@ export function ModalBase({
   headerActions,
   footerActions,
   className = '',
+  fullScreen = false, // Add fullScreen prop
   ...props
 }) {
   // Lock background scroll when modal is open
@@ -45,15 +46,36 @@ export function ModalBase({
 
   return (
     <AnimatePresence>
-      {/* Full-page neumorphic opaque container */}
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="neumorphic-container flex flex-col"
-        {...props}
-      >
+      {fullScreen ? (
+        /* Full-screen neumorphic container */
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="neumorphic-container flex flex-col"
+          {...props}
+        >
+      ) : (
+        /* Backdrop for windowed modals */
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
+          onClick={onClose}
+        >
+          {/* Rounded neumorphic mother panel */}
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.5, opacity: 0, y: 50 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={(e) => e.stopPropagation()}
+            className="neumorphic-panel w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden"
+            {...props}
+          >
+      )}
           {/* Fixed Header */}
           {(title || headerActions) && (
             <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
@@ -99,7 +121,13 @@ export function ModalBase({
               </div>
             </div>
           )}
-      </motion.div>
+      
+      {fullScreen ? (
+        </motion.div>
+      ) : (
+          </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }

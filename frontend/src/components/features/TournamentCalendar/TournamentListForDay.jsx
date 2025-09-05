@@ -103,7 +103,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
             {tournaments.map((tournament) => (
               <div
                 key={tournament.id}
-                className="neumorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
+                className="glassmorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>

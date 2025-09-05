@@ -41,9 +41,11 @@ body {
   
   /* Base button foundation with Syne font and proper padding */
   .btn {
-    @apply inline-flex items-center justify-center font-syne font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center transition-all duration-200;
     @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Syne', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
     font-size: 0.875rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -74,22 +76,22 @@ body {
     background: linear-gradient(145deg, #007193, #00A29C);
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 
-      0 6px 0 rgba(0, 0, 0, 0.3),
+      0 6px 0 rgba(0, 0, 0, 0.2),
       inset 0 2px 0 rgba(255, 255, 255, 0.1),
-      0 4px 12px rgba(0, 113, 147, 0.3);
+      0 4px 20px rgba(0, 113, 147, 0.15);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 0 rgba(0, 0, 0, 0.3),
-      0 6px 16px rgba(0, 113, 147, 0.4),
+      0 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 25px rgba(0, 113, 147, 0.2),
       inset 0 2px 0 rgba(255, 255, 255, 0.15);
     background: linear-gradient(145deg, #1985a3, #1ab3ac);
   }
   .btn-primary:active {
     transform: translateY(3px);
     box-shadow: 
-      0 2px 0 rgba(0, 0, 0, 0.4),
+      0 2px 0 rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
@@ -99,15 +101,15 @@ body {
     background: linear-gradient(145deg, #D4AF37, #B8941F);
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.3),
+      0 4px 0 rgba(0, 0, 0, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 2px 8px rgba(212, 175, 55, 0.3);
+      0 2px 15px rgba(212, 175, 55, 0.2);
   }
   .btn-secondary:hover {
     transform: translateY(-1px);
     box-shadow: 
-      0 5px 0 rgba(0, 0, 0, 0.3),
-      0 4px 12px rgba(212, 175, 55, 0.4),
+      0 5px 0 rgba(0, 0, 0, 0.2),
+      0 4px 20px rgba(212, 175, 55, 0.25),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
     background: linear-gradient(145deg, #E6C14D, #D4AF37);
   }
@@ -171,33 +173,36 @@ body {
 
   /* Opaque neumorphic panels for content areas */
   .neumorphic-panel {
-    background: #2c2c30;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 1rem; /* Ensure proper rounded corners */
+    background: #2a2a2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem; /* Larger border radius for mother panels */
+    position: relative;
+    z-index: 10;
     box-shadow: 
-      inset 4px 4px 8px rgba(0, 0, 0, 0.3),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.02),
-      0 4px 12px rgba(0, 0, 0, 0.2);
-    overflow: hidden; /* Prevent content from breaking rounded corners */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 255, 255, 0.03),
+      0 8px 32px rgba(0, 0, 0, 0.3);
   }
   .neumorphic-panel:hover {
     border-color: rgba(212, 175, 55, 0.2);
     box-shadow: 
-      inset 4px 4px 8px rgba(0, 0, 0, 0.3),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.03),
-      0 6px 16px rgba(0, 0, 0, 0.25);
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 255, 255, 0.04),
+      0 12px 40px rgba(0, 0, 0, 0.35);
   }
 
     /* Glassmorphic panels for content areas (auth, tournament cards, etc.) */
   .glassmorphic-panel {
-    @apply bg-black/40 backdrop-blur-xl border border-white/10;
+    @apply bg-black/50 backdrop-blur-xl border border-white/15;
+    position: relative;
+    z-index: 20; /* Higher z-index to prevent transparency bleed */
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   .glassmorphic-panel:hover {
-    @apply border-white/15;
-    background: rgba(0, 0, 0, 0.35);
+    @apply border-white/20;
+    background: rgba(0, 0, 0, 0.45);
   }
 
     /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
