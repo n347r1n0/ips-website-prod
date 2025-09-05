@@ -8,8 +8,8 @@ import { RegistrationConfirmationModal } from './RegistrationConfirmationModal';
 import { TournamentResultsModal } from './TournamentResultsModal';
 
 export function TournamentListForDay({ tournaments, onClose }) {
-  const [selectedTournament, setSelectedTournament] = useState(null); // для регистрации
-  const [resultsTournament, setResultsTournament] = useState(null); // для результатов
+  const [selectedTournament, setSelectedTournament] = useState(null);
+  const [resultsTournament, setResultsTournament] = useState(null);
 
   if (!tournaments || tournaments.length === 0) {
     return null;
@@ -63,7 +63,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
 
   return (
     <AnimatePresence>
-      {/* Full-screen neumorphic container */}
+      {/* Full-screen neumorphic container - NO glassmorphic wrapper */}
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
@@ -100,64 +100,60 @@ export function TournamentListForDay({ tournaments, onClose }) {
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto min-h-0 px-6">
           <div className="py-6 spacing-content">
-            <div className="spacing-content">
-              {tournaments.map((tournament) => (
-                <div
-                  key={tournament.id}
-                  className="glassmorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-heading text-white mb-2">
-                        {tournament.name}
-                      </h3>
-                      <div className="flex items-center space-x-4 text-gray-300 text-sm">
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-2 text-gold-accent" />
-                          <span>{formatTime(tournament.tournament_date)}</span>
-                        </div>
-                        {tournament.settings_json?.tournament_type && (
-                          <div className="flex items-center">
-                            {(() => {
-                              const TypeIcon = getTournamentTypeIcon(tournament.settings_json.tournament_type);
-                              const typeColor = getTournamentTypeColor(tournament.settings_json.tournament_type);
-                              return <TypeIcon className={`w-4 h-4 mr-2 ${typeColor}`} />;
-                            })()}
-                            <span>{tournament.settings_json.tournament_type}</span>
-                          </div>
-                        )}
+            {tournaments.map((tournament) => (
+              <div
+                key={tournament.id}
+                className="glassmorphic-panel border border-white/20 rounded-xl p-6 hover:border-gold-accent/40 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-brand text-white mb-2">
+                      {tournament.name}
+                    </h3>
+                    <div className="flex items-center space-x-4 text-gray-300 text-sm">
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2 text-gold-accent" />
+                        <span>{formatTime(tournament.tournament_date)}</span>
                       </div>
+                      {tournament.settings_json?.tournament_type && (
+                        <div className="flex items-center">
+                          {(() => {
+                            const TypeIcon = getTournamentTypeIcon(tournament.settings_json.tournament_type);
+                            const typeColor = getTournamentTypeColor(tournament.settings_json.tournament_type);
+                            return <TypeIcon className={`w-4 h-4 mr-2 ${typeColor}`} />;
+                          })()}
+                          <span>{tournament.settings_json.tournament_type}</span>
+                        </div>
+                      )}
                     </div>
-
-                    {tournament.status === 'completed' ? (
-                      <Button
-                        variant="secondary"
-                        size="md"
-                        onClick={() => setResultsTournament(tournament)}
-                      >
-                        Результаты
-                      </Button>
-                    ) : (
-
-                      <Button
-                        variant="primary"
-                        size="md"
-                        onClick={() => setSelectedTournament(tournament)}
-                      >
-                        Записаться
-                      </Button>
-                    )}
-
                   </div>
 
-                  {tournament.settings_json?.buy_in_cost && (
-                    <div className="text-gold-accent font-medium">
-                      Вступительный взнос: ${tournament.settings_json.buy_in_cost}
-                    </div>
+                  {tournament.status === 'completed' ? (
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() => setResultsTournament(tournament)}
+                    >
+                      Результаты
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => setSelectedTournament(tournament)}
+                    >
+                      Записаться
+                    </Button>
                   )}
                 </div>
-              ))}
-            </div>
+
+                {tournament.settings_json?.buy_in_cost && (
+                  <div className="text-gold-accent font-medium">
+                    Вступительный взнос: ${tournament.settings_json.buy_in_cost}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </motion.div>
@@ -179,7 +175,6 @@ export function TournamentListForDay({ tournaments, onClose }) {
           onClose={() => setResultsTournament(null)}
         />
       )}
-
     </AnimatePresence>
   );
 }
