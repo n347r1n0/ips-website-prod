@@ -13,16 +13,10 @@ export function ModalBase({
   headerActions,
   footerActions,
   className = '',
-  contentClassName = '',
-  fullScreen = true, // Mobile-first full-screen default
-  closeButton = true,
-  backgroundLock = true,
   ...props
 }) {
   // Lock background scroll when modal is open
   useEffect(() => {
-    if (!backgroundLock) return;
-    
     if (isOpen) {
       const originalStyle = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = 'hidden';
@@ -31,7 +25,7 @@ export function ModalBase({
         document.body.style.overflow = originalStyle;
       };
     }
-  }, [isOpen, backgroundLock]);
+  }, [isOpen]);
 
   // Close on escape key
   useEffect(() => {
@@ -55,94 +49,62 @@ export function ModalBase({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className={`fixed inset-0 z-50 flex ${fullScreen ? 'p-0' : 'p-4 items-center justify-center'}`}
-        onClick={onClose}
+        transition={{ duration: 0.25 }}
+        className={`fixed inset-0 z-50 ${className}`}
         {...props}
       >
-        {/* Background overlay */}
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-        
-        {/* Modal container */}
+        {/* Full-page neumorphic opaque container */}
         <motion.div
-          initial={fullScreen 
-            ? { y: '100%' } 
-            : { scale: 0.8, y: 50, opacity: 0 }
-          }
-          animate={fullScreen 
-            ? { y: 0 } 
-            : { scale: 1, y: 0, opacity: 1 }
-          }
-          exit={fullScreen 
-            ? { y: '100%' } 
-            : { scale: 0.8, y: 50, opacity: 0 }
-          }
-          transition={{ 
-            type: fullScreen ? 'spring' : 'spring', 
-            stiffness: fullScreen ? 400 : 300, 
-            damping: fullScreen ? 40 : 30 
-          }}
-          className={`relative ${fullScreen 
-            ? 'w-full h-full flex flex-col' 
-            : 'w-full max-w-2xl max-h-[90vh] rounded-2xl overflow-hidden'
-          } ${className}`}
-          onClick={(e) => e.stopPropagation()}
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="w-full h-full neumorphic-container flex flex-col"
         >
-          {/* Neomorphic inset shell */}
-          <div className={`${fullScreen ? 'h-full flex flex-col' : 'h-full'} bg-gray-800 neumorphic-inset ${fullScreen ? 'rounded-none' : 'rounded-2xl'}`}>
-            
-            {/* Sticky Header */}
-            {(title || headerActions || closeButton) && (
-              <div className="flex-shrink-0 p-6 pb-4 border-b border-white/10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    {title && (
-                      <h2 className="text-2xl font-heading text-white mb-1">
-                        {title}
-                      </h2>
-                    )}
-                    {subtitle && (
-                      <p className="text-sm text-gray-400">
-                        {subtitle}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    {headerActions}
-                    {closeButton && (
-                      <button
-                        onClick={onClose}
-                        className="p-2 text-white/50 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                      >
-                        <X className="w-6 h-6" />
-                      </button>
-                    )}
-                  </div>
+          {/* Fixed Header */}
+          {(title || headerActions) && (
+            <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1">
+                  {title && (
+                    <h1 className="heading-lg mb-2">{title}</h1>
+                  )}
+                  {subtitle && (
+                    <p className="text-secondary">{subtitle}</p>
+                  )}
                 </div>
                 
-                {/* Decorative divider */}
-                <div className="mt-4 h-px bg-gradient-to-r from-transparent via-gold-accent to-transparent opacity-50" />
-              </div>
-            )}
-            
-            {/* Scrollable Glass Content */}
-            <div className={`flex-1 overflow-y-auto ${fullScreen ? 'min-h-0' : ''}`}>
-              <div className={`glassmorphic-panel border-0 ${fullScreen ? 'h-full rounded-none' : 'rounded-none'} ${contentClassName}`}>
-                {children}
-              </div>
-            </div>
-            
-            {/* Sticky Footer */}
-            {footerActions && (
-              <div className="flex-shrink-0 p-6 pt-4 border-t border-white/10">
-                <div className="flex items-center justify-end space-x-3">
-                  {footerActions}
+                <div className="flex items-center space-x-3">
+                  {headerActions}
+                  <button
+                    onClick={onClose}
+                    className="btn btn-secondary btn-sm p-2 aspect-square"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-            )}
-            
+              
+              {/* Elegant divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-gold-accent/30 to-transparent" />
+            </div>
+          )}
+          
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto min-h-0 px-6">
+            <div className="py-6 spacing-content">
+              {children}
+            </div>
           </div>
+          
+          {/* Fixed Footer */}
+          {footerActions && (
+            <div className="flex-shrink-0 px-6 py-6 border-t border-white/5">
+              <div className="flex items-center justify-end space-x-3">
+                {footerActions}
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

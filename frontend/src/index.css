@@ -37,132 +37,81 @@ body {
 
 /* === НАШИ КАСТОМНЫЕ КОМПОНЕНТЫ === */
 @layer components {
-  /* === IPS UNIFIED BUTTON SYSTEM === */
+  /* === CLEAN BUTTON SYSTEM === */
   
-  /* Color palette CSS variables */
-  .btn-col-red { --brand-red: #ee2346; --from: var(--brand-red); --via: #ff4569; --to: #cc1e3f; }
-  .btn-col-teal { --teal: #00A29C; --from: var(--teal); --via: #1ab3ac; --to: #008a85; }
-  .btn-col-ocean { --ocean: #007193; --from: var(--ocean); --via: #1985a3; --to: #005c7a; }
-  .btn-col-sand { --sand: #C5A288; --from: var(--sand); --via: #d4b199; --to: #b5926f; }
-  .btn-col-royal { --royal: #201E53; --from: var(--royal); --via: #2d2a66; --to: #1a1743; }
-  .btn-col-porcelain { --porcelain: #D4B694; --from: var(--porcelain); --via: #e0c4a5; --to: #c8a683; }
-
   /* Base button foundation */
   .btn {
-    @apply inline-flex items-center justify-center font-semibold transition-all duration-200 relative overflow-hidden;
-    @apply focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent;
+    @apply inline-flex items-center justify-center font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50 focus:ring-offset-2 focus:ring-offset-transparent;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: 44px; /* Touch target compliance */
+    min-height: 44px;
+    font-size: 0.9rem;
+    letter-spacing: 0.025em;
   }
 
   /* Button sizes */
-  .btn-sm { @apply text-xs px-3 py-2 min-h-[36px]; }
-  .btn-md { @apply text-sm px-4 py-2.5 min-h-[44px]; }
-  .btn-lg { @apply text-base px-6 py-3 min-h-[52px]; }
+  .btn-sm { @apply text-sm px-4 py-2 min-h-[40px]; }
+  .btn-md { @apply text-base px-6 py-3 min-h-[48px]; }
+  .btn-lg { @apply text-lg px-8 py-4 min-h-[56px]; }
 
-  /* Icon-only button support */
-  .btn-icon { @apply aspect-square p-2; }
-  .btn-icon.btn-sm { @apply w-9 h-9; }
-  .btn-icon.btn-md { @apply w-11 h-11; }
-  .btn-icon.btn-lg { @apply w-12 h-12; }
-
-  /* === BUTTON VARIANTS (shape/material/shadows) === */
-  
-  /* Neomorphic (semi-soft, complex rim) - most pill */
-  .btn-neo {
-    @apply rounded-full text-white border-0;
-    background: linear-gradient(145deg, #2c2c30, #1c1c1e);
-    box-shadow: 
-      inset 0 2px 4px rgba(255,255,255,0.05),
-      inset 0 -2px 4px rgba(0,0,0,0.4),
-      0 4px 8px rgba(0,0,0,0.3),
-      0 2px 4px rgba(0,0,0,0.2);
+  /* Primary action button */
+  .btn-primary {
+    @apply rounded-xl text-white font-medium;
+    background: linear-gradient(135deg, #007193, #00A29C);
+    box-shadow: 0 4px 12px rgba(0, 113, 147, 0.3);
   }
-  .btn-neo:hover {
-    box-shadow: 
-      inset 0 2px 6px rgba(255,255,255,0.08),
-      inset 0 -2px 6px rgba(0,0,0,0.5),
-      0 6px 12px rgba(0,0,0,0.4),
-      0 3px 6px rgba(0,0,0,0.3);
-    transform: translateY(-1px);
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 113, 147, 0.4);
+    background: linear-gradient(135deg, #1985a3, #1ab3ac);
   }
-  .btn-neo:active {
-    @apply scale-95;
-    box-shadow: 
-      inset 0 1px 3px rgba(255,255,255,0.04),
-      inset 0 -1px 3px rgba(0,0,0,0.5),
-      0 2px 4px rgba(0,0,0,0.2);
+  .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 113, 147, 0.3);
   }
 
-  /* Glassmorphic (clean glass) - most square */
-  .btn-glass {
-    @apply rounded-lg text-white border border-white/20 backdrop-blur-sm;
+  /* Secondary glass button */
+  .btn-secondary {
+    @apply rounded-lg text-white border border-white/20;
     background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
   }
-  .btn-glass:hover {
+  .btn-secondary:hover {
     @apply border-white/30;
     background: rgba(255, 255, 255, 0.12);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
-  .btn-glass:active {
-    @apply scale-95;
+  .btn-secondary:active {
     background: rgba(255, 255, 255, 0.06);
+    transform: translateY(0);
   }
 
-  /* Claymorphic (trendy clay) - medium rounding */
-  .btn-clay {
-    @apply rounded-2xl text-white border border-black/20;
-    background: linear-gradient(145deg, #3c3c40, #2c2c30);
-    box-shadow: 
-      0 4px 0 rgba(0,0,0,0.4),
-      inset 0 1px 0 rgba(255,255,255,0.06);
+  /* Danger button */
+  .btn-danger {
+    @apply rounded-lg text-white border border-red-400/30;
+    background: rgba(239, 68, 68, 0.1);
+    backdrop-filter: blur(12px);
   }
-  .btn-clay:hover {
-    @apply brightness-110;
+  .btn-danger:hover {
+    @apply border-red-400/50;
+    background: rgba(239, 68, 68, 0.2);
     transform: translateY(-1px);
-    box-shadow: 
-      0 5px 0 rgba(0,0,0,0.4),
-      0 2px 8px rgba(0,0,0,0.2),
-      inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  .btn-clay:active {
-    transform: translateY(2px);
-    box-shadow: 
-      0 1px 0 rgba(0,0,0,0.5),
-      inset 0 1px 0 rgba(255,255,255,0.04);
+  .btn-danger:active {
+    background: rgba(239, 68, 68, 0.05);
+    transform: translateY(0);
   }
 
-  /* === GRADIENT MODIFIERS (color only) === */
-  .btn-grad-linear {
-    background: linear-gradient(135deg, var(--from), var(--to)) !important;
-  }
-  .btn-grad-linear3 {
-    background: linear-gradient(135deg, var(--from), var(--via), var(--to)) !important;
-  }
-  .btn-grad-conic {
-    background: conic-gradient(from 210deg at 50% 50%, var(--from), var(--via) 50%, var(--to)) !important;
-  }
-  .btn-grad-elliptic {
-    background: radial-gradient(120% 80% at 50% 50%, var(--from) 0%, var(--to) 100%) !important;
-  }
-
-  /* === BACKWARD COMPATIBILITY === */
-  /* Make luxury-button an alias to clay + ocean + linear */
-  .luxury-button {
-    @apply btn btn-clay btn-md;
-    --ocean: #007193; --from: var(--ocean); --via: #1985a3; --to: #005c7a;
-    background: linear-gradient(135deg, var(--from), var(--to)) !important;
-    @apply text-white font-bold uppercase tracking-wider;
-  }
-
+  /* Glass panels for content areas */
   .glassmorphic-panel {
-    @apply bg-black/50 backdrop-blur-xl border border-glass-border shadow-lg transition-all duration-300;
+    @apply bg-black/40 backdrop-blur-xl border border-white/10;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
-    /* 👇 ДОБАВЛЯЕМ НОВЫЙ БЛОК ДЛЯ HOVER-ЭФФЕКТА ПАНЕЛИ */
   .glassmorphic-panel:hover {
-    @apply bg-black/40 border-white/20 -translate-y-0.5;
+    @apply border-white/15;
+    background: rgba(0, 0, 0, 0.35);
   }
 
     /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
@@ -180,14 +129,16 @@ body {
 
 
 
-  /* 👇 Добавляем этот класс */
-  .neumorphic-inset {
-    @apply shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),_inset_-4px_-4px_8px_rgba(255,255,255,0.05)];
+  /* Neumorphic containers - opaque full-page shells */
+  .neumorphic-container {
+    background: #2a2a2e;
+    box-shadow: 
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 255, 255, 0.03);
   }
-
-  .neumorphic-outset {
-  /* Те же параметры, но без слова 'inset' */
-  @apply shadow-[4px_4px_8px_rgba(0,0,0,0.4),_-4px_-4px_8px_rgba(255,255,255,0.05)];
+  
+  .neumorphic-inset {
+    @apply shadow-[inset_6px_6px_12px_rgba(0,0,0,0.4),_inset_-6px_-6px_12px_rgba(255,255,255,0.03)];
   }
 
   .art-deco-divider {
@@ -254,65 +205,18 @@ body {
 
 
 
-  /* Не конфликтуем с .button — своё имя */
-  .btn-neo {
-    --radius: 100px;
-    --bg: #080808;
-
-    position: relative;
-    display: inline-flex;
-    outline: none;
-    cursor: pointer;
-    border: 0;
-    border-radius: var(--radius);
-    background-color: var(--bg);
-    transition: transform .2s ease, box-shadow .2s ease;
-
-    box-shadow:
-      inset 0 0.3rem 0.9rem rgba(255, 255, 255, 0.3),
-      inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.7),
-      inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.5),
-      0 3rem 3rem rgba(0, 0, 0, 0.3),
-      0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
-  }
-  .btn-neo .wrap {
-    font-size: 20px;
-    font-weight: 600;
-    color: rgba(255,255,255,.85);
-    padding: 18px 28px;
-    border-radius: inherit;
-    position: relative;
-    overflow: visible;      /* было hidden */
-  }
-  .btn-neo .label{
-    display:inline-flex; align-items:center; gap:12px; margin:0;
-    position: relative; z-index: 1;        /* текст над подсветками */
-    transform: none;                        /* без сдвига */
-    -webkit-mask-image: none; mask-image: none; /* убираем маску */
-    color:#fff;
-  }
-  /* полностью убрали «каплю/сердцевину» */
-  .btn-neo .wrap::before,
-  .btn-neo .wrap::after { display: none; }
-
-  .btn-neo:hover{
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 0.3rem 0.5rem rgba(255, 255, 255, 0.4),
-      inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.7),
-      inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.7),
-      0 3rem 3rem rgba(0, 0, 0, 0.3),
-      0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
-  }
-  .btn-neo:active{
-    transform: translateY(4px);
-    box-shadow:
-      inset 0 0.3rem 0.5rem rgba(255, 255, 255, 0.5),
-      inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.8),
-      inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.4),
-      0 3rem 3rem rgba(0, 0, 0, 0.3),
-      0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
-  }
+  /* Typography and spacing system */
+  .heading-lg { @apply text-2xl font-heading text-white leading-tight; }
+  .heading-md { @apply text-xl font-heading text-white leading-snug; }
+  .heading-sm { @apply text-lg font-heading text-white leading-normal; }
+  
+  .text-body { @apply text-base text-white/90 leading-relaxed; }
+  .text-secondary { @apply text-sm text-white/70 leading-normal; }
+  .text-caption { @apply text-xs text-white/60 leading-tight; }
+  
+  .spacing-section { @apply space-y-6; }
+  .spacing-content { @apply space-y-4; }
+  .spacing-tight { @apply space-y-2; }
 
 
 

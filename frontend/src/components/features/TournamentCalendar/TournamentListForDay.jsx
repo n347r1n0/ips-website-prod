@@ -124,17 +124,17 @@ export function TournamentListForDay({ tournaments, onClose }) {
 
                     {tournament.status === 'completed' ? (
                       <Button
+                        variant="secondary"
+                        size="md"
                         onClick={() => setResultsTournament(tournament)}
-                        className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-2 rounded-xl"
-                     >
+                      >
                         Результаты
                       </Button>
                     ) : (
 
                       <Button
-                        variant="clay"
-                        gradient="elliptic"
-                        color="ocean"
+                        variant="primary"
+                        size="md"
                         onClick={() => setSelectedTournament(tournament)}
                       >
                         Записаться
@@ -154,8 +154,9 @@ export function TournamentListForDay({ tournaments, onClose }) {
 
             <div className="mt-8 text-center">
               <Button
+                variant="secondary"
+                size="lg"
                 onClick={onClose}
-                className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-3 rounded-xl"
               >
                 Закрыть
               </Button>

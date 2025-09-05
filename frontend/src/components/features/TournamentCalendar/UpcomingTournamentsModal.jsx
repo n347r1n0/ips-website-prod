@@ -162,11 +162,9 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
         onClose={onClose}
         title="Ближайшие турниры"
         subtitle={`${tournaments.length} турнир${tournaments.length === 1 ? '' : tournaments.length < 5 ? 'а' : 'ов'} в ближайшее время`}
-        contentClassName="p-6"
       >
-        <div className="space-y-3">
+        <div className="spacing-content">
               {tournaments.map((tournament) => {
-                // --- ИЗМЕНЕНИЕ: Проверка регистрации теперь мгновенная ---
                 const isRegistered = userRegistrationIds.has(tournament.id);
                 const TypeIcon = getTournamentTypeIcon(tournament.settings_json?.tournament_type);
                 const typeColor = getTournamentTypeColor(tournament.settings_json?.tournament_type);
@@ -174,70 +172,73 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                 return (
                   <motion.div
                     key={tournament.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={() => handleTournamentClick(tournament)}
-                    className={`glassmorphic-panel border rounded-xl cursor-pointer transition-all duration-300 ${
+                    className={`glassmorphic-panel rounded-xl cursor-pointer transition-all duration-200 p-5 ${
                       isRegistered 
-                        ? 'border-gold-accent/50 bg-gold-accent/10' 
-                        : 'border-white/30 hover:border-gold-accent/50 hover:bg-white/5'
+                        ? 'border-gold-accent/40 bg-gold-accent/5' 
+                        : 'border-white/10 hover:border-gold-accent/30'
                     }`}
                   >
-                    <div className="flex items-center justify-between h-20 px-4 py-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-3 mb-1">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <div className="flex items-center space-x-3 mb-3">
                           <TypeIcon className={`w-5 h-5 ${typeColor} flex-shrink-0`} />
-                          <h3 className="text-white font-medium truncate">{tournament.name}</h3>
+                          <h3 className="heading-sm truncate">{tournament.name}</h3>
                           {tournament.settings_json?.tournament_type && (
-                            <span className={`text-xs px-2 py-1 rounded-full bg-black/20 ${typeColor} flex-shrink-0`}>
+                            <span className={`text-xs px-3 py-1 rounded-full bg-black/20 ${typeColor} flex-shrink-0`}>
                               {tournament.settings_json.tournament_type}
                             </span>
                           )}
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 text-sm text-white/70">
-                            <div className="flex items-center space-x-1">
-                              <Clock className="w-4 h-4" />
-                              <span>{formatDate(tournament.tournament_date)}</span>
-                              <span>•</span>
-                              <span>{formatTime(tournament.tournament_date)}</span>
-                            </div>
-                          </div>
-                          
+                        <div className="flex items-center space-x-4 text-secondary mb-3">
                           <div className="flex items-center space-x-2">
-                            {isRegistered && (
-                              <span className="text-xs text-gold-accent font-medium">
-                                ✓ Уже записаны
-                              </span>
-                            )}
-                            
-                            {/* Cancel button for registered tournaments */}
-                            {isRegistered && (
-                              <Button
-                                variant="glass"
-                                size="sm"
-                                onClick={(e) => handleCancelRegistration(tournament.id, e)}
-                                disabled={loading}
-                                className="text-red-300 border-red-300/50 hover:bg-red-300/10 text-xs flex-shrink-0"
-                              >
-                                Отменить
-                              </Button>
-                            )}
+                            <Clock className="w-4 h-4" />
+                            <span>{formatDate(tournament.tournament_date)}</span>
+                            <span>•</span>
+                            <span>{formatTime(tournament.tournament_date)}</span>
                           </div>
                         </div>
+                        
+                        {tournament.settings_json?.buy_in_cost && (
+                          <div className="text-gold-accent font-medium text-sm">
+                            Вступительный взнос: ${tournament.settings_json.buy_in_cost}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col items-end space-y-2">
+                        {isRegistered && (
+                          <span className="text-xs text-gold-accent font-medium px-2 py-1 bg-gold-accent/10 rounded">
+                            ✓ Зарегистрированы
+                          </span>
+                        )}
+                        
+                        {isRegistered && (
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={(e) => handleCancelRegistration(tournament.id, e)}
+                            disabled={loading}
+                          >
+                            Отменить
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
                 );
               })}
-        </div>
-
-        {tournaments.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-white/60">Нет предстоящих турниров</p>
           </div>
-        )}
+
+          {tournaments.length === 0 && (
+            <div className="glassmorphic-panel rounded-xl p-8 text-center">
+              <p className="text-secondary">Нет предстоящих турниров</p>
+            </div>
+          )}
+        </div>
       </ModalBase>
 
       {/* Registration confirmation modal */}
