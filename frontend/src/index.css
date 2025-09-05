@@ -54,64 +54,104 @@ body {
   .btn-md { @apply text-base px-6 py-3 min-h-[48px]; }
   .btn-lg { @apply text-lg px-8 py-4 min-h-[56px]; }
 
-  /* Primary action button */
+  /* Primary claymorphic action button */
   .btn-primary {
-    @apply rounded-xl text-white font-medium;
-    background: linear-gradient(135deg, #007193, #00A29C);
-    box-shadow: 0 4px 12px rgba(0, 113, 147, 0.3);
+    @apply rounded-2xl text-white font-medium;
+    background: linear-gradient(145deg, #007193, #00A29C);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 8px rgba(0, 113, 147, 0.3);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 113, 147, 0.4);
-    background: linear-gradient(135deg, #1985a3, #1ab3ac);
+    box-shadow: 
+      0 6px 0 rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 113, 147, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: linear-gradient(145deg, #1985a3, #1ab3ac);
   }
   .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(0, 113, 147, 0.3);
+    transform: translateY(2px);
+    box-shadow: 
+      0 1px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  /* Secondary glass button */
+  /* Secondary claymorphic button */
   .btn-secondary {
-    @apply rounded-lg text-white border border-white/20;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
+    @apply rounded-xl text-white font-medium;
+    background: linear-gradient(145deg, #3c3c40, #2c2c30);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+      0 3px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 2px 6px rgba(0, 0, 0, 0.2);
   }
   .btn-secondary:hover {
-    @apply border-white/30;
-    background: rgba(255, 255, 255, 0.12);
     transform: translateY(-1px);
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      0 3px 8px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    background: linear-gradient(145deg, #434347, #323236);
   }
   .btn-secondary:active {
-    background: rgba(255, 255, 255, 0.06);
-    transform: translateY(0);
+    transform: translateY(1px);
+    box-shadow: 
+      0 1px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  /* Danger button */
+  /* Danger claymorphic button */
   .btn-danger {
-    @apply rounded-lg text-white border border-red-400/30;
-    background: rgba(239, 68, 68, 0.1);
-    backdrop-filter: blur(12px);
+    @apply rounded-xl text-white font-medium;
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 
+      0 3px 0 rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 6px rgba(220, 38, 38, 0.3);
   }
   .btn-danger:hover {
-    @apply border-red-400/50;
-    background: rgba(239, 68, 68, 0.2);
     transform: translateY(-1px);
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.3),
+      0 3px 8px rgba(220, 38, 38, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    background: linear-gradient(145deg, #ef4444, #dc2626);
   }
   .btn-danger:active {
-    background: rgba(239, 68, 68, 0.05);
-    transform: translateY(0);
+    transform: translateY(1px);
+    box-shadow: 
+      0 1px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  /* Glass panels for content areas */
+  /* Opaque neumorphic panels for content areas */
+  .neumorphic-panel {
+    background: #2c2c30;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+      inset 4px 4px 8px rgba(0, 0, 0, 0.3),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.02),
+      0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  .neumorphic-panel:hover {
+    border-color: rgba(212, 175, 55, 0.2);
+    box-shadow: 
+      inset 4px 4px 8px rgba(0, 0, 0, 0.3),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.03),
+      0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Keep glassmorphic only for specific cases */
   .glassmorphic-panel {
     @apply bg-black/40 backdrop-blur-xl border border-white/10;
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  }
-  .glassmorphic-panel:hover {
-    @apply border-white/15;
-    background: rgba(0, 0, 0, 0.35);
   }
 
     /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
@@ -132,6 +172,15 @@ body {
   /* Neumorphic containers - opaque full-page shells */
   .neumorphic-container {
     background: #2a2a2e;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    z-index: 9999;
     box-shadow: 
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
       inset -8px -8px 16px rgba(255, 255, 255, 0.03);

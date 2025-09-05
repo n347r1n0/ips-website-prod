@@ -60,9 +60,8 @@ export function EventMarker({ tournament }) {
   const { Icon, glassBg, colorOverlay, glowColor, borderColor, iconColor } = getEventStyles();
   const isMajorEvent = tournament.is_major;
 
-  // 👇 ДОБАВЛЯЕМ ЭТУ СТРОЧКУ 👇
-  // Определяем размер иконки: для главного события w-7 h-7, для остальных w-5 h-5
-  const iconSizeClass = isMajorEvent ? 'w-6 h-6' : 'w-4 h-4';
+  // Reduced icon sizes by half as requested
+  const iconSizeClass = isMajorEvent ? 'w-3 h-3' : 'w-2 h-2';
 
 
 

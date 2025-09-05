@@ -45,22 +45,15 @@ export function ModalBase({
 
   return (
     <AnimatePresence>
+      {/* Full-page neumorphic opaque container */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
-        className={`fixed inset-0 z-50 ${className}`}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="neumorphic-container flex flex-col"
         {...props}
       >
-        {/* Full-page neumorphic opaque container */}
-        <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="w-full h-full neumorphic-container flex flex-col"
-        >
           {/* Fixed Header */}
           {(title || headerActions) && (
             <div className="flex-shrink-0 px-6 py-6 border-b border-white/5">
@@ -105,7 +98,6 @@ export function ModalBase({
               </div>
             </div>
           )}
-        </motion.div>
       </motion.div>
     </AnimatePresence>
   );
