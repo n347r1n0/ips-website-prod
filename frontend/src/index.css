@@ -173,10 +173,12 @@ body {
   .neumorphic-panel {
     background: #2c2c30;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem; /* Ensure proper rounded corners */
     box-shadow: 
       inset 4px 4px 8px rgba(0, 0, 0, 0.3),
       inset -4px -4px 8px rgba(255, 255, 255, 0.02),
       0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Prevent content from breaking rounded corners */
   }
   .neumorphic-panel:hover {
     border-color: rgba(212, 175, 55, 0.2);
@@ -225,9 +227,16 @@ body {
     height: 100vh;
     height: 100dvh; /* Dynamic viewport height for mobile */
     z-index: 9999;
+    border-radius: 0; /* Full screen modals have no border radius */
     box-shadow: 
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
       inset -8px -8px 16px rgba(255, 255, 255, 0.03);
+  }
+  
+  /* Ensure proper spacing for modal content */
+  .neumorphic-container .spacing-content > * {
+    margin-left: 0;
+    margin-right: 0;
   }
   
   .neumorphic-inset {

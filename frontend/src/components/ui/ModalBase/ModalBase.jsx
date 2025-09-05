@@ -86,7 +86,7 @@ export function ModalBase({
           
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto min-h-0 px-6">
-            <div className="py-6 spacing-content">
+            <div className="py-6 spacing-content max-w-full">
               {children}
             </div>
           </div>
