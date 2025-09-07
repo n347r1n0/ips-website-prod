@@ -49,7 +49,7 @@ jobs:
 
       # ✅ фиксируем кастомный домен в артефакте
       - name: Write CNAME
-        run: echo "www.ipokerstyle.com" > dist/CNAME
+        run: echo "www.ipoker.style" > dist/CNAME
 
       # SPA fallback
       - name: Add 404 fallback
