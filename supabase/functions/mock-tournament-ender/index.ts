@@ -4,12 +4,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 /** ----------- CORS ----------- */
 const ALLOW_ORIGINS = [
-  "https://www.ipoker.style",
-  "https://ipoker.style",
-  "https://www.ips-entertain.xyz",
-  "https://ips-entertain.xyz",
-  "http://localhost:5173",
+  'https://ipoker.style',
+  'https://www.ipoker.style',
+  'https://n347r1n0.github.io',
+  'http://localhost:5173',
 ];
+
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
