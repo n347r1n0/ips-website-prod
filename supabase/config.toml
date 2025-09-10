@@ -1,45 +1,22 @@
 # supabase/config.toml
 
-#[api]
-#enabled = true
-#port = 54321
-#
-#[db]
-#enabled = true
-#port = 54322
-#
-#[functions]
-#enabled = true
-#port = 54323
-#
-#[edge_functions]
-#enabled = true
-
-
-# supabase/config.toml
-
-# Project ID твоего проекта Supabase (взят из лога ошибки)
-project_id = "jdiutiqdfherukamniqx"
+project_id = "sklioimlyhomfemiruvb"
 
 [api]
 port = 54321
-# 'enabled' удалено
 
 [db]
 port = 54322
-# 'enabled' удалено
 
-# Разделы [functions] и [edge_functions] были полностью удалены,
-# так как их синтаксис вызывал ошибку. CLI будет использовать
-# стандартные настройки для деплоя, что нам и нужно.
-
+# Оставляем как есть
 [functions.mock-tournament-ender]
 enabled = true
 verify_jwt = true
 import_map = "./functions/mock-tournament-ender/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/mock-tournament-ender/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/mock-tournament-ender/*.html" ]
+
+# 🔽 ДОБАВЬ ЭТОТ БЛОК
+[functions."telegram-auth-callback"]
+verify_jwt = false
+entrypoint = "./functions/telegram-auth-callback/index.ts"
+# import_map можно опустить, если не используешь deno.json тут

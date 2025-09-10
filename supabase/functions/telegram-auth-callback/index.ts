@@ -1,4 +1,3 @@
-
 // supabase/functions/telegram-auth-callback/index.ts
 
 import { createClient } from 'npm:@supabase/supabase-js@2.55.0';
@@ -73,6 +72,27 @@ async function passwordGrant(email: string, password: string) {
   });
 }
 
+// ---------- Ensure club_members profile (idempotent) ----------
+async function ensureProfile(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  userId: string,
+  tg: any
+) {
+  const fullName = `${tg.first_name || ''} ${tg.last_name || ''}`.trim();
+  const payload = {
+    user_id: userId,
+    nickname: tg.username || tg.first_name || `tg_${Number(tg.id)}`,
+    full_name: fullName || null,
+    avatar_url: tg.photo_url ?? null,
+    telegram_id: Number(tg.id) || null,
+    telegram_username: tg.username ?? null,
+  };
+  // service_role обходит RLS
+  const { error } = await supabaseAdmin.from('club_members')
+    .upsert(payload, { onConflict: 'user_id' });
+  if (error) console.warn('ensureProfile upsert error:', error.message || error);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
 
@@ -123,16 +143,24 @@ Deno.serve(async (req) => {
     const email = `tg_${telegramId}@telegram.user`;
     const password = `${SHADOW_SECRET}:${telegramId}`;
 
+    // Подготовим admin-клиент сразу (нужен для ensureProfile)
+    const supabaseAdmin = createClient(SB_URL, SB_SERVICE_ROLE);
+
     // 1) пробуем войти (если уже есть)
     let res = await passwordGrant(email, password);
     if (res.ok) {
       const tokens = await res.json();
+
+      // гарантируем профиль
+      const { data: userInfo } = await supabaseAdmin.auth.getUser(tokens.access_token);
+      if (userInfo?.user?.id) {
+        await ensureProfile(supabaseAdmin, userInfo.user.id, tg);
+      }
+
       return json(req, { success: true, session_token: tokens });
     }
 
     // 2) создаём пользователя и повторяем вход
-    const supabaseAdmin = createClient(SB_URL, SB_SERVICE_ROLE);
-
     const fullName = `${tg.first_name || ''} ${tg.last_name || ''}`.trim();
     const metadata = {
       provider: 'telegram',
@@ -164,6 +192,13 @@ Deno.serve(async (req) => {
     }
 
     const tokens = await res.json();
+
+    // гарантируем профиль и здесь
+    const { data: userInfo } = await supabaseAdmin.auth.getUser(tokens.access_token);
+    if (userInfo?.user?.id) {
+      await ensureProfile(supabaseAdmin, userInfo.user.id, tg);
+    }
+
     return json(req, { success: true, session_token: tokens });
   } catch (e: any) {
     console.error('Telegram Auth Failed:', e?.message || e);
