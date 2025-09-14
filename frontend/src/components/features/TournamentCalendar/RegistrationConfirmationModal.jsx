@@ -1,9 +1,9 @@
 // src/components/features/TournamentCalendar/RegistrationConfirmationModal.jsx
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ModalBase } from '@/components/ui/ModalBase';
 import { BuyInSummary } from './BuyInSummary';
 import { BlindsStructureViewer } from './BlindsStructureViewer';
 import { participantsAPI } from '@/lib/participantsAPI';
@@ -15,7 +15,7 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user, profile } = useAuth();
-  const { guestData, clearGuestData } = useGuestStore();
+  const { guestData } = useGuestStore();
   const toast = useToast();
 
   const formatDate = (dateString) => {
@@ -78,123 +78,101 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
   const playerContact = user?.email || guestData?.contact;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.8, y: 50, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.8, y: 50, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="glassmorphic-panel rounded-2xl p-8">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="mb-8">
-              <h2 className="text-3xl font-heading text-white mb-2">
-                Подтверждение регистрации
-              </h2>
-              <div className="h-px bg-gradient-to-r from-transparent via-gold-accent to-transparent mb-4" />
-              <div className="text-gray-300">
-                <p className="text-xl font-medium mb-2">{tournament.name}</p>
-                <p>📅 {formatDate(tournament.tournament_date)}</p>
-                <p>🕐 {formatTime(tournament.tournament_date)}</p>
-              </div>
-            </div>
-
-            {/* Player Information */}
-            <div className="glassmorphic-panel border border-white/30 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-heading text-white mb-4">
-                Информация об игроке
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Игрок:</span>
-                  <span className="text-white font-medium">
-                    {playerName || 'Не указано'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Контакт:</span>
-                  <span className="text-white">
-                    {playerContact || 'Не указано'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Статус:</span>
-                  <span className="text-gold-accent">
-                    {user ? 'Участник клуба' : 'Гость'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tournament Details */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <BuyInSummary 
-                buyInSettings={tournament.settings_json?.buy_in_settings}
-                tournamentType={tournament.settings_json?.tournament_type}
-                buyInCost={tournament.settings_json?.buy_in_cost}
-              />
-              <BlindsStructureViewer 
-                blindsStructure={tournament.settings_json?.blinds_structure}
-              />
-            </div>
-
-            {/* Error Display */}
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 flex items-center">
-                <AlertCircle className="w-5 h-5 text-red-300 mr-3 flex-shrink-0" />
-                <p className="text-red-300">{error}</p>
-              </div>
+    <ModalBase
+      isOpen={true}
+      onClose={onClose}
+      title="Подтверждение регистрации"
+      subtitle={`${tournament.name} • ${formatDate(tournament.tournament_date)} • ${formatTime(tournament.tournament_date)}`}
+      priority={true}
+      footerActions={
+        <>
+          <Button
+            onClick={onClose}
+            disabled={loading}
+            className="btn-glass px-6 py-3 rounded-xl"
+          >
+            Отмена
+          </Button>
+          <Button
+            onClick={handleConfirmRegistration}
+            disabled={loading || (!user && !guestData)}
+            className="btn-clay luxury-button px-6 py-3 rounded-xl flex items-center"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            ) : (
+              <CheckCircle className="w-5 h-5 mr-2" />
             )}
+            {loading ? 'Регистрация...' : 'Подтвердить регистрацию'}
+          </Button>
+        </>
+      }
+    >
+      {/* You are signing in as... (compact line) */}
+      <div className="mb-6 text-center">
+        <p className="text-white/80 text-sm">
+          Вы регистрируетесь как: <span className="text-white font-medium">{playerName || 'Не указано'}</span> • <span className="text-white/70">{playerContact || 'Контакт не указан'}</span>
+        </p>
+        <p className="text-gold-accent/80 text-xs mt-1">
+          {user ? 'Участник клуба' : 'Гость'}
+        </p>
+      </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button
-                onClick={handleConfirmRegistration}
-                disabled={loading || (!user && !guestData)}
-                className="btn-clay luxury-button flex-1"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                )}
-                {loading ? 'Регистрация...' : 'Подтвердить регистрацию'}
-              </Button>
-              
-              <Button
-                onClick={onClose}
-                disabled={loading}
-                className="btn-glass"
-              >
-                Отмена
-              </Button>
+      {/* Tournament Details - Glass Cards */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Tournament Summary Glass Card */}
+        <div className="glassmorphic-panel border border-white/10 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+            📅 Информация о турнире
+          </h3>
+          <div className="space-y-3">
+            <div>
+              <span className="text-white/70 text-sm">Название:</span>
+              <p className="text-white font-medium">{tournament.name}</p>
             </div>
-
-            {(!user && !guestData) && (
-              <div className="mt-4 text-center">
-                <p className="text-gray-400 text-sm">
-                  Для регистрации необходимо войти в систему или заполнить гостевую форму
-                </p>
-              </div>
-            )}
+            <div>
+              <span className="text-white/70 text-sm">Дата и время:</span>
+              <p className="text-white">{formatDate(tournament.tournament_date)}</p>
+              <p className="text-white">{formatTime(tournament.tournament_date)}</p>
+            </div>
+            <div>
+              <span className="text-white/70 text-sm">Формат:</span>
+              <p className="text-white">{tournament.settings_json?.tournament_format || 'Стандартный'}</p>
+            </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+
+        {/* Buy-in & Rules Glass Card */}
+        <BuyInSummary 
+          buyInSettings={tournament.settings_json?.buy_in_settings}
+          tournamentType={tournament.settings_json?.tournament_type}
+          buyInCost={tournament.settings_json?.buy_in_cost}
+        />
+      </div>
+
+      {/* Blinds Structure - Full width glass card */}
+      <div className="mt-6">
+        <BlindsStructureViewer 
+          blindsStructure={tournament.settings_json?.blinds_structure}
+        />
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mt-6 bg-red-500/20 border border-red-500/50 rounded-xl p-4 flex items-center">
+          <AlertCircle className="w-5 h-5 text-red-300 mr-3 flex-shrink-0" />
+          <p className="text-red-300">{error}</p>
+        </div>
+      )}
+
+      {/* Info message for users without data */}
+      {(!user && !guestData) && (
+        <div className="mt-6 text-center">
+          <p className="text-gray-400 text-sm">
+            Для регистрации необходимо войти в систему или заполнить гостевую форму
+          </p>
+        </div>
+      )}
+    </ModalBase>
   );
 }

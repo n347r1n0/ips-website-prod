@@ -157,7 +157,7 @@ body {
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
       0 10px 0 rgba(0, 0, 0, 0.4),
       inset 0 2px 0 rgba(255, 255, 255, 0.2),
       0 8px 25px rgba(0, 0, 0, 0.6),
@@ -166,7 +166,7 @@ body {
   }
   .btn-primary:active {
     transform: translateY(4px);
-    box-shadow: 
+    box-shadow:
       0 4px 0 rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 2px 10px rgba(0, 0, 0, 0.4);
@@ -177,7 +177,7 @@ body {
     @apply rounded-xl text-white;
     background: linear-gradient(145deg, #D4AF37, #B8941F);
     border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow: 
+    box-shadow:
       0 6px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
       0 4px 15px rgba(0, 0, 0, 0.4),
@@ -185,7 +185,7 @@ body {
   }
   .btn-secondary:hover {
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       0 7px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.25),
       0 5px 20px rgba(0, 0, 0, 0.5),
@@ -194,7 +194,7 @@ body {
   }
   .btn-secondary:active {
     transform: translateY(2px);
-    box-shadow: 
+    box-shadow:
       0 1px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
@@ -204,7 +204,7 @@ body {
     @apply rounded-xl text-white;
     background: linear-gradient(145deg, #dc2626, #b91c1c);
     border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow: 
+    box-shadow:
       0 6px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       0 4px 15px rgba(0, 0, 0, 0.4),
@@ -212,7 +212,7 @@ body {
   }
   .btn-danger:hover {
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       0 7px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
       0 5px 20px rgba(0, 0, 0, 0.5),
@@ -221,7 +221,7 @@ body {
   }
   .btn-danger:active {
     transform: translateY(3px);
-    box-shadow: 
+    box-shadow:
       0 3px 0 rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 1px 8px rgba(0, 0, 0, 0.4);
@@ -232,7 +232,7 @@ body {
     @apply rounded-xl text-white/90;
     background: linear-gradient(145deg, #3c3c40, #2c2c30);
     border: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 
+    box-shadow:
       0 3px 0 rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 2px 6px rgba(0, 0, 0, 0.25);
@@ -240,7 +240,7 @@ body {
   .btn-neutral:hover {
     @apply text-white;
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       0 4px 0 rgba(0, 0, 0, 0.3),
       0 3px 8px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -248,7 +248,7 @@ body {
   }
   .btn-neutral:active {
     transform: translateY(1px);
-    box-shadow: 
+    box-shadow:
       0 1px 0 rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
@@ -260,14 +260,14 @@ body {
     border-radius: 1.5rem; /* Larger border radius for mother panels */
     position: relative;
     z-index: 10;
-    box-shadow: 
+    box-shadow:
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
       inset -8px -8px 16px rgba(255, 255, 255, 0.03),
       0 8px 32px rgba(0, 0, 0, 0.3);
   }
   .neumorphic-panel:hover {
     border-color: rgba(212, 175, 55, 0.2);
-    box-shadow: 
+    box-shadow:
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
       inset -8px -8px 16px rgba(255, 255, 255, 0.04),
       0 12px 40px rgba(0, 0, 0, 0.35);
@@ -278,7 +278,7 @@ body {
     @apply bg-black/50 backdrop-blur-xl border border-white/15;
     position: relative;
     z-index: 20; /* Higher z-index to prevent transparency bleed */
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
@@ -315,17 +315,17 @@ body {
     height: 100dvh; /* Dynamic viewport height for mobile */
     z-index: 40; /* Lower z-index so registration modals can appear on top */
     border-radius: 0; /* Full screen modals have no border radius */
-    box-shadow: 
+    box-shadow:
       inset 8px 8px 16px rgba(0, 0, 0, 0.4),
       inset -8px -8px 16px rgba(255, 255, 255, 0.03);
   }
-  
+
   /* Ensure proper spacing for modal content */
   .neumorphic-container .spacing-content > * {
     margin-left: 0;
     margin-right: 0;
   }
-  
+
   .neumorphic-inset {
     @apply shadow-[inset_6px_6px_12px_rgba(0,0,0,0.4),_inset_-6px_-6px_12px_rgba(255,255,255,0.03)];
   }
@@ -369,20 +369,20 @@ body {
   .luxury-button-conic:hover,
   .luxury-button-elliptic:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
       0 10px 0 rgba(0, 0, 0, 0.4),
       inset 0 2px 0 rgba(255, 255, 255, 0.2),
       0 8px 25px rgba(0, 0, 0, 0.6),
       0 6px 20px rgba(0, 113, 147, 0.4);
   }
-  
+
   .luxury-button:active,
   .luxury-button-linear:active,
   .luxury-button-linear3:active,
   .luxury-button-conic:active,
   .luxury-button-elliptic:active {
     transform: translateY(4px);
-    box-shadow: 
+    box-shadow:
       0 4px 0 rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 2px 10px rgba(0, 0, 0, 0.4);
@@ -398,7 +398,7 @@ body {
     font-weight: 600;
     @apply text-white rounded-2xl;
     border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow: 
+    box-shadow:
       0 8px 0 rgba(0, 0, 0, 0.4),
       inset 0 2px 0 rgba(255, 255, 255, 0.15),
       0 6px 20px rgba(0, 0, 0, 0.5),
@@ -413,7 +413,7 @@ body {
     letter-spacing: 0.05em;
     font-size: 0.875rem;
   }
-  
+
   /* Градиенты (только background) — меняешь имя класса и всё */
   .luxury-button {                           /* твой текущий дефолт */
     background: linear-gradient(145deg, #00A29C, #007193);
@@ -441,11 +441,11 @@ body {
   .heading-lg { @apply text-2xl font-brand text-white leading-tight; }
   .heading-md { @apply text-xl font-brand text-white leading-snug; }
   .heading-sm { @apply text-lg font-brand text-white leading-normal; }
-  
+
   .text-body { @apply text-base text-white/90 leading-relaxed; }
   .text-secondary { @apply text-sm text-white/70 leading-normal; }
   .text-caption { @apply text-xs text-white/60 leading-tight; }
-  
+
   .spacing-section { @apply space-y-6; }
   .spacing-content { @apply space-y-4; }
   .spacing-tight { @apply space-y-2; }
@@ -471,12 +471,12 @@ body {
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
     transition: all 0.3s ease;
   }
-  
+
   .telegram-widget-container iframe:hover {
     filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
     transform: translateY(-1px);
   }
-  
+
   /* Класс для контроля заливки watermark */
   .watermark-number-filled {
     font-family: 'Syne', sans-serif;
@@ -487,7 +487,7 @@ body {
     letter-spacing: -0.05em;
     opacity: 0.35; /* Отдельное управление прозрачностью заливки */
   }
-  
+
   .watermark-number-outline {
     font-family: 'Syne', sans-serif;
     font-weight: 900;

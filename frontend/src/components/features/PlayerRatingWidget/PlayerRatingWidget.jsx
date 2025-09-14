@@ -130,11 +130,12 @@ function FullRatingModal({ isOpen, onClose, players, onPlayerClick, onAchievemen
       onClose={onClose}
       title="Полный рейтинг клуба"
       subtitle="Кликните на заголовок столбца для сортировки"
+      priority={true}
     >
 
         <div className="overflow-auto">
           <table className="w-full">
-                <thead className="sticky top-0 bg-black/70 backdrop-blur-sm">
+                <thead className="sticky top-0 bg-black/70 backdrop-blur-sm z-10">
                   <tr className="text-left text-white/80 border-b border-white/20">
                     <th 
                       className="p-3 cursor-pointer hover:bg-white/10 transition-colors"
@@ -266,6 +267,7 @@ function PlayerModal({ player, isOpen, onClose }) {
       onClose={onClose}
       title={`${player.name} ${player.surname[0]}.`}
       subtitle={`"${player.nickname}"`}
+      priority={true}
     >
       <div className="spacing-content max-w-2xl mx-auto">
         <div className="text-center mb-8">
@@ -404,7 +406,7 @@ export function PlayerRatingWidget() {
           // Табличный вид
           <div className="h-96 overflow-y-auto pr-2">
             <table className="w-full">
-              <thead className="sticky top-0 bg-black/50 backdrop-blur-sm">
+              <thead className="sticky top-0 bg-black/50 backdrop-blur-sm z-10">
                 <tr className="text-left text-white/70 text-sm border-b border-white/10">
                   <th className="p-2">#</th>
                   <th className="p-2">Игрок</th>
@@ -555,7 +557,7 @@ export function PlayerRatingWidget() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed z-50 glassmorphic-panel rounded-lg p-3 pointer-events-none border border-gold-accent/30"
+            className="fixed z-[70] glassmorphic-panel rounded-lg p-3 pointer-events-none border border-gold-accent/30"
             style={{ 
               left: tooltipPosition.x + 10, 
               top: tooltipPosition.y - 60,

@@ -102,10 +102,12 @@ export function HomePage({ onAuthModalOpen }) {
         </div>
         <GoldLine />
         <div id="user-paths-section">
-          <UserPathsSection
-            onAuthModalOpen={onAuthModalOpen}
-            onGuestModalOpen={openGuestModal}
-          />
+          <div id="userpaths">
+            <UserPathsSection
+              onAuthModalOpen={onAuthModalOpen}
+              onGuestModalOpen={openGuestModal}
+            />
+          </div>
         </div>
         <GoldLine />
         <div id="calendar">
