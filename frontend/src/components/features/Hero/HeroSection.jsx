@@ -3,10 +3,15 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Play } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths }) {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   function GoldLine() {
     return <div className="art-deco-divider" />;
@@ -60,14 +65,33 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths
             </p>
             <Button
               onClick={() => {
-                // Direct call to the passed prop function
-                if (scrollToUserPaths) {
-                  scrollToUserPaths();
+                if (user) {
+                  // Authenticated user - scroll to calendar
+                  if (location.pathname !== '/') {
+                    // Not on home page, navigate to home with calendar anchor
+                    navigate('/#calendar');
+                  } else {
+                    // On home page, smooth scroll to calendar
+                    const calendarElement = document.getElementById('calendar');
+                    if (calendarElement) {
+                      calendarElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }
                 } else {
-                  // Fallback: scroll directly
-                  const element = document.getElementById('user-paths-section');
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  // Unauthenticated user - scroll to user paths
+                  if (location.pathname !== '/') {
+                    // Not on home page, navigate to home with user paths anchor
+                    navigate('/#userpaths');
+                  } else {
+                    // On home page, use provided function or fallback
+                    if (scrollToUserPaths) {
+                      scrollToUserPaths();
+                    } else {
+                      const userPathsElement = document.getElementById('user-paths-section');
+                      if (userPathsElement) {
+                        userPathsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }
                   }
                 }
               }}

@@ -1,6 +1,7 @@
 // src/components/ui/ModalBase/ModalBase.jsx
 
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +16,8 @@ export function ModalBase({
   footerActions,
   className = '',
   fullScreen = false, // Add fullScreen prop
+  priority = false, // Add priority prop for high z-index portal mounting
+  usePortal = false, // Add portal prop
   ...props
 }) {
   // Lock background scroll when modal is open
@@ -97,7 +100,7 @@ export function ModalBase({
     </>
   );
 
-  return (
+  const modalMarkup = (
     <AnimatePresence>
       {fullScreen ? (
         /* Full-screen neumorphic container */
@@ -117,7 +120,13 @@ export function ModalBase({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-40"
+          className={`fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 ${priority ? 'z-[60]' : 'z-40'}`}
+          style={{
+            paddingTop: 'max(1rem, env(safe-area-inset-top))',
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+            paddingRight: 'max(1rem, env(safe-area-inset-right))'
+          }}
           onClick={onClose}
         >
           {/* Rounded neumorphic mother panel */}
@@ -136,4 +145,11 @@ export function ModalBase({
       )}
     </AnimatePresence>
   );
+
+  // Use portal if specified or if priority is true
+  if ((usePortal || priority) && typeof window !== 'undefined') {
+    return createPortal(modalMarkup, document.body);
+  }
+
+  return modalMarkup;
 }
