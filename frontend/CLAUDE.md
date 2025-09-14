@@ -69,7 +69,7 @@ ips-website/
 
 * **Frontend:** React, Vite, Tailwind CSS, Framer Motion, React Router, Zustand  
 * **Backend:** Supabase (PostgreSQL, GoTrue Auth), Supabase Edge Functions (Deno, TypeScript)  
-* **JS Client:** @supabase/supabase-js  
+* **JS Client:** @supabase/supabase-js v2.55.0 (used in both frontend and Edge Functions) 
 * **Timer App:** Python, PySide6 (no code access here)
 
 ## **3\. Development Workflow & Architecture**
@@ -102,6 +102,27 @@ ips-website/
   * **Admin client** (init with SERVICE\_ROLE\_KEY) — used to perform privileged mutations (UPDATE/INSERT/DELETE) after permission check.  
 * Main functions today: telegram-auth-callback, mock-tournament-ender.
 
+---
+### Telegram callback – operational notes
+
+* Import supabase client using an **import spec**:
+  `import { createClient } from 'npm:@supabase/supabase-js@2.55.0'`
+* Expected secrets (Edge → Secrets):
+
+  * `SB_URL`, `SB_ANON_KEY`, `SB_SERVICE_ROLE_KEY`
+    *(fallbacks exist for `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)*
+  * `TELEGRAM_CLIENT_SECRET` *(bot token for signature verification)*
+  * `SHADOW_PASSWORD_SECRET` *(salt for deterministic password `shadow:<telegram_id>`)*
+  * `DEBUG_TELEGRAM_BYPASS` = `"false"` in production
+* **Verify JWT:** disabled by default. If you enable it, callers must send both headers:
+
+  * `Authorization: Bearer <ANON_KEY>`
+  * `apikey: <ANON_KEY>`
+* **CORS allowlist (prod):**
+  `https://ipoker.style`, `https://www.ipoker.style`, `https://n347r1n0.github.io`, `http://localhost:5173`
+* The function returns a **session\_token**; the client must set it via `supabase.auth.setSession(tokens)`.
+---
+
 ## **6\. Rules & Interaction Protocol**
 
 * Keep changes localized; follow the existing patterns and conventions.  
@@ -116,7 +137,8 @@ ips-website/
 * **tournaments** — main events table. Includes:  
   * status with lifecycle constraint (e.g., scheduled, registration\_open, completed, …) enforced via CHECK.  
   * tournament\_date, settings\_json, and other metadata.  
-* **club\_members** — user profiles linked to auth.users, includes role (member/admin), nickname, etc.  
+* **club\_members** — user profiles linked to auth.users, includes role (member/admin), nickname, etc. 
+  * Profile creation/update happens **via trigger** `auth.users → on_auth_user_created → public.handle_new_auth_user()` (SECURITY DEFINER).
 * **tournament\_participants** — links users/guests to tournaments. Written at registration; later updated with final\_place, rating\_points.  
 * **global\_player\_ratings\_v1 (VIEW)** — global leaderboard aggregating rating\_points across all completed tournaments (for both members and guests).
 
@@ -134,8 +156,16 @@ Auth methods supported:
 * **Telegram Sign-In (Edge Function flow)**  
   * Client posts Telegram widget payload to /functions/v1/telegram-auth-callback.  
   * Function verifies HMAC and creates/retrieves the user with shadow credentials:  
-    * email \= tg\_\<telegram\_id\>@telegram.user, password is deterministic from telegram\_id.  
-  * Function returns session tokens; client sets them via supabase.auth.setSession(tokens).
+    * Checks freshness of `auth_date` and verifies HMAC using `TELEGRAM_CLIENT_SECRET`.
+  * If the user doesn’t exist, the function creates it via `auth.admin.createUser()` with metadata; this triggers insertion into `public.club_members` via the `on_auth_user_created` trigger.
+  * The function then performs a password grant with:
+
+    * `email: tg_<telegram_id>@telegram.user`
+    * `password: <SHADOW_PASSWORD_SECRET>:<telegram_id>` - password is deterministic
+  * A `session_token` is returned; the client applies it using `supabase.auth.setSession(tokens)`.
+
+---
+
 
 **Auth State Management & Synchronization**
 
@@ -240,6 +270,12 @@ if (\!me || me.role \!== 'admin') return new Response('Forbidden', { status: 403
   * **Root cause:** Concurrent auth attempts from multiple devices/sessions causing state desynchronization.
   * **Fix:** Implemented AuthSynchronizer with device fingerprinting, session deduplication, and controlled state changes.
   * **Status:** Significantly improved but may need further refinement for edge cases.
+* **Missing `club_members` row after Telegram auth (fixed)**
+  * **Root cause:** missing `on_auth_user_created` trigger or incorrect privileges on `handle_new_auth_user`.
+  * **Fix:** restored the trigger, confirmed `SECURITY DEFINER`, and verified insertion into `public.club_members`.
+
+
+
 
 ## **10\. Current System Status**
 
@@ -264,6 +300,8 @@ if (\!me || me.role \!== 'admin') return new Response('Forbidden', { status: 403
 * Check isAuthInProgress() before starting new auth operations.
 * All DB changes via migrations.  
 * In edge functions, use the Two-Client Pattern.
+* Edge Functions: use `SB_*` secrets (with fallback to `SUPABASE_*`), plus `TELEGRAM_CLIENT_SECRET` and `SHADOW_PASSWORD_SECRET`; keep `DEBUG_TELEGRAM_BYPASS=false` in production.
+
 
 **⚠️ Known Issues:**
 
