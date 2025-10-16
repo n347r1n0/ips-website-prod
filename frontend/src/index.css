@@ -1,4 +1,5 @@
 /* src/index.css */
+@import './ui/tokens.css'; /* tokens: imported once for PROD surfaces */
 
 /* Директивы @tailwind */
 @tailwind base;
@@ -42,7 +43,7 @@ body {
   /* Base Shapes - Form Only */
   
   /* Claymorphic shape - 3D depth with box-shadow blur */
-  .btn-clay {
+.btn-clay {
     @apply inline-flex items-center justify-center;
     @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
@@ -53,33 +54,33 @@ body {
     text-transform: uppercase;
     padding: 0.75rem 1.5rem;
     min-height: 44px;
-    border-radius: 1rem; /* medium radius */
-    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: var(--r-l); /* tokenized radius */
+    border: var(--clay-border);
     transition: all 0.2s ease;
     /* 3D claymorphic depth with box-shadow blur */
-    box-shadow: 
-      0 8px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15),
-      0 6px 20px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      var(--clay-ledge),
+      var(--clay-inset-uplight),
+      var(--clay-shadow);
   }
   
   .btn-clay:hover {
     /* No transforms - avoid mobile jitter */
-    box-shadow: 
-      0 10px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2),
-      0 8px 25px rgba(0, 0, 0, 0.6);
+    box-shadow:
+      var(--clay-hover-ledge),
+      var(--clay-hover-inset),
+      var(--clay-hover-shadow);
   }
   
   .btn-clay:active {
-    box-shadow: 
-      0 4px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 2px 10px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      var(--clay-active-ledge),
+      var(--clay-active-inset),
+      var(--clay-active-shadow);
   }
   
   /* Glass shape - translucent with backdrop-filter */
-  .btn-glass {
+.btn-glass {
     @apply inline-flex items-center justify-center;
     @apply focus:outline-none focus:ring-2 focus:ring-white/50;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
@@ -90,11 +91,11 @@ body {
     text-transform: uppercase;
     padding: 0.75rem 1.5rem;
     min-height: 44px;
-    border-radius: 0.5rem; /* squarer */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    color: white;
+    border-radius: var(--r-s); /* tokenized radius */
+    border: var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    color: var(--fg-strong);
     transition: all 0.2s ease;
   }
   
@@ -275,16 +276,20 @@ body {
 
     /* Glassmorphic panels for content areas (auth, tournament cards, etc.) */
   .glassmorphic-panel {
-    @apply bg-black/50 backdrop-blur-xl border border-white/15;
+    /* tokenized glass panel used by Toast */
+    @apply border; /* keep border width via Tailwind */
+    background: var(--backdrop-heavy);
+    backdrop-filter: blur(var(--glass-blur));
+    border-color: var(--glass-border-weak);
     position: relative;
     z-index: 20; /* Higher z-index to prevent transparency bleed */
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      var(--panel-shadow),
+      var(--panel-shadow-inset);
   }
   .glassmorphic-panel:hover {
     @apply border-white/20;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--panel-hover-bg);
   }
 
     /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
