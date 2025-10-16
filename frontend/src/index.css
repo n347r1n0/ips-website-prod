@@ -39,9 +39,9 @@ body {
 /* === НАШИ КАСТОМНЫЕ КОМПОНЕНТЫ === */
 @layer components {
   /* === DUMB BUTTON SYSTEM === */
-  
+
   /* Base Shapes - Form Only */
-  
+
   /* Claymorphic shape - 3D depth with box-shadow blur */
 .btn-clay {
     @apply inline-flex items-center justify-center;
@@ -63,7 +63,7 @@ body {
       var(--clay-inset-uplight),
       var(--clay-shadow);
   }
-  
+
   .btn-clay:hover {
     /* No transforms - avoid mobile jitter */
     box-shadow:
@@ -71,14 +71,14 @@ body {
       var(--clay-hover-inset),
       var(--clay-hover-shadow);
   }
-  
+
   .btn-clay:active {
     box-shadow:
       var(--clay-active-ledge),
       var(--clay-active-inset),
       var(--clay-active-shadow);
   }
-  
+
   /* Glass shape - translucent with backdrop-filter */
 .btn-glass {
     @apply inline-flex items-center justify-center;
@@ -98,30 +98,30 @@ body {
     color: var(--fg-strong);
     transition: all 0.2s ease;
   }
-  
+
   .btn-glass:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
   }
-  
+
   .btn-glass:active {
     background: rgba(255, 255, 255, 0.08);
   }
-  
+
   /* Colors/Gradients - Color Only (use on top of base shapes) */
-  
+
   /* Primary luxury button - blue-green linear gradient */
   .luxury-button {
     background: linear-gradient(145deg, #007193, #00A29C) !important;
     color: white;
   }
-  
+
   /* Conic gradient variant */
   .luxury-button-conic {
     background: conic-gradient(from 210deg at 50% 50%, #00A29C, #2dd4bf 50%, #007193) !important;
     color: white;
   }
-  
+
   /* Elliptic radial gradient variant */
   .luxury-button-elliptic {
     background: radial-gradient(120% 80% at 50% 50%, #00A29C 0%, #007193 100%) !important;
@@ -129,17 +129,17 @@ body {
   }
 
   /* Button sizes with proper padding */
-  .btn-sm { 
+  .btn-sm {
     @apply text-xs;
     padding: 0.5rem 1rem;
     min-height: 36px;
   }
-  .btn-md { 
+  .btn-md {
     @apply text-sm;
     padding: 0.75rem 1.5rem;
     min-height: 44px;
   }
-  .btn-lg { 
+  .btn-lg {
     @apply text-base;
     padding: 1rem 2rem;
     min-height: 52px;
@@ -150,7 +150,7 @@ body {
     @apply rounded-2xl text-white;
     background: linear-gradient(145deg, #007193, #00A29C);
     border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow: 
+    box-shadow:
       0 8px 0 rgba(0, 0, 0, 0.4),
       inset 0 2px 0 rgba(255, 255, 255, 0.15),
       0 6px 20px rgba(0, 0, 0, 0.5),
@@ -278,7 +278,7 @@ body {
   .glassmorphic-panel {
     /* tokenized glass panel used by Toast */
     @apply border; /* keep border width via Tailwind */
-    background: var(--backdrop-heavy);
+    background: var(--panel-bg);
     backdrop-filter: blur(var(--glass-blur));
     border-color: var(--glass-border-weak);
     position: relative;
@@ -292,12 +292,14 @@ body {
     background: var(--panel-hover-bg);
   }
 
-    /* === 👇 ДОБАВЛЯЕМ НОВЫЙ КЛАСС БЕЗ HOVER-ЭФФЕКТА 👇 === */
+    /* === 👇 Вариант без hover для галереи 👇 === */
   .gallery-card-panel {
-    @apply bg-black/50 backdrop-blur-xl border border-glass-border shadow-lg;
+    @apply border; /* только ширина */
+    background: var(--backdrop-heavy);
+    backdrop-filter: blur(var(--glass-blur));
+    border-color: var(--glass-border-weak);
+    box-shadow: var(--panel-shadow), var(--panel-shadow-inset);
   }
-
-
 
 
 

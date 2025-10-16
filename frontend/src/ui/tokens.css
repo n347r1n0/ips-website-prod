@@ -47,6 +47,10 @@
   --backdrop-heavy: rgba(0, 0, 0, 0.80);
   --backdrop-blur:  12px; /* equals backdrop-blur-md */
 
+  /* Glass panel base (used by .glassmorphic-panel) */
+  --panel-bg:        rgba(0, 0, 0, 0.5); /* parity with current PROD look */
+
+
   /* Clay button tokens (from index.css .btn-clay) */
   --clay-bg:     #171A20;
   --clay-shadow: 0 6px 20px rgba(0,0,0,0.5);
