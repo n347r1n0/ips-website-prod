@@ -12,6 +12,7 @@
   @font-face {
     font-family: 'Museo Cyrl';
     font-weight: 700;
+    font-display: swap;
     src: url('/fonts/exljbris - Museo Cyrl 700.otf') format('opentype');
   }
 }
@@ -95,17 +96,18 @@ body {
     border: var(--glass-border);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     color: var(--fg-strong);
     transition: all 0.2s ease;
   }
 
   .btn-glass:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--glass-hover-bg);
+    border-color: var(--glass-hover-border);
   }
 
   .btn-glass:active {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--glass-active-bg);
   }
 
   /* Colors/Gradients - Color Only (use on top of base shapes) */
@@ -280,6 +282,7 @@ body {
     @apply border; /* keep border width via Tailwind */
     background: var(--panel-bg);
     backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     border-color: var(--glass-border-weak);
     position: relative;
     z-index: 20; /* Higher z-index to prevent transparency bleed */
@@ -295,8 +298,9 @@ body {
     /* === 👇 Вариант без hover для галереи 👇 === */
   .gallery-card-panel {
     @apply border; /* только ширина */
-    background: var(--backdrop-heavy);
+    background: var(--panel-bg-strong);
     backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     border-color: var(--glass-border-weak);
     box-shadow: var(--panel-shadow), var(--panel-shadow-inset);
   }

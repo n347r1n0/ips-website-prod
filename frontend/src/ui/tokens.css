@@ -1,3 +1,5 @@
+/* src/ui/tokens.css */
+
 /* PROD tokens: core surfaces only (colors/shadows/radii/blur)
    Mirrors DEV structure but values match current PROD visuals.
    No side effects — variables only. */
@@ -25,6 +27,11 @@
   --glass-blur:   24px; /* equals backdrop-blur-xl */
   --glass-border-weak: rgba(255, 255, 255, 0.15);
 
+  /* Glass interaction */
+  --glass-hover-bg:    rgba(255, 255, 255, 0.15);
+  --glass-hover-border:rgba(255, 255, 255, 0.30);
+  --glass-active-bg:   rgba(255, 255, 255, 0.08);
+
   /* Dividers (map from border-white/5) */
   --divider-weak: rgba(255, 255, 255, 0.05);
 
@@ -49,7 +56,7 @@
 
   /* Glass panel base (used by .glassmorphic-panel) */
   --panel-bg:        rgba(0, 0, 0, 0.5); /* parity with current PROD look */
-
+  --panel-bg-strong: rgba(0, 0, 0, 0.6); /* slightly denser option */
 
   /* Clay button tokens (from index.css .btn-clay) */
   --clay-bg:     #171A20;
