@@ -1,4 +1,4 @@
-// src/components/ui/Button.jsx
+// src/components/ui/Button.dark.jsx
 
 export function Button({ children, className = '', style = {}, onMouseEnter, onMouseLeave, ...props }) {
   const isLuxuryButton = className.includes('luxury-button');

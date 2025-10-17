@@ -22,15 +22,21 @@ ips-website/
 │   │   │   │   │   ├── DeleteConfirmModal.jsx  
 │   │   │   │   │   ├── MockTimerModal.jsx  
 │   │   │   │   │   └── TournamentModal.jsx  
-│   │   │   │   ├── AtmosphereGallery/  
+│   │   │   │   ├── AtmosphereGallery/ 
+│   │   │   │   │   └── AtmosphereGallery.jsx  
 │   │   │   │   ├── Auth/  
 │   │   │   │   │   ├── AuthModal.jsx  
 │   │   │   │   │   ├── TelegramLoginWidget.jsx  
 │   │   │   │   │   └── TelegramLoginRedirect.jsx  
-│   │   │   │   ├── FAQ/  
-│   │   │   │   ├── Hero/  
-│   │   │   │   ├── PlayerRatingWidget/  
+│   │   │   │   ├── FAQ/
+│   │   │   │   │   └── FAQ.jsx
+│   │   │   │   ├── Hero/
+│   │   │   │   │   └── HeroSection.jsx
+│   │   │   │   ├── PlayerRatingWidget/
+│   │   │   │   │   └── PlayerRatingWidget.jsx
 │   │   │   │   ├── RegistrationForm/  
+│   │   │   │   │   ├── GuestFormModal.jsx
+│   │   │   │   │   └── RegistrationForm.jsx
 │   │   │   │   ├── TournamentCalendar/  
 │   │   │   │   │   ├── BlindsStructureViewer.jsx  
 │   │   │   │   │   ├── BuyInSummary.jsx  
@@ -40,9 +46,13 @@ ips-website/
 │   │   │   │   │   ├── TournamentListForDay.jsx  
 │   │   │   │   │   ├── TournamentResultsModal.jsx  
 │   │   │   │   │   └── UpcomingTournamentsModal.jsx  
-│   │   │   │   └── ValueProps/  
+│   │   │   │   ├── UserPaths/  
+│   │   │   │   │   └── UserPathsSection.jsx
+│   │   │   │   └── ValueProps/ 
+│   │   │   │   │   ├── FeatureCard.jsx
+│   │   │   │   │   └── ValuePropsSection.jsx
 │   │   │   ├── layout/ (Header, Footer, Section, etc.)  
-│   │   │   └── ui/ (AuthErrorDisplay, Button, GlassPanel, Toast)  
+│   │   │   └── ui/ (AuthErrorDisplay, Button, GlassPanel, Toast, etc.)  
 │   │   ├── contexts/ (AuthContext.jsx)  
 │   │   ├── hooks/ (useAuthVersion.js, useMediaQuery.js)  
 │   │   ├── lib/  
@@ -51,7 +61,8 @@ ips-website/
 │   │   │   ├── sessionUtils.js  
 │   │   │   ├── preAuthCleanup.js  
 │   │   │   ├── validatedStorage.js  
-│   │   │   └── iosSafariUtils.js  
+│   │   │   ├── iosSafariUtils.js  
+│   │   │   └── , etc.
 │   │   ├── pages/ (HomePage, AdminDashboardPage, DashboardPage, TelegramCallbackPage)  
 │   │   ├── App.jsx, main.jsx, index.css  
 │   ├── tailwind.config.js, postcss.config.js, vite.config.js  

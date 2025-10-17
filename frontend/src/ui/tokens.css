@@ -1,0 +1,92 @@
+/* src/ui/tokens.css */
+
+/* PROD tokens: core surfaces only (colors/shadows/radii/blur)
+   Mirrors DEV structure but values match current PROD visuals.
+   No side effects — variables only. */
+
+:root {
+  /* Foreground (kept minimal for this phase) */
+  --fg:        #ffffffcc; /* white/80 */
+  --fg-strong: #ffffffff; /* white */
+  --fg-weak:   #ffffff99; /* white/60 */
+
+  /* Background tiers (used by glass contrasts if needed) */
+  --bg-1: #363333; /* current body bg */
+  --bg-2: #3a3737; /* slightly elevated */
+
+  /* Brand & semantic (align with DEV naming) */
+  --brand:  #00A29C; /* primary gradient family present in PROD */
+  --gold:   #D4AF37; /* gold accent used in dividers */
+  --success:#22C55E; /* Tailwind green-500 */
+  --danger: #EF4444; /* Tailwind red-500 */
+  --info:   #38BDF8; /* Tailwind sky-400 */
+
+  /* Glass tokens (map from bg-white/10, border-white/20, blur-xl) */
+  --glass-bg:     rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.20);
+  --glass-blur:   24px; /* equals backdrop-blur-xl */
+  --glass-border-weak: rgba(255, 255, 255, 0.15);
+
+  /* Glass interaction */
+  --glass-hover-bg:    rgba(255, 255, 255, 0.15);
+  --glass-hover-border:rgba(255, 255, 255, 0.30);
+  --glass-active-bg:   rgba(255, 255, 255, 0.08);
+
+  /* Dividers (map from border-white/5) */
+  --divider-weak: rgba(255, 255, 255, 0.05);
+
+  /* Radii (map to Tailwind scales for consistency) */
+  --r-s:   0.5rem;  /* rounded-lg */
+  --r-m:   0.75rem; /* rounded-xl */
+  --r-l:   1rem;    /* rounded-2xl */
+  --r-2xl: 1rem;    /* alias to match current usage */
+
+  /* Shadows (approximate Tailwind presets for parity) */
+  --shadow-s: 0 2px 10px rgba(0,0,0,0.25);
+  --shadow-m: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.25);
+  --shadow-l: 0 25px 50px -12px rgba(0,0,0,0.35);
+
+  /* Focus rings */
+  --ring:       0 0 0 2px rgba(255,255,255,0.5);
+  --ring-brand: 0 0 0 2px var(--brand);
+
+  /* Modal backdrops (map from bg-black/80) */
+  --backdrop-heavy: rgba(0, 0, 0, 0.80);
+  --backdrop-blur:  12px; /* equals backdrop-blur-md */
+
+  /* Glass panel base (used by .glassmorphic-panel) */
+  --panel-bg:        rgba(0, 0, 0, 0.5); /* parity with current PROD look */
+  --panel-bg-strong: rgba(0, 0, 0, 0.6); /* slightly denser option */
+
+  /* Clay button tokens (from index.css .btn-clay) */
+  --clay-bg:     #171A20;
+  --clay-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  --clay-inset-uplight: inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  --clay-ledge:  0 8px 0 rgba(0, 0, 0, 0.4);
+  --clay-pressed: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --clay-border: 2px solid rgba(0, 0, 0, 0.30);
+  --clay-hover-ledge: 0 10px 0 rgba(0, 0, 0, 0.4);
+  --clay-hover-inset: inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  --clay-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  --clay-active-ledge: 0 4px 0 rgba(0, 0, 0, 0.5);
+  --clay-active-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --clay-active-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+
+  /* Toast semantic surfaces (match current Tailwind utilities in Toast.jsx) */
+  --toast-success-bg:    rgba(34, 197, 94, 0.20);  /* green-500/20 */
+  --toast-success-border:rgba(34, 197, 94, 0.50);  /* green-500/50 */
+  --toast-success-fg:    #86efac;                  /* green-300 */
+
+  --toast-error-bg:      rgba(239, 68, 68, 0.20);  /* red-500/20 */
+  --toast-error-border:  rgba(239, 68, 68, 0.50);  /* red-500/50 */
+  --toast-error-fg:      #fca5a5;                  /* red-300 */
+
+  --toast-info-bg:       rgba(59, 130, 246, 0.20); /* blue-500/20 */
+  --toast-info-border:   rgba(59, 130, 246, 0.50); /* blue-500/50 */
+  --toast-info-fg:       #93c5fd;                  /* blue-300 */
+
+  /* Glass panel tokens used by Toast container */
+  --panel-shadow:        0 8px 32px rgba(0, 0, 0, 0.3);
+  --panel-shadow-inset:  inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --panel-hover-bg:      rgba(0, 0, 0, 0.45);
+}

@@ -67,9 +67,9 @@ function Toast({ toast, onRemove }) {
   };
   
   const colors = {
-    success: 'bg-green-500/20 border-green-500/50 text-green-300',
-    error: 'bg-red-500/20 border-red-500/50 text-red-300',
-    info: 'bg-blue-500/20 border-blue-500/50 text-blue-300',
+    success: 'bg-[--toast-success-bg] border-[--toast-success-border] text-[--toast-success-fg]',
+    error: 'bg-[--toast-error-bg] border-[--toast-error-border] text-[--toast-error-fg]',
+    info: 'bg-[--toast-info-bg] border-[--toast-info-border] text-[--toast-info-fg]',
   };
 
   const Icon = icons[type] || AlertCircle;
