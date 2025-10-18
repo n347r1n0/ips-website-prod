@@ -8,18 +8,21 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   label-and-ping:
     runs-on: ubuntu-latest
     steps:
       - name: Add review label
+        if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: codex:review
 
       - name: Ping Codex to review
+        if: ${{ !github.event.pull_request.draft }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
