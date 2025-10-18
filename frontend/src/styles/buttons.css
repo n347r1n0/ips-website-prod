@@ -1,0 +1,217 @@
+/* src/styles/buttons.css — Button system scoped */
+
+@layer components {
+  /* === DUMB BUTTON SYSTEM === */
+
+  /* Base Shapes - Form Only */
+
+  /* Claymorphic shape - 3D depth with box-shadow blur */
+  .btn-clay {
+    @apply inline-flex items-center justify-center;
+    @apply focus:outline-none focus:ring-2 focus:ring-gold-accent/50;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    border-radius: var(--r-l); /* tokenized radius */
+    border: var(--clay-border);
+    transition: all 0.2s ease;
+    /* 3D claymorphic depth with box-shadow blur */
+    box-shadow:
+      var(--clay-ledge),
+      var(--clay-inset-uplight),
+      var(--clay-shadow);
+  }
+
+  .btn-clay:hover {
+    /* No transforms - avoid mobile jitter */
+    box-shadow:
+      var(--clay-hover-ledge),
+      var(--clay-hover-inset),
+      var(--clay-hover-shadow);
+  }
+
+  .btn-clay:active {
+    box-shadow:
+      var(--clay-active-ledge),
+      var(--clay-active-inset),
+      var(--clay-active-shadow);
+  }
+
+  /* Glass shape - translucent with backdrop-filter */
+  .btn-glass {
+    @apply inline-flex items-center justify-center;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    border-radius: var(--r-s); /* tokenized radius */
+    border: var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    color: var(--fg-strong);
+    transition: all 0.2s ease;
+  }
+
+  .btn-glass:hover {
+    background: var(--glass-hover-bg);
+    border-color: var(--glass-hover-border);
+  }
+
+  .btn-glass:active {
+    background: var(--glass-active-bg);
+  }
+
+  /* Button sizes with proper padding */
+  .btn-sm {
+    @apply text-xs;
+    padding: 0.5rem 1rem;
+    min-height: 36px;
+  }
+  .btn-md {
+    @apply text-sm;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+  }
+  .btn-lg {
+    @apply text-base;
+    padding: 1rem 2rem;
+    min-height: 52px;
+  }
+
+  /* Primary claymorphic action button with Inter styling */
+  .btn-primary {
+    @apply rounded-2xl text-white;
+    background: var(--btn-primary-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-primary-shadow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--btn-primary-hover-shadow);
+    background: var(--btn-primary-hover-bg);
+  }
+  .btn-primary:active {
+    transform: translateY(4px);
+    box-shadow: var(--btn-primary-active-shadow);
+  }
+
+  /* Gold Secondary - Important secondary actions */
+  .btn-secondary {
+    @apply rounded-xl text-white;
+    background: var(--btn-secondary-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-secondary-shadow);
+  }
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--btn-secondary-hover-shadow);
+    background: var(--btn-secondary-hover-bg);
+  }
+  .btn-secondary:active {
+    transform: translateY(2px);
+    box-shadow: var(--btn-secondary-active-shadow);
+  }
+
+  /* Danger claymorphic button with Inter styling */
+  .btn-danger {
+    @apply rounded-xl text-white;
+    background: var(--btn-danger-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-danger-shadow);
+  }
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--btn-danger-hover-shadow);
+    background: var(--btn-danger-hover-bg);
+  }
+  .btn-danger:active {
+    transform: translateY(3px);
+    box-shadow: var(--btn-danger-active-shadow);
+  }
+
+  /* Neutral Gray - Utility actions (close, back) */
+  .btn-neutral {
+    @apply rounded-xl text-white/90;
+    background: var(--btn-neutral-bg);
+    border: var(--neutral-border);
+    box-shadow: var(--btn-neutral-shadow);
+  }
+  .btn-neutral:hover {
+    @apply text-white;
+    transform: translateY(-1px);
+    box-shadow: var(--btn-neutral-hover-shadow);
+    background: var(--btn-neutral-hover-bg);
+  }
+  .btn-neutral:active {
+    transform: translateY(1px);
+    box-shadow: var(--btn-neutral-active-shadow);
+  }
+
+  /* Luxury button variants — backgrounds switch via tokens; depth via tokens */
+  /* Base visual set (no form) */
+  .luxury-button,
+  .luxury-button-linear,
+  .luxury-button-linear3,
+  .luxury-button-conic,
+  .luxury-button-elliptic {
+    @apply text-white font-bold uppercase tracking-wider border transition-all duration-300;
+    border: var(--clay-border);
+  }
+  .luxury-button:hover,
+  .luxury-button-linear:hover,
+  .luxury-button-linear3:hover,
+  .luxury-button-conic:hover,
+  .luxury-button-elliptic:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--btn-primary-hover-shadow);
+  }
+  .luxury-button:active,
+  .luxury-button-linear:active,
+  .luxury-button-linear3:active,
+  .luxury-button-conic:active,
+  .luxury-button-elliptic:active {
+    transform: translateY(4px);
+    box-shadow: var(--btn-primary-active-shadow);
+  }
+
+  /* Enhanced claymorphic structure for luxury buttons */
+  .luxury-button,
+  .luxury-button-linear,
+  .luxury-button-linear3,
+  .luxury-button-conic,
+  .luxury-button-elliptic {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    @apply text-white rounded-2xl;
+    border: var(--clay-border);
+    box-shadow: var(--btn-primary-shadow);
+    transition: all 0.2s ease;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+  }
+
+  /* Gradient backgrounds — tokens only */
+  .luxury-button        { background: var(--luxury-grad-default); }
+  .luxury-button-linear { background: var(--luxury-grad-linear); }
+  .luxury-button-linear3{ background: var(--luxury-grad-linear3); }
+  .luxury-button-conic  { background: var(--luxury-grad-conic); }
+  .luxury-button-elliptic { background: var(--luxury-grad-elliptic); }
+}
+
