@@ -52,7 +52,7 @@ export function ModalBase({
     <>
       {/* Fixed Header */}
       {(title || headerActions) && (
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-[--divider-weak]">
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-[var(--divider-weak)]">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 pr-3 sm:pr-4">
               {title && (
@@ -91,7 +91,7 @@ export function ModalBase({
       
       {/* Fixed Footer */}
       {footerActions && (
-        <div className="flex-shrink-0 px-6 py-6 border-t border-[--divider-weak]">
+        <div className="flex-shrink-0 px-6 py-6 border-t border-[var(--divider-weak)]">
           <div className="flex items-center justify-end space-x-3">
             {footerActions}
           </div>
@@ -120,7 +120,7 @@ export function ModalBase({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className={`fixed inset-0 bg-[--backdrop-heavy] backdrop-blur-[var(--backdrop-blur)] flex items-center justify-center p-4 ${priority ? 'z-[60]' : 'z-40'}`}
+          className={`fixed inset-0 bg-[var(--backdrop-heavy)] backdrop-blur-[var(--backdrop-blur)] flex items-center justify-center p-4 ${priority ? 'z-[60]' : 'z-40'}`}
           style={{
             paddingTop: 'max(1rem, env(safe-area-inset-top))',
             paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',

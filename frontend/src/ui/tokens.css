@@ -89,4 +89,50 @@
   --panel-shadow:        0 8px 32px rgba(0, 0, 0, 0.3);
   --panel-shadow-inset:  inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --panel-hover-bg:      rgba(0, 0, 0, 0.45);
+
+  /* Luxury gradients (variables-only) */
+  --luxury-grad-default: linear-gradient(145deg, #00A29C, #007193);
+  --luxury-grad-linear:  linear-gradient(135deg, #00A29C, #007193);
+  --luxury-grad-linear3: linear-gradient(135deg, #00A29C, #2dd4bf, #007193);
+  --luxury-grad-conic:   conic-gradient(from 210deg at 50% 50%, #00A29C, #2dd4bf 50%, #007193);
+  --luxury-grad-elliptic: radial-gradient(120% 80% at 50% 50%, #00A29C 0%, #007193 100%);
+
+  /* Buttons/Clay — gradient + shadow stacks (no widths) */
+  /* Primary (blue-green) */
+  --btn-primary-bg:              linear-gradient(145deg, #007193, #00A29C);
+  --btn-primary-hover-bg:        linear-gradient(145deg, #1985a3, #1ab3ac);
+  --btn-primary-shadow:          0 8px 0 rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.15), 0 6px 20px rgba(0,0,0,0.5), 0 4px 15px rgba(0,113,147,0.3);
+  --btn-primary-hover-shadow:    0 10px 0 rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2), 0 8px 25px rgba(0,0,0,0.6), 0 6px 20px rgba(0,113,147,0.4);
+  --btn-primary-active-shadow:   0 4px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 10px rgba(0,0,0,0.4);
+
+  /* Secondary (gold) */
+  --btn-secondary-bg:            linear-gradient(145deg, #D4AF37, #B8941F);
+  --btn-secondary-hover-bg:      linear-gradient(145deg, #E6C14D, #D4AF37);
+  --btn-secondary-shadow:        0 6px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 15px rgba(0,0,0,0.4), 0 2px 12px rgba(212,175,55,0.3);
+  --btn-secondary-hover-shadow:  0 7px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25), 0 5px 20px rgba(0,0,0,0.5), 0 3px 15px rgba(212,175,55,0.4);
+  --btn-secondary-active-shadow: 0 1px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+
+  /* Danger (red) */
+  --btn-danger-bg:               linear-gradient(145deg, #dc2626, #b91c1c);
+  --btn-danger-hover-bg:         linear-gradient(145deg, #ef4444, #dc2626);
+  --btn-danger-shadow:           0 6px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 15px rgba(0,0,0,0.4), 0 2px 10px rgba(220,38,38,0.4);
+  --btn-danger-hover-shadow:     0 7px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2), 0 5px 20px rgba(0,0,0,0.5), 0 3px 15px rgba(220,38,38,0.5);
+  --btn-danger-active-shadow:    0 3px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 8px rgba(0,0,0,0.4);
+
+  /* Neutral (gray) */
+  --btn-neutral-bg:              linear-gradient(145deg, #3c3c40, #2c2c30);
+  --btn-neutral-hover-bg:        linear-gradient(145deg, #434347, #323236);
+  --neutral-border:              1px solid rgba(0,0,0,0.2);
+  --btn-neutral-shadow:          0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.25);
+  --btn-neutral-hover-shadow:    0 4px 0 rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+  --btn-neutral-active-shadow:   0 1px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+
+  /* Neumorphic surfaces (mother panels) */
+  --neuro-bg:                    #2a2a2e;
+  --neuro-border:                rgba(255,255,255,0.1);
+  --neuro-hover-border:          rgba(212,175,55,0.2);
+  --neuro-shadow:                inset 8px 8px 16px rgba(0,0,0,0.4), inset -8px -8px 16px rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.3);
+  --neuro-shadow-hover:          inset 8px 8px 16px rgba(0,0,0,0.4), inset -8px -8px 16px rgba(255,255,255,0.04), 0 12px 40px rgba(0,0,0,0.35);
+  --neuro-inset-container-shadow: inset 8px 8px 16px rgba(0,0,0,0.4), inset -8px -8px 16px rgba(255,255,255,0.03);
+  --neumorphic-inset-shadow:     inset 6px 6px 12px rgba(0,0,0,0.4), inset -6px -6px 12px rgba(255,255,255,0.03);
 }
