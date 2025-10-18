@@ -110,25 +110,6 @@ body {
     background: var(--glass-active-bg);
   }
 
-  /* Colors/Gradients - Color Only (use on top of base shapes) */
-
-  /* Primary luxury button - blue-green linear gradient */
-  .luxury-button {
-    background: linear-gradient(145deg, #007193, #00A29C) !important;
-    color: white;
-  }
-
-  /* Conic gradient variant */
-  .luxury-button-conic {
-    background: conic-gradient(from 210deg at 50% 50%, #00A29C, #2dd4bf 50%, #007193) !important;
-    color: white;
-  }
-
-  /* Elliptic radial gradient variant */
-  .luxury-button-elliptic {
-    background: radial-gradient(120% 80% at 50% 50%, #00A29C 0%, #007193 100%) !important;
-    color: white;
-  }
 
   /* Button sizes with proper padding */
   .btn-sm {
@@ -150,130 +131,84 @@ body {
   /* Primary claymorphic action button with Inter styling */
   .btn-primary {
     @apply rounded-2xl text-white;
-    background: linear-gradient(145deg, #007193, #00A29C);
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow:
-      0 8px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15),
-      0 6px 20px rgba(0, 0, 0, 0.5),
-      0 4px 15px rgba(0, 113, 147, 0.3);
+    background: var(--btn-primary-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-primary-shadow);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow:
-      0 10px 0 rgba(0, 0, 0, 0.4),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2),
-      0 8px 25px rgba(0, 0, 0, 0.6),
-      0 6px 20px rgba(0, 113, 147, 0.4);
-    background: linear-gradient(145deg, #1985a3, #1ab3ac);
+    box-shadow: var(--btn-primary-hover-shadow);
+    background: var(--btn-primary-hover-bg);
   }
   .btn-primary:active {
     transform: translateY(4px);
-    box-shadow:
-      0 4px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 2px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--btn-primary-active-shadow);
   }
 
   /* Gold Secondary - Important secondary actions */
   .btn-secondary {
     @apply rounded-xl text-white;
-    background: linear-gradient(145deg, #D4AF37, #B8941F);
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow:
-      0 6px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 4px 15px rgba(0, 0, 0, 0.4),
-      0 2px 12px rgba(212, 175, 55, 0.3);
+    background: var(--btn-secondary-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-secondary-shadow);
   }
   .btn-secondary:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 7px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25),
-      0 5px 20px rgba(0, 0, 0, 0.5),
-      0 3px 15px rgba(212, 175, 55, 0.4);
-    background: linear-gradient(145deg, #E6C14D, #D4AF37);
+    box-shadow: var(--btn-secondary-hover-shadow);
+    background: var(--btn-secondary-hover-bg);
   }
   .btn-secondary:active {
     transform: translateY(2px);
-    box-shadow:
-      0 1px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: var(--btn-secondary-active-shadow);
   }
 
   /* Danger claymorphic button with Inter styling */
   .btn-danger {
     @apply rounded-xl text-white;
-    background: linear-gradient(145deg, #dc2626, #b91c1c);
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    box-shadow:
-      0 6px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 4px 15px rgba(0, 0, 0, 0.4),
-      0 2px 10px rgba(220, 38, 38, 0.4);
+    background: var(--btn-danger-bg);
+    border: var(--clay-border);
+    box-shadow: var(--btn-danger-shadow);
   }
   .btn-danger:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 7px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 5px 20px rgba(0, 0, 0, 0.5),
-      0 3px 15px rgba(220, 38, 38, 0.5);
-    background: linear-gradient(145deg, #ef4444, #dc2626);
+    box-shadow: var(--btn-danger-hover-shadow);
+    background: var(--btn-danger-hover-bg);
   }
   .btn-danger:active {
     transform: translateY(3px);
-    box-shadow:
-      0 3px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 1px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--btn-danger-active-shadow);
   }
 
   /* Neutral Gray - Utility actions (close, back) */
   .btn-neutral {
     @apply rounded-xl text-white/90;
-    background: linear-gradient(145deg, #3c3c40, #2c2c30);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow:
-      0 3px 0 rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.25);
+    background: var(--btn-neutral-bg);
+    border: var(--neutral-border);
+    box-shadow: var(--btn-neutral-shadow);
   }
   .btn-neutral:hover {
     @apply text-white;
     transform: translateY(-1px);
-    box-shadow:
-      0 4px 0 rgba(0, 0, 0, 0.3),
-      0 3px 8px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    background: linear-gradient(145deg, #434347, #323236);
+    box-shadow: var(--btn-neutral-hover-shadow);
+    background: var(--btn-neutral-hover-bg);
   }
   .btn-neutral:active {
     transform: translateY(1px);
-    box-shadow:
-      0 1px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: var(--btn-neutral-active-shadow);
   }
 
   /* Opaque neumorphic panels for content areas */
   .neumorphic-panel {
-    background: #2a2a2e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--neuro-bg);
+    border: 1px solid var(--neuro-border);
     border-radius: 1.5rem; /* Larger border radius for mother panels */
     position: relative;
     z-index: 10;
-    box-shadow:
-      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
-      inset -8px -8px 16px rgba(255, 255, 255, 0.03),
-      0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--neuro-shadow);
   }
   .neumorphic-panel:hover {
-    border-color: rgba(212, 175, 55, 0.2);
-    box-shadow:
-      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
-      inset -8px -8px 16px rgba(255, 255, 255, 0.04),
-      0 12px 40px rgba(0, 0, 0, 0.35);
+    border-color: var(--neuro-hover-border);
+    box-shadow: var(--neuro-shadow-hover);
   }
 
     /* Glassmorphic panels for content areas (auth, tournament cards, etc.) */
@@ -291,7 +226,7 @@ body {
       var(--panel-shadow-inset);
   }
   .glassmorphic-panel:hover {
-    @apply border-white/20;
+    border-color: var(--glass-hover-border);
     background: var(--panel-hover-bg);
   }
 
@@ -315,7 +250,7 @@ body {
 
   /* Neumorphic containers - opaque full-page shells */
   .neumorphic-container {
-    background: #2a2a2e;
+    background: var(--neuro-bg);
     position: fixed;
     top: 0;
     left: 0;
@@ -326,9 +261,7 @@ body {
     height: 100dvh; /* Dynamic viewport height for mobile */
     z-index: 40; /* Lower z-index so registration modals can appear on top */
     border-radius: 0; /* Full screen modals have no border radius */
-    box-shadow:
-      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
-      inset -8px -8px 16px rgba(255, 255, 255, 0.03);
+    box-shadow: var(--neuro-inset-container-shadow);
   }
 
   /* Ensure proper spacing for modal content */
@@ -337,9 +270,8 @@ body {
     margin-right: 0;
   }
 
-  .neumorphic-inset {
-    @apply shadow-[inset_6px_6px_12px_rgba(0,0,0,0.4),_inset_-6px_-6px_12px_rgba(255,255,255,0.03)];
-  }
+  .neumorphic-inset { box-shadow: var(--neumorphic-inset-shadow); }
+
 
   .art-deco-divider {
     @apply w-full h-[3px] bg-gradient-to-r from-transparent via-gold-accent to-transparent relative;
@@ -426,21 +358,13 @@ body {
   }
 
   /* Градиенты (только background) — меняешь имя класса и всё */
-  .luxury-button {                           /* твой текущий дефолт */
-    background: linear-gradient(145deg, #00A29C, #007193);
-  }
-  .luxury-button-linear {                    /* обычный линейный */
-    background: linear-gradient(135deg, #00A29C, #007193);
-  }
-  .luxury-button-linear3 {                   /* трёхцветный линейный */
-    background: linear-gradient(135deg, #00A29C, #2dd4bf, #007193);
-  }
-  .luxury-button-conic {                     /* угловой */
-    background: conic-gradient(from 210deg at 50% 50%, #00A29C, #2dd4bf 50%, #007193);
-  }
-  .luxury-button-elliptic {                  /* эллиптический радиальный */
-    background: radial-gradient(120% 80% at 50% 50%, #00A29C 0%, #007193 100%);
-  }
+  .luxury-button        { background: var(--luxury-grad-default); }
+  .luxury-button-linear { background: var(--luxury-grad-linear); }
+  .luxury-button-linear3{ background: var(--luxury-grad-linear3); }
+  .luxury-button-conic  { background: var(--luxury-grad-conic); }
+  .luxury-button-elliptic { background: var(--luxury-grad-elliptic); }
+
+
 
 
 
