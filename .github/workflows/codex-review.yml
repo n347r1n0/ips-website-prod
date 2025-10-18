@@ -28,9 +28,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Codex: please review this PR.
-            Scope: tokens-only styles; button rules moved to `frontend/src/styles/buttons.css`.
-            Requirements: no visual change; no selector widening; var(...) only.
+            Codex, please review this PR per your system rules and the pinned task context.
+            • PR: #${{ github.event.pull_request.number }} — "${{ github.event.pull_request.title }}"
+            • Branch: ${{ github.event.pull_request.head.ref }}
+            Use the repository CODEX.md + the PR's pinned brief for scope/criteria.
 
   build-check:
     runs-on: ubuntu-latest
