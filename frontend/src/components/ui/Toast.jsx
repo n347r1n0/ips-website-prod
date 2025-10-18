@@ -11,9 +11,9 @@ export function ToastProvider({ children }) {
   const addToast = (message, type = 'info', duration = 5000) => {
     const id = Date.now() + Math.random();
     const toast = { id, message, type, duration };
-    
+
     setToasts(prev => [...prev, toast]);
-    
+
     if (duration > 0) {
       setTimeout(() => removeToast(id), duration);
     }
@@ -59,17 +59,17 @@ function ToastContainer({ toasts, onRemove }) {
 
 function Toast({ toast, onRemove }) {
   const { id, message, type } = toast;
-  
+
   const icons = {
     success: CheckCircle,
     error: XCircle,
     info: AlertCircle,
   };
-  
+
   const colors = {
-    success: 'bg-[--toast-success-bg] border-[--toast-success-border] text-[--toast-success-fg]',
-    error: 'bg-[--toast-error-bg] border-[--toast-error-border] text-[--toast-error-fg]',
-    info: 'bg-[--toast-info-bg] border-[--toast-info-border] text-[--toast-info-fg]',
+    success: 'bg-[var(--toast-success-bg)] border-[var(--toast-success-border)] text-[var(--toast-success-fg)]',
+    error:   'bg-[var(--toast-error-bg)]  border-[var(--toast-error-border)]  text-[var(--toast-error-fg)]',
+    info:    'bg-[var(--toast-info-bg)]   border-[var(--toast-info-border)]   text-[var(--toast-info-fg)]',
   };
 
   const Icon = icons[type] || AlertCircle;
