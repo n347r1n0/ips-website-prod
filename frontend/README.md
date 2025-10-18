@@ -47,6 +47,33 @@ Both apps share a **single Supabase database** for seamless data synchronization
 - **Database Migrations** with proper version control
 - **CI/CD Pipeline** via GitHub Actions
 
+### 🎨 **UI Tokens & Styling Rules**
+- * Где лежат токены: `frontend/src/ui/tokens.css`.
+- * Импорт: в `src/index.css` первой строкой:
+  `@import './ui/tokens.css';`
+- * **Запрет хардкода** цветов/теней/радиусов в JSX/CSS — только через CSS Custom Properties (tokens).
+- * **Важно про Tailwind arbitrary values:**
+  В классах используй **`var()`**:
+  * ✅ `bg-[var(--glass-bg)]`
+  * ✅ `border-[var(--glass-border)]`
+  * ✅ `text-[var(--toast-success-fg)]`
+  * ❌ `bg-[--glass-bg]` (без `var()` не сработает)
+  
+
+- * Основные токены, которые уже есть (короткий список):
+
+  * Glass: `--glass-bg`, `--glass-border`, `--glass-blur`, `--glass-border-weak`
+  * Backdrop: `--backdrop-heavy`, `--backdrop-blur`
+  * Radii: `--r-s`, `--r-m`, `--r-l`, `--r-2xl`
+  * Shadows: `--shadow-s/m/l`, `--panel-shadow`, `--panel-shadow-inset`
+  * Toast: `--toast-*-bg/border/fg`
+  
+
+- * Примеры использования (одна строка на пример):
+
+  * `className="bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)]"`
+  * `className="text-[var(--toast-error-fg)] border-[var(--toast-error-border)]"`
+
 ---
 
 ## 🚀 **Quick Start**
@@ -100,6 +127,16 @@ Navigate to `http://localhost:5173` and start developing!
 │ • Player Profiles│    │ • Row Level      │    │   Tracking      │
 └──────────────────┘    │   Security       │    └─────────────────┘
                         └──────────────────┘
+```
+
+## 🤖 **CODEX & Internal Agent Rules**
+
+* Смотри `frontend/CODEX.md` — правила агента (one-time read batch, report-first → patch-set).
+* DEV используется **как эталон правил** (токены/паттерны), **но** визуал и функционал PROD не деградируем.
+* Отчёты/диффы: храним в DEV в
+  `ips-ui-lab/frontend/src/PROD_comparison/reports/` и `.../drafts/`
+  *(упомяни это, чтобы понимать, откуда брать текст в PR).*
+
 ```
 
 ### Authentication Flow
@@ -378,6 +415,12 @@ For high-traffic scenarios:
 2. Telegram Settings → Privacy & Security → Connected Websites → [yoursite] → Disconnect
 3. Restart browser and try again
 
+#### 🕳 Typical Tokenization Pitfalls
+
+* Симптом: стеклянные панели «почернели» → проверь, что классы используют `var()` (см. выше).
+* Симптом: изменился размыв — сравни `--glass-blur`/`--backdrop-blur` (24px/12px), проверь `@import './ui/tokens.css'`.
+* Симптом: Toast цвета дефолтные → классы `bg-[var(--toast-*-bg)]`, `border-[var(--toast-*-border)]`, `text-[var(--toast-*-fg)]`.
+
 ---
 
 ## 🚀 **Deployment**
@@ -392,6 +435,8 @@ The project auto-deploys to GitHub Pages via GitHub Actions:
    - Create production `.env` from GitHub Secrets
    - Build project (`npm run build`)
    - Deploy to Pages with SPA fallback
+3. **“Main is protected”**: деплой идёт **только** после **Squash merge** в `main`.
+4. **Короткая памятка Rollback**: `git revert <SHA>` через PR (не пушем). 
 
 ### Environment Secrets (GitHub Repository Settings)
 
@@ -421,7 +466,7 @@ git push origin main     # Triggers new deployment
 
 ---
 
-## 🤝 **Contributing**
+## 🤝 **Contributing & PR Workflow**
 
 ### Development Workflow
 
@@ -445,6 +490,37 @@ git push origin main     # Triggers new deployment
    - Small, focused changes
    - Clear description of changes
    - Include any necessary env var updates
+
+5. **Branch protection:** прямые пуши в `main` запрещены → все изменения через PR.
+
+6. **Именование веток:**
+  `feat/...`, `fix/...`, `refactor/...`, `chore/...`, `docs/...`
+  Примеры: `fix/tokens-var-wrappers`, `refactor/tokens-phase1`.
+
+7. **Типы коммитов:** `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`.
+  Пример: `fix(tokens): wrap CSS vars in var() for Toast/GlassPanel`.
+
+8. **Draft PR → Review → Squash merge:**
+
+  1. Открывай **Draft PR** для серии мелких коммитов.
+  2. Дожидайся авто-комментариев Codex (lint-ревью).
+  3. Исправь, **resolve conversation** в PR (кнопка под комментарием).
+  4. Конвертируй в **Ready for review** и **Squash & merge**.
+  5. Ветки удаляются автоматически (или руками).
+
+* **Требование к PR-описанию:** включай: цель, область затронутых файлов, риски, как проверить (используй отчёты из `reports/` как текст).
+* **Локальный `main` не трогаем:** не коммить. Если разошёлся с `origin/main`:
+  `git fetch && git reset --hard origin/main`.
+
+
+### PR Checklist
+- [ ] Changes are **scoped and reversible** (no config/deps changes)
+- [ ] Visual **parity with PROD** (no UX/layout drift)
+- [ ] All CSS uses **tokens**; no hard-coded rgba/hex in JSX
+- [ ] Tailwind arbitrary values wrapped in **var()**
+- [ ] Modal scroll is stable (`overflow-y:auto; min-height:0`)
+- [ ] Added/updated report in `DEV/.../PROD_comparison/reports/` (optional link)
+- [ ] All Codex PR comments resolved
 
 ### Code Style Guidelines
 
@@ -512,6 +588,12 @@ The application includes comprehensive logging with emoji-coded messages:
 - [ ] **Testing**: Unit and integration test coverage
 - [ ] **Monitoring**: Real-time error tracking and analytics
 
+### Ближайшие задачи по визуалу/токенам:
+
+- [ ] Phase 1.1 — пройтись по `var()` во всех токенизированных классах
+- [ ] Вынести градиенты кнопок в семантические токены
+- [ ] Интегрировать систему генерации шрифтов из DEV (отдельная таска)
+
 ---
 
 ## 📞 **Support & Contact**
@@ -565,4 +647,4 @@ Built with ❤️ by the IPS development team.
 
 ---
 
-*Last updated: August 2025*
+*Last updated: October 2025*
