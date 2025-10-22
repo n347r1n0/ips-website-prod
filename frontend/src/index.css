@@ -7,6 +7,7 @@
 @tailwind components;
 
 @import './styles/buttons.css';
+@import './styles/panels.css';
 
 @tailwind utilities;
 
@@ -45,80 +46,7 @@ body {
 @layer components {
   /* === DUMB BUTTON SYSTEM MOVED TO styles/buttons.css === */
 
-  /* Opaque neumorphic panels for content areas */
-  .neumorphic-panel {
-    background: var(--neuro-bg);
-    border: 1px solid var(--neuro-border);
-    border-radius: 1.5rem; /* Larger border radius for mother panels */
-    position: relative;
-    z-index: 10;
-    box-shadow: var(--neuro-shadow);
-  }
-  .neumorphic-panel:hover {
-    border-color: var(--neuro-hover-border);
-    box-shadow: var(--neuro-shadow-hover);
-  }
-
-    /* Glassmorphic panels for content areas (auth, tournament cards, etc.) */
-  .glassmorphic-panel {
-    /* tokenized glass panel used by Toast */
-    @apply border; /* keep border width via Tailwind */
-    background: var(--panel-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-color: var(--glass-border-weak);
-    position: relative;
-    z-index: 20; /* Higher z-index to prevent transparency bleed */
-    box-shadow:
-      var(--panel-shadow),
-      var(--panel-shadow-inset);
-  }
-  .glassmorphic-panel:hover {
-    border-color: var(--glass-hover-border);
-    background: var(--panel-hover-bg);
-  }
-
-    /* === 👇 Вариант без hover для галереи 👇 === */
-  .gallery-card-panel {
-    @apply border; /* только ширина */
-    background: var(--panel-bg-strong);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-color: var(--glass-border-weak);
-    box-shadow: var(--panel-shadow), var(--panel-shadow-inset);
-  }
-
-
-
-
-
-
-
-
-
-  /* Neumorphic containers - opaque full-page shells */
-  .neumorphic-container {
-    background: var(--neuro-bg);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile */
-    z-index: 40; /* Lower z-index so registration modals can appear on top */
-    border-radius: 0; /* Full screen modals have no border radius */
-    box-shadow: var(--neuro-inset-container-shadow);
-  }
-
-  /* Ensure proper spacing for modal content */
-  .neumorphic-container .spacing-content > * {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .neumorphic-inset { box-shadow: var(--neumorphic-inset-shadow); }
+  /* panels moved to styles/panels.css */
 
 
   .art-deco-divider {
