@@ -100,7 +100,7 @@ export function MockTimerModal({ isOpen, onClose, onSuccess }) {
         <div className="mt-8 flex justify-end space-x-4">
           <Button
             onClick={handleClose}
-            className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-2 rounded-xl"
+            className="btn-glass px-6 py-2 rounded-xl text-white border-white/30 hover:bg-white/10"
             disabled={simulating}
           >
             Cancel

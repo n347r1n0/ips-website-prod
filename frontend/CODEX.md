@@ -54,6 +54,7 @@ PROD:/frontend/src
 │  ├─ features/      # Admin, Auth, TournamentCalendar, RatingWidget, Hero, FAQ, etc.
 │  ├─ layout/        # Header, Footer, Section, ...
 │  └─ ui/            # Button, GlassPanel, Toast, ModalBase, ...
+├─ styles/           # tokens-based extracted layers: buttons.css, panels.css (each uses @layer components)
 ├─ contexts/         # AuthContext.jsx
 ├─ hooks/            # useAuthVersion.js ...
 ├─ lib/              # supabaseClient.js, authSynchronizer.js, ...
@@ -87,6 +88,12 @@ PROD:/frontend/src
 
 * **Token-first**: colors/shadows/radii/blur come from tokens. If a token doesn’t exist, introduce a local variable with a safe fallback: `var(--gold, #D4AF37)`.
 * **Modularity**: extract and reuse surfaces/patterns (Glass/Modal/Card/Drawer/Divider) instead of ad-hoc classes.
+* **CSS import order (strict)**:
+   1) `@import './ui/tokens.css'` (first),
+   2) `@tailwind base; @tailwind components;`
+   3) `@import './styles/*.css'` (files that contain `@layer components`),
+   4) `@tailwind utilities;`.
+   Do **not** import component layers after utilities. Import `tokens.css` once and only in `index.css`.
 * **Safe switches**: ship new implementations behind a **prop/feature flag** with a reversible legacy path:
 
   * e.g., `navigationMode="legacy" | "wheel"` or `useNewWheel={true}`; on the first patch keep **legacy as the default**.
@@ -182,6 +189,7 @@ After the response — **chat-only** mode. If you truly need a **second batch**,
 * New utilities/variants — only after agreeing on name/location.
 * Z-index, focus, radii, shadows — via tokens/variables.
 * **Treat DEV carefully**. Patch PROD; touch DEV only by request.
+* **Place extracted CSS** (buttons, panels, etc.) under `PROD:/frontend/src/styles/…` and wrap rules in `@layer components`. Keep imports in `index.css` per the order in §4.
 
 ---
 

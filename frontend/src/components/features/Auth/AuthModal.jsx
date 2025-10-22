@@ -266,7 +266,7 @@ export function AuthModal({ isOpen, onClose }) {
                         </p>
                       </>
                     )}
-                     <Button onClick={handleClose} className="w-full luxury-button py-3 text-lg rounded-xl mt-4">
+                     <Button onClick={handleClose} className="luxury-button w-full py-3 text-lg rounded-xl mt-4">
                         Понятно
                      </Button>
                   </div>
@@ -324,14 +324,14 @@ export function AuthModal({ isOpen, onClose }) {
                               <div className="flex gap-2">
                                 <Button
                                   onClick={() => { setMode('signIn'); setError(''); }}
-                                  className="flex-1 glassmorphic-panel border border-white/30 text-white hover:bg-white/10 py-2 text-sm rounded-lg"
+                                  className="btn-glass flex-1 py-2 text-sm rounded-lg border border-white/30 text-white hover:bg-white/10"
                                 >
                                   Войти
                                 </Button>
                                 <Button
                                   onClick={handlePasswordReset}
                                   disabled={loading}
-                                  className="flex-1 glassmorphic-panel border border-white/30 text-white hover:bg-white/10 py-2 text-sm rounded-lg"
+                                  className="btn-glass flex-1 py-2 text-sm rounded-lg border border-white/30 text-white hover:bg-white/10"
                                 >
                                   Забыли пароль?
                                 </Button>
@@ -344,7 +344,7 @@ export function AuthModal({ isOpen, onClose }) {
                                 <Button
                                   onClick={handlePasswordReset}
                                   disabled={loading}
-                                  className="glassmorphic-panel border border-white/30 text-white hover:bg-white/10 py-2 px-4 text-sm rounded-lg"
+                                  className="btn-glass py-2 px-4 text-sm rounded-lg border border-white/30 text-white hover:bg-white/10"
                                 >
                                   Забыли пароль?
                                 </Button>
@@ -356,7 +356,7 @@ export function AuthModal({ isOpen, onClose }) {
                         </div>
                       )}
 
-                      <Button type="submit" disabled={loading} className="w-full luxury-button py-3 text-lg rounded-xl mt-4">
+                      <Button type="submit" disabled={loading} className="luxury-button w-full py-3 text-lg rounded-xl mt-4">
                         {loading ? (
                           <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                         ) : (

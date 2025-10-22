@@ -96,7 +96,7 @@ export function RegistrationConfirmationModal({ tournament, onClose, onSuccess }
           <Button
             onClick={handleConfirmRegistration}
             disabled={loading || (!user && !guestData)}
-            className="btn-clay luxury-button px-6 py-3 rounded-xl flex items-center"
+            className="luxury-button px-6 py-3 rounded-xl flex items-center"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />

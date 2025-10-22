@@ -6,6 +6,8 @@ import App from './App.jsx';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx'; // 👈 1. Импортируем наш провайдер
+import '@/lib/uiDebug'; // активируется только когда localStorage.uiDebug === '1'
+
 
 // 2. Устанавливаем react-router-dom, если еще не установлен
 // В терминале: npm install react-router-dom

@@ -116,7 +116,7 @@ export function TournamentListForDay({ tournaments, onClose }) {
                       </Button>
                     ) : (
                       <Button
-                        className="btn-clay luxury-button"
+                        className="luxury-button"
                         onClick={() => setSelectedTournament(tournament)}
                       >
                         Записаться

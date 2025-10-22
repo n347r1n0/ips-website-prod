@@ -40,7 +40,7 @@ export function AuthErrorDisplay() {
               <div className="flex gap-2">
                 <Button
                   onClick={recoverAuthState}
-                  className="text-xs px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded"
+                  className="btn-neutral text-xs px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded"
                 >
                   <RefreshCw className="w-3 h-3 mr-1" />
                   Retry
@@ -49,7 +49,7 @@ export function AuthErrorDisplay() {
                 {isDevMode && (
                   <Button
                     onClick={() => window.clearCorruptedAuthTokens?.()}
-                    className="text-xs px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded"
+                    className="btn-neutral text-xs px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded"
                   >
                     Clear Tokens
                   </Button>

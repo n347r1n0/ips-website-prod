@@ -159,15 +159,14 @@ export function TournamentModal({ isOpen, onClose, tournament, onSuccess }) {
             type="button"
             onClick={onClose}
             disabled={loading}
-            variant="neutral"
-            className="btn-clay px-6 py-3 rounded-xl"
+            className="btn-neutral px-6 py-3 rounded-xl"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={loading}
-            className={`btn-clay luxury-button px-6 py-3 rounded-xl flex items-center ${
+            className={`luxury-button px-6 py-3 rounded-xl flex items-center ${
               loading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             onClick={handleSubmit}

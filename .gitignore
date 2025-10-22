@@ -41,3 +41,5 @@ Thumbs.db
 
 # Supabase local dev files
 supabase/.temp/
+
+frontend/src/PROD_comparison/
