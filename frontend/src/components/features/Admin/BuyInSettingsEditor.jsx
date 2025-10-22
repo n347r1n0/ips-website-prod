@@ -196,14 +196,13 @@ export function BuyInSettingsEditor({ settings, onUpdate, onBack, format, blinds
         <>
           <Button
             onClick={onBack}
-            variant="neutral"
-            className="btn-clay px-6 py-3 rounded-xl"
+            className="btn-neutral px-6 py-3 rounded-xl"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="btn-clay luxury-button px-6 py-3 rounded-xl flex items-center"
+            className="luxury-button px-6 py-3 rounded-xl flex items-center"
           >
             <Save className="w-5 h-5 mr-2" />
             Save Settings

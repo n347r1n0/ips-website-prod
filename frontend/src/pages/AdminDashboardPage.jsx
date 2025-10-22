@@ -131,7 +131,7 @@ export function AdminDashboardPage() {
               <p className="text-gray-300">Manage all club tournaments from this admin panel</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button onClick={() => setIsMockModalOpen(true)} className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-3 rounded-xl flex items-center">
+              <Button onClick={() => setIsMockModalOpen(true)} className="btn-glass px-6 py-3 rounded-xl flex items-center text-white border-white/30 hover:bg-white/10">
                 <Bot className="w-5 h-5 mr-2" />
                 Timer Simulator
               </Button>
@@ -147,7 +147,7 @@ export function AdminDashboardPage() {
               <p className="text-red-300">{error}</p>
               <Button 
                 onClick={() => setError(null)} 
-                className="mt-2 text-sm text-red-300 hover:text-white"
+                className="btn-neutral mt-2 text-sm text-red-300 hover:text-white"
               >
                 Dismiss
               </Button>
@@ -189,13 +189,13 @@ export function AdminDashboardPage() {
                     <div className="flex space-x-3">
                       <Button 
                         onClick={() => handleEditTournament(tournament)}
-                        className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-4 py-2 rounded-xl"
+                        className="btn-glass px-4 py-2 rounded-xl text-white border-white/30 hover:bg-white/10"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button 
                         onClick={() => handleDeleteTournament(tournament)}
-                        className="glassmorphic-panel border-red-500/30 text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-xl"
+                        className="btn-glass px-4 py-2 rounded-xl text-red-300 border-red-500/30 hover:bg-red-500/10"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

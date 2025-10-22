@@ -34,7 +34,7 @@ export function DeleteConfirmModal({ isOpen, onClose, onConfirm, tournamentName,
           <Button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 bg-red-500/80 hover:bg-red-500 text-white px-6 py-3 rounded-xl flex items-center justify-center transition-colors"
+            className="btn-clay btn-danger px-6 py-3 rounded-xl flex-1 flex items-center justify-center transition-colors"
           >
             {loading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current" />
@@ -48,7 +48,7 @@ export function DeleteConfirmModal({ isOpen, onClose, onConfirm, tournamentName,
           <Button
             onClick={onClose}
             disabled={loading}
-            className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-3 rounded-xl"
+            className="btn-glass px-6 py-3 rounded-xl"
           >
             Cancel
           </Button>

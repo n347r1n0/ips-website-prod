@@ -69,7 +69,7 @@ export function BlindsStructureEditor({ structure, onUpdate, onBack }) {
         <div className="flex items-center">
           <Button
             onClick={onBack}
-            className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 p-2 rounded-xl mr-4"
+            className="btn-glass p-2 rounded-xl mr-4 text-white border-white/30 hover:bg-white/10"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -78,14 +78,14 @@ export function BlindsStructureEditor({ structure, onUpdate, onBack }) {
         <div className="flex space-x-2">
           <Button
             onClick={addLevel}
-            className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-4 py-2 rounded-xl flex items-center"
+            className="btn-glass px-4 py-2 rounded-xl flex items-center text-white border-white/30 hover:bg-white/10"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Level
           </Button>
           <Button
             onClick={addBreak}
-            className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-4 py-2 rounded-xl flex items-center"
+            className="btn-glass px-4 py-2 rounded-xl flex items-center text-white border-white/30 hover:bg-white/10"
           >
             <Coffee className="w-4 h-4 mr-2" />
             Add Break
@@ -139,7 +139,7 @@ export function BlindsStructureEditor({ structure, onUpdate, onBack }) {
                   </button>
                   <Button
                     onClick={() => removeLevel(index)}
-                    className="glassmorphic-panel border-red-500/30 text-red-300 hover:bg-red-500/20 p-2 rounded-lg"
+                    className="btn-glass p-2 rounded-lg text-red-300 border-red-500/30 hover:bg-red-500/20"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

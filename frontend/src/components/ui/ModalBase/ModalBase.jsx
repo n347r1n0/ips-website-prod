@@ -67,9 +67,7 @@ export function ModalBase({
               {headerActions}
               <Button
                 onClick={onClose}
-                variant="neutral"
-                size="sm"
-                className="p-2 aspect-square min-w-[40px] min-h-[40px]"
+                className="btn-glass btn-sm p-2 aspect-square min-w-[40px] min-h-[40px]"
                 aria-label="Закрыть"
               >
                 <X className="w-5 h-5" />

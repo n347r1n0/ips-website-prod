@@ -117,7 +117,7 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
                         </Button>
                       </Link>
                     )}
-                    <Button onClick={handleSignOut} variant="outline" className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-4 py-2 rounded-xl">
+                    <Button onClick={handleSignOut} className="btn-glass px-4 py-2 rounded-xl text-white border-white/30 hover:bg-white/10">
                       <LogOut className="w-4 h-4" />
                     </Button>
                   </>

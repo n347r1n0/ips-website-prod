@@ -280,17 +280,14 @@ export function DashboardPage() {
                 {/* Action buttons */}
                 <div className="flex items-center space-x-3">
                   <Button
-                    variant="secondary"
-                    size="sm"
                     onClick={() => setIsEditingProfile(true)}
-                    className="p-2"
+                    className="btn-clay btn-secondary p-2"
                   >
                     <Edit3 className="w-4 h-4" />
                   </Button>
                   <Button
-                    variant="neutral"
-                    size="sm"
                     onClick={signOut}
+                    className="btn-neutral btn-sm"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Выйти
@@ -350,18 +347,15 @@ export function DashboardPage() {
                 <div className="flex space-x-3 pt-4">
                   <Button
                     type="submit"
-                    variant="primary"
-                    size="md"
                     loading={profileLoading}
-                    className="flex-1"
+                    className="btn-clay btn-primary btn-md flex-1"
                   >
                     Сохранить
                   </Button>
                   <Button
                     type="button"
-                    variant="neutral"
-                    size="md"
                     onClick={() => setIsEditingProfile(false)}
+                    className="btn-neutral btn-md"
                   >
                     Отмена
                   </Button>
@@ -526,7 +520,7 @@ export function DashboardPage() {
                   Tournament management, participants, and club settings
                 </p>
                 <Link to="/admin">
-                  <Button variant="secondary" size="lg" className="flex items-center">
+                  <Button className="btn-clay btn-secondary btn-lg flex items-center">
                     <Settings className="w-4 h-4 mr-2" />
                     Open Admin Panel
                   </Button>
@@ -548,13 +542,13 @@ export function DashboardPage() {
               <h2 className="text-2xl font-syne font-bold text-white text-center mb-6">Быстрые действия</h2>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link to="/#calendar">
-                  <Button variant="primary" size="lg" className="flex items-center">
+                  <Button className="btn-clay btn-primary btn-lg flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
                     Календарь турниров
                   </Button>
                 </Link>
                 <Link to="/#rating">
-                  <Button variant="secondary" size="lg" className="flex items-center">
+                  <Button className="btn-clay btn-secondary btn-lg flex items-center">
                     <Users className="w-4 h-4 mr-2" />
                     Рейтинг игроков
                   </Button>

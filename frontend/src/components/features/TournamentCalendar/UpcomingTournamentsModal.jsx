@@ -233,7 +233,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                       </>
                     ) : (
                       <Button
-                        className="btn-clay luxury-button"
+                        className="luxury-button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleTournamentClick(tournament);
@@ -351,7 +351,7 @@ export function UpcomingTournamentsModal({ tournaments, onClose }) {
                 onClick={handleDisabledRegisterClick}
                 disabled={true}
                 aria-disabled={true}
-                className="btn-clay luxury-button px-6 py-3 rounded-xl flex items-center opacity-50 cursor-not-allowed"
+                className="luxury-button px-6 py-3 rounded-xl flex items-center opacity-50 cursor-not-allowed"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Записаться

@@ -84,7 +84,7 @@ export function TournamentResultsModal({ tournament, onClose }) {
             )}
 
             <div className="mt-6 text-right">
-              <Button onClick={onClose} className="glassmorphic-panel border-white/30 text-white hover:bg-white/10 px-6 py-2 rounded-xl">
+              <Button onClick={onClose} className="btn-glass px-6 py-2 rounded-xl text-white border-white/30 hover:bg-white/10">
                 Закрыть
               </Button>
             </div>

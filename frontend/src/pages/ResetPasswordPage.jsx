@@ -108,7 +108,7 @@ export function ResetPasswordPage() {
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full luxury-button py-3 text-lg rounded-xl">
+  <Button type="submit" disabled={loading} className="luxury-button w-full py-3 text-lg rounded-xl">
                 {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : "Сохранить новый пароль"}
               </Button>
             </form>
