@@ -1,7 +1,9 @@
 /* src/index.css */
 @import './ui/tokens.css'; /* tokens: imported once for PROD surfaces */
+
 @import './styles/buttons.css';
 @import './styles/panels.css';
+@import './styles/helpers.css';
 
 /* Директивы @tailwind */
 @tailwind base;

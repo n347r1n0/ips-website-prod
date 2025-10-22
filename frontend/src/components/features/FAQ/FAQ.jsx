@@ -129,7 +129,16 @@ export function FAQ() {
       </header>
 
       {/* === АККОРДЕОН (без изменений) === */}
-      <div className="glassmorphic-panel rounded-3xl p-2 sm:p-4">
+      {/*<div className="glassmorphic-panel rounded-3xl p-2 sm:p-4">*/}
+      {/*<div className="rounded-3xl p-2 sm:p-4">*/}
+      {/*<div className="rounded-3xl p-2 sm:p-4 bg-black/30 border border-white/15 backdrop-blur-0">*/}
+      {/*<div className="rounded-3xl p-2 sm:p-4 border border-white/15 backdrop-blur-0"
+          style={{ background: "var(--panel-bg-strong)" }}>*/}
+      {/*<div className="rounded-3xl p-2 sm:p-4
+                 relative z-10 isolate
+                 bg-transparent [background-image:none]
+                 backdrop-blur-0 [filter:none] mix-blend-normal">*/}
+      <div className="rounded-3xl p-2 sm:p-4 content-contrast-reset">
         {faqData.map((item) => (
           <FaqItem
             key={item.id}

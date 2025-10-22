@@ -154,7 +154,8 @@ export function TournamentCalendar() {
   const hasUpcomingTournaments = allUpcomingTournaments.length > 0;
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">
+    <div className="relative w-full max-w-5xl mx-auto p-4 md:p-8">
+    {/*<div className="relative w-full max-w-5xl mx-auto p-4 md:p-8 glassmorphic-panel rounded-3xl">*/}
       {/* === ШАПКА КАЛЕНДАРЯ === */}
       <div className="flex items-center justify-between mb-6 relative z-40">
         <motion.button 

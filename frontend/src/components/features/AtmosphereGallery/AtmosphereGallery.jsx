@@ -115,7 +115,7 @@ export function AtmosphereGallery() {
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="glassmorphic-panel rounded-3xl p-8"
+          className="rounded-3xl p-8 content-contrast-reset"
         >
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
