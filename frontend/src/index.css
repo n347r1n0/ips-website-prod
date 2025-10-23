@@ -78,11 +78,6 @@ body {
 
 
 
-
-
-
-
-
   /* Typography and spacing system */
   .heading-lg { @apply text-2xl font-brand text-white leading-tight; }
   .heading-md { @apply text-xl font-brand text-white leading-snug; }

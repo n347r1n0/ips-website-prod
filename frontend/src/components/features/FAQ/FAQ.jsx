@@ -59,7 +59,7 @@ function FaqItem({ item, onToggle, isOpen }) {
           className="w-full py-6 text-left flex items-center justify-between gap-6 group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70 rounded-2xl"
         >
           <span className={`
-            text-xl font-bold text-gold-accent/70 tabular-nums pl-6 transition-all duration-300
+            text-xl font-bold text-gold-accent/70 tabular-nums pl-6 transition-all duration-300 font-mono-role
             ${glowClasses}
           `}>
             {number}
@@ -67,7 +67,7 @@ function FaqItem({ item, onToggle, isOpen }) {
 
           <h3
             className={`
-              flex-1 text-xl font-syne font-semibold transition-all duration-300
+              flex-1 text-xl font-ui-role font-semibold transition-all duration-300
               ${isOpen ? 'text-gold-accent' : 'text-white group-hover:text-gold-accent'}
               ${glowClasses}
             `}
@@ -102,7 +102,7 @@ function FaqItem({ item, onToggle, isOpen }) {
               className="overflow-hidden rounded-b-2xl"
             >
               <div className="px-6 pb-6">
-                <div className="pl-16 text-white/80 font-garamond text-lg leading-relaxed max-w-3xl">
+                <div className="pl-16 text-white/80 font-serif-role text-lg leading-relaxed max-w-3xl">
                   {answer}
                 </div>
               </div>
@@ -123,7 +123,7 @@ export function FAQ() {
     <div>
       {/* === ШАПКА (ИЗМЕНЕНО) === */}
       <header className="mb-12 text-center"> {/* Убрали flex, добавили text-center */}
-        <h2 className="text-4xl lg:text-5xl font-bold font-brand text-white gold-highlight">
+        <h2 className="text-4xl lg:text-5xl font-bold font-brand-role text-white gold-highlight">
           Частые вопросы
         </h2>
       </header>
@@ -151,7 +151,7 @@ export function FAQ() {
 
       {/* === НОВЫЙ БЛОК-ФУТЕР (ДОБАВЛЕНО) === */}
       <footer className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4 text-center">
-        <p className="font-garamond text-xl text-white/70">
+        <p className="font-serif-role text-xl text-white/70">
           Если не нашли ответ — спросите консьержа.
         </p>
         <a
