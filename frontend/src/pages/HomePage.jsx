@@ -108,22 +108,27 @@ export function HomePage({ onAuthModalOpen }) {
     }
   };
 
+
   /* ────────────────────────────────────────────────────────────────
-     Хэш-навигация (#section-id) — мягкая поддержка закладок
-     ──────────────────────────────────────────────────────────────── */
-  const location = useLocation();
+       Хэш-навигация (#section-id) — мягкая поддержка закладок
+     Совместимость:
+       • старые ссылки вида  #about
+       • новые ссылки вида   #section-about  (SectionAnchor ставит такие id)
+  ─────────────────────────────────────────────────────────────── */
   useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.replace('#', '');
-      const element = document.getElementById(id);
-      if (element) {
-        // Небольшая задержка — на случай отложенного рендера
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
-    }
+    const raw = location.hash?.replace('#', '');
+    if (!raw) return;
+    const candidates = [`section-${raw}`, raw]; // сначала префиксованный, потом «голый»
+    const target = candidates.map(id => document.getElementById(id)).find(Boolean);
+    if (!target) return;
+    // чуть откладываем, чтобы разметка точно отрендерилась
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }, [location]);
+
+
+
 
   /* ────────────────────────────────────────────────────────────────
      КОНФИГ СЕКЦИЙ для колесика (идентификаторы/лейблы/иконки)
