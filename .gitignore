@@ -43,3 +43,7 @@ Thumbs.db
 supabase/.temp/
 
 frontend/src/PROD_comparison/
+
+# Generated font CSS
+frontend/src/ui/generated/fonts.css
+frontend/src/ui/generated/font-vars.css

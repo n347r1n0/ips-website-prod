@@ -4,6 +4,13 @@
    Mirrors DEV structure but values match current PROD visuals.
    No side effects — variables only. */
 
+
+/* Подключаем сгенерированные шрифты (если запущен скрипт gen-fonts) */
+@import './generated/fonts.css';
+@import './generated/font-vars.css';
+
+
+
 :root {
   /* Foreground (kept minimal for this phase) */
   --fg:        #ffffffcc; /* white/80 */

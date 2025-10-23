@@ -137,7 +137,7 @@ Navigate to `http://localhost:5173` and start developing!
   `ips-ui-lab/frontend/src/PROD_comparison/reports/` и `.../drafts/`
   *(упомяни это, чтобы понимать, откуда брать текст в PR).*
 
-```
+
 
 ### Authentication Flow
 
