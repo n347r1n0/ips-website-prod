@@ -18,6 +18,7 @@
   --fg-weak:   #ffffff99; /* white/60 */
 
   /* Background tiers (used by glass contrasts if needed) */
+  --bg-0: #0B0D12; /* page */
   --bg-1: #363333; /* current body bg */
   --bg-2: #3a3737; /* slightly elevated */
 
@@ -142,4 +143,26 @@
   --neuro-shadow-hover:          inset 8px 8px 16px rgba(0,0,0,0.4), inset -8px -8px 16px rgba(255,255,255,0.04), 0 12px 40px rgba(0,0,0,0.35);
   --neuro-inset-container-shadow: inset 8px 8px 16px rgba(0,0,0,0.4), inset -8px -8px 16px rgba(255,255,255,0.03);
   --neumorphic-inset-shadow:     inset 6px 6px 12px rgba(0,0,0,0.4), inset -6px -6px 12px rgba(255,255,255,0.03);
+
+
+  /* hairline для «стеклянных» контуров (используется skin/иконки) */
+  --hairline: 0.5px;
+
+  /* AccordionPill — геометрия */
+  --acc-pill-px:        12px;
+  --acc-pill-py:        10px;
+  --acc-pill-row-h:     40px;
+  --acc-pill-icon-size: 18px;
+  --acc-pill-icon-gap:   8px;
+
+  /* AccordionPill — стеклянный контур шапки */
+  --acc-pill-glass-border: rgba(255,255,255,0.14);
+
+  /* 3D-капсула у шапки */
+  --acc3d-fill:           #35171c;
+  --acc3d-top-gloss:      linear-gradient(to bottom, rgba(255,255,255,.18), rgba(255,255,255,0) 14%);
+  --acc3d-inset-light:    inset 0 1px 0 rgba(255,255,255,.25);
+  --acc3d-inset-dark:     inset 0 -8px 18px rgba(0,0,0,.35);
+  --acc3d-drop:           0 6px 16px rgba(0,0,0,.28);
+  --acc3d-border:         1px solid rgba(255,255,255,.12);
 }

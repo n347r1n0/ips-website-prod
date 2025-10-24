@@ -259,7 +259,7 @@ export function DashboardPage() {
                     {profile?.avatar_url ? (
                       <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-2xl font-syne font-bold text-white/80">
+                      <span className="text-2xl font-brand-role font-bold text-white/80">
                         {displayName[0]?.toUpperCase()}
                       </span>
                     )}
@@ -267,7 +267,7 @@ export function DashboardPage() {
                   
                   {/* Profile Info */}
                   <div>
-                    <h1 className="text-3xl font-syne font-bold text-white mb-2">
+                    <h1 className="text-3xl font-brand-role font-bold text-white mb-2">
                       Добро пожаловать, {displayName}!
                     </h1>
                     <p className="text-white/70 text-lg">Личный кабинет участника клуба</p>
@@ -312,7 +312,7 @@ export function DashboardPage() {
               className="glassmorphic-panel rounded-2xl p-6 max-w-md w-full"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl font-syne font-bold text-white mb-4">Редактировать профиль</h2>
+              <h2 className="text-xl font-brand-role font-bold text-white mb-4">Редактировать профиль</h2>
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div>
                   <label className="text-white/80 text-sm font-medium mb-2 block">Никнейм</label>
@@ -380,7 +380,7 @@ export function DashboardPage() {
                     <h3 className="text-white/70 font-medium">{stat.label}</h3>
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <p className={`text-3xl font-syne font-bold ${stat.color} mb-1`}>
+                  <p className={`text-3xl font-brand-role font-bold ${stat.color} mb-1`}>
                     {stat.value}
                   </p>
                   {stat.subtitle && (
@@ -403,7 +403,7 @@ export function DashboardPage() {
               <div className="p-6">
                 <div className="flex items-center space-x-2 mb-6">
                   <Calendar className="w-5 h-5 text-gold-accent" />
-                  <h2 className="text-xl font-syne font-bold text-white">Предстоящие турниры</h2>
+                  <h2 className="text-xl font-brand-role font-bold text-white">Предстоящие турниры</h2>
                 </div>
                 
                 {dashboardData.loading ? (
@@ -456,7 +456,7 @@ export function DashboardPage() {
               <div className="p-6">
                 <div className="flex items-center space-x-2 mb-6">
                   <Trophy className="w-5 h-5 text-gold-accent" />
-                  <h2 className="text-xl font-syne font-bold text-white">Последние результаты</h2>
+                  <h2 className="text-xl font-brand-role font-bold text-white">Последние результаты</h2>
                 </div>
                 
                 {dashboardData.loading ? (
@@ -511,7 +511,7 @@ export function DashboardPage() {
             <GlassPanel className="border-gold-accent/30">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-syne font-bold text-gold-accent flex items-center">
+                  <h2 className="text-xl font-brand-role font-bold text-gold-accent flex items-center">
                     <Settings className="w-5 h-5 mr-2" />
                     Admin Panel
                   </h2>
@@ -539,7 +539,7 @@ export function DashboardPage() {
         >
           <GlassPanel>
             <div className="p-8">
-              <h2 className="text-2xl font-syne font-bold text-white text-center mb-6">Быстрые действия</h2>
+              <h2 className="text-2xl font-brand-role font-bold text-white text-center mb-6">Быстрые действия</h2>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link to="/#calendar">
                   <Button className="btn-clay btn-primary btn-lg flex items-center">

@@ -14,3 +14,18 @@
     position: relative; /* помогает с z-index при необходимости */
   }
 }
+
+@layer utilities {
+  .font-ui-role {
+    font-family: var(--font-ui, system-ui), -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .font-brand-role {
+    font-family: var(--font-brand, var(--font-ui, system-ui)), -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .font-serif-role {
+    font-family: var(--font-serif, Georgia, "Times New Roman", Times, serif);
+  }
+  .font-mono-role {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace);
+  }
+}

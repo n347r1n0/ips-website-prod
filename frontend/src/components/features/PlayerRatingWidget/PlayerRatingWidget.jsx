@@ -216,7 +216,7 @@ function FullRatingModal({ isOpen, onClose, players, onPlayerClick, onAchievemen
                             </div>
                             <div>
                               <div className="text-white font-bold">{player.name} {player.surname[0]}.</div>
-                              <div className="text-sm text-gold-accent/80 font-mono">"{player.nickname}"</div>
+                              <div className="text-sm text-gold-accent/80 font-mono-role">"{player.nickname}"</div>
                             </div>
                           </div>
                         </td>
@@ -276,7 +276,7 @@ function PlayerModal({ player, isOpen, onClose }) {
             {player.avatar_url ? (
               <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-3xl font-bold text-white/80 font-syne">
+              <span className="text-3xl font-bold text-white/80 font-brand-role">
                 {player.name[0]}{player.surname[0]}
               </span>
             )}
@@ -448,7 +448,7 @@ export function PlayerRatingWidget() {
                           </div>
                           <div>
                             <div className="text-white font-medium">{player.name} {player.surname[0]}.</div>
-                            <div className="text-xs text-gold-accent/80 font-mono">"{player.nickname}"</div>
+                            <div className="text-xs text-gold-accent/80 font-mono-role">"{player.nickname}"</div>
                           </div>
                         </div>
                       </td>
@@ -503,7 +503,7 @@ export function PlayerRatingWidget() {
                         {player.avatar_url ? (
                           <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
                         ) : (
-                          <span className="text-sm font-bold text-white/80 font-syne">
+                          <span className="text-sm font-bold text-white/80 font-brand-role">
                             {player.name[0]}{player.surname[0]}
                           </span>
                         )}
@@ -516,7 +516,7 @@ export function PlayerRatingWidget() {
                         </h3>
                         {/* Никнейм и достижения в одной строке */}
                         <div className="flex items-center gap-2">
-                          <p className="text-xs text-gold-accent/80 font-mono truncate">
+                          <p className="text-xs text-gold-accent/80 font-mono-role truncate">
                             "{player.nickname}"
                           </p>
                           <div className="flex items-center gap-1">
