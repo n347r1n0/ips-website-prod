@@ -1068,7 +1068,7 @@ export function FloatingChipWheel({
               onClick={() => { if (!animating && !draggingRef.current) snapTo(logicalStep); }}
               className={twMerge(
                 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-                'rounded-full',
+                'rounded-full text-[--fg]',
                 isActive ? 'shadow-[var(--shadow-s)]' : ''
               )}
               style={{

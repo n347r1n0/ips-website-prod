@@ -248,9 +248,9 @@ export const pokerSkin = {
                     ${matched} 0%,
                     color-mix(in oklab, ${matched} 70%, black) 100%)`
                 : (palette?.underDiskFill ?? `radial-gradient(75% 75% at 50% 50%,
-                    color-mix(in oklab, var(--bg-0) 86%, white 14%) 0%,
-                    color-mix(in oklab, var(--bg-0) 76%, white 24%) 45%,
-                    color-mix(in oklab, var(--bg-0) 58%, black 42%) 100%)`);
+                    color-mix(in oklab, var(--bg-0, #0B0D12) 86%, white 14%) 0%,
+                    color-mix(in oklab, var(--bg-0, #0B0D12) 76%, white 24%) 45%,
+                    color-mix(in oklab, var(--bg-0, #0B0D12) 58%, black 42%) 100%)`);
 
               return (
                 <div
@@ -287,13 +287,13 @@ export const pokerSkin = {
 
                 background: centerInvertShading
                   ? `radial-gradient(85% 85% at 50% 50%,
-                       color-mix(in oklab, var(--bg-0) 68%, black 32%) 0%,
-                       color-mix(in oklab, var(--bg-0) 80%, white 20%) 100%
+                       color-mix(in oklab, var(--bg-0, #0B0D12) 68%, black 32%) 0%,
+                       color-mix(in oklab, var(--bg-0, #0B0D12) 80%, white 20%) 100%
                      )` // свет по краям, темнее к центру
                   : `radial-gradient(75% 75% at 50% 45%,
-                       color-mix(in oklab, var(--bg-0) 84%, white 16%) 0%,
-                       color-mix(in oklab, var(--bg-0) 90%, white 10%) 45%,
-                       color-mix(in oklab, var(--bg-0) 65%, black 35%) 100%
+                       color-mix(in oklab, var(--bg-0, #0B0D12) 84%, white 16%) 0%,
+                       color-mix(in oklab, var(--bg-0, #0B0D12) 90%, white 10%) 45%,
+                       color-mix(in oklab, var(--bg-0, #0B0D12) 65%, black 35%) 100%
                      )`,
                 // ВНЕШНИЕ DROP-ТЕНИ (падают на нижний диск) + ТОНКИЙ СВЕТЛЫЙ КАНТ изнутри
                 boxShadow: `
