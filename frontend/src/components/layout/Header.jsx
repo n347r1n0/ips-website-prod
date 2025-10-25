@@ -166,22 +166,33 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
                 >
                   <Bot className="w-5 h-5" aria-hidden="true" />
                 </a>
-                {/* Auth/Profile — bigger touch target, same icon */}
+                {/* Auth/Profile — bigger touch target, distinct states */}
                 {user ? (
-                  <Link
-                    to="/dashboard"
-                    aria-label="Открыть профиль"
-                    className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
-                  >
-                    <User className="w-6 h-6" aria-hidden="true" />
-                  </Link>
+                  location.pathname === '/dashboard' ? (
+                    <Link
+                      to="/dashboard"
+                      aria-label="Профиль (текущая страница)"
+                      aria-current="page"
+                      className="h-12 w-12 flex items-center justify-center rounded-[var(--r-m)] cursor-default text-gold-accent shadow-[0_0_8px_theme(colors.gold-accent/35%)] focus:outline-none focus:[box-shadow:var(--ring)]"
+                    >
+                      <User className="w-7 h-7" aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/dashboard"
+                      aria-label="Открыть профиль"
+                      className="h-12 w-12 flex items-center justify-center rounded-[var(--r-m)] text-deep-teal shadow-[0_0_8px_theme(colors.deep-teal/35%)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                    >
+                      <User className="w-7 h-7" aria-hidden="true" />
+                    </Link>
+                  )
                 ) : (
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
                     aria-label="Вход / Регистрация"
-                    className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                    className="h-12 w-12 flex items-center justify-center rounded-[var(--r-m)] text-[--fg-strong] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
                   >
-                    <User className="w-6 h-6" aria-hidden="true" />
+                    <User className="w-7 h-7" aria-hidden="true" />
                   </button>
                 )}
               </div>
