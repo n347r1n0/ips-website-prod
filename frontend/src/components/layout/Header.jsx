@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button.jsx";
-import { User, LogOut, Home, Key } from "lucide-react";
+import { User, LogOut, Instagram, Send, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { socialLinks } from "@/config/socialLinks";
+import { VkIcon } from "@/components/ui/icons/VkIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/features/Auth/AuthModal";
 
@@ -42,13 +44,7 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
     { label: 'Галерея', id: 'gallery' },
   ];
 
-  // Mobile navigation items (without "Главная")
-  const mobileNavigationItems = [
-    { label: 'О клубе', id: 'about' },
-    { label: 'Календарь', id: 'calendar' },
-    { label: 'Рейтинг', id: 'rating' },
-    { label: 'Галерея', id: 'gallery' },
-  ];
+  // NOTE: Mobile section links removed in favor of social actions (see below)
 
   const handleSignOut = async () => {
     await signOut();
@@ -68,7 +64,8 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-20">
-            <Link to="/" className="cursor-pointer">
+            {/* Logo → scroll to Hero via hash (handled globally) */}
+            <Link to="/#hero" aria-label="Перейти к началу" className="cursor-pointer">
               <motion.div whileHover={{ scale: 1.05 }}>
                 <img
                   src="/logo/Logo_IPS.svg"
@@ -130,49 +127,63 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
                 )}
               </div>
 
-              {/* Mobile navigation - 2x2 grid with icons */}
-              <div className="md:hidden flex items-center justify-center">
-                {/* 2x2 navigation grid with consistent spacing */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3 mr-6">
-                  {mobileNavigationItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNavClick(item.id)}
-                      className="text-sm font-medium text-gray-300 hover:text-gold-accent transition-colors duration-300 px-2 py-1 text-center min-w-[80px]"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Right column icons with consistent spacing */}
-                <div className="flex flex-col gap-3">
-                  {/* Home icon */}
-                  <button
-                    onClick={() => handleNavClick('hero')}
-                    className="p-2 hover:bg-white/10 transition-colors duration-300 rounded-lg"
-                    aria-label="Главная"
+              {/* Mobile actions: socials + auth/profile (no section tabs) */}
+              <div className="md:hidden flex items-center gap-2 text-[--fg-strong]">
+                {/* Each action: min 44x44 hit-area, inherits currentColor */}
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Открыть Instagram"
+                  className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                >
+                  <Instagram className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={socialLinks.vk}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Открыть VK"
+                  className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                >
+                  <VkIcon className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={socialLinks.tgChannel}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Открыть Telegram-канал"
+                  className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                >
+                  <Send className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={socialLinks.tgBot}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Открыть Telegram-бот"
+                  className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                >
+                  <Bot className="w-5 h-5" aria-hidden="true" />
+                </a>
+                {/* Auth/Profile — bigger touch target, same icon */}
+                {user ? (
+                  <Link
+                    to="/dashboard"
+                    aria-label="Открыть профиль"
+                    className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
                   >
-                    <Home className="w-6 h-6 text-white hover:text-gold-accent transition-colors duration-300" />
+                    <User className="w-6 h-6" aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    aria-label="Вход / Регистрация"
+                    className="h-11 w-11 flex items-center justify-center rounded-[var(--r-m)] hover:opacity-90 focus:outline-none focus:[box-shadow:var(--ring)]"
+                  >
+                    <User className="w-6 h-6" aria-hidden="true" />
                   </button>
-                  
-                  {/* Auth icon - signature color with yellow on click */}
-                  {user ? (
-                    <Link to="/dashboard">
-                      <button className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg group">
-                        <User className="w-6 h-6 text-deep-teal group-hover:text-gold-accent group-active:text-yellow-400 transition-colors duration-300" />
-                      </button>
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => setIsAuthModalOpen(true)}
-                      className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg group"
-                      aria-label="Вход / Регистрация"
-                    >
-                      <Key className="w-6 h-6 text-deep-teal group-hover:text-gold-accent group-active:text-yellow-400 transition-colors duration-300" />
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
