@@ -39,6 +39,7 @@ import { GuestFormModal } from '@/components/features/RegistrationForm/GuestForm
 
 // DEV-паттерны, перенесённые в PROD
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { scrollToSection, extractSectionIdFromHash } from '@/lib/sectionNav';
 import { SectionAnchor } from '@/ui/patterns/SectionAnchor';
 import { useSectionNav } from '@/hooks/useSectionNav';
 import { FloatingChipWheel } from '@/ui/patterns/FloatingChipWheel';
@@ -78,6 +79,7 @@ export function HomePage({ onAuthModalOpen }) {
      ──────────────────────────────────────────────────────────────── */
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isGuestModalOpen, setGuestModalOpen] = useState(false);
+  const location = useLocation();
 
   /* ────────────────────────────────────────────────────────────────
      Medias — выбираем набор видео и автоперелистывание
@@ -109,6 +111,7 @@ export function HomePage({ onAuthModalOpen }) {
   };
 
 
+
   /* ────────────────────────────────────────────────────────────────
        Хэш-навигация (#section-id) — мягкая поддержка закладок
      Совместимость:
@@ -126,6 +129,21 @@ export function HomePage({ onAuthModalOpen }) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }, [location]);
+  /* ────────────────────────────────────────────────────────────────
+     Хэш-навигация (#about / #section-about) → централизованный скролл
+     ─ поддерживаем оба формата через extractSectionIdFromHash
+  ─────────────────────────────────────────────────────────────── */
+  useEffect(() => {
+    const hash = location?.hash;
+    if (!hash) return;
+    const id = extractSectionIdFromHash(hash);
+    if (!id) return;
+    // небольшая задержка — даём секциям отрендериться
+    const t = setTimeout(() => scrollToSection(id), 80);
+    return () => clearTimeout(t);
+  }, [location?.hash]);
+
+
 
 
 

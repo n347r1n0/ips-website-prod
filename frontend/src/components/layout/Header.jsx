@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button.jsx";
 import { User, LogOut, Instagram, Send, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { scrollToSection } from "@/lib/sectionNav";
 import { socialLinks } from "@/config/socialLinks";
 import { VkIcon } from "@/components/ui/icons/VkIcon";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,16 +26,18 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
 
   const handleNavClick = (sectionId) => {
     if (location.pathname !== '/') {
-      // Если не на главной странице, переходим с hash
+      // не на главной → отдаём роутеру переход на /#id
       navigate(`/#${sectionId}`);
     } else {
-      // Если уже на главной, просто скроллим
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      // на главной → мягкий централизованный скролл
+      scrollToSection(sectionId);
     }
   };
+
+
+
+
+
 
   const navigationItems = [
     { label: 'Главная', id: 'hero' },
@@ -56,16 +59,30 @@ export default function Header({ isAuthModalOpen, setIsAuthModalOpen }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
+
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'glassmorphic-panel border-b border-white/10'
+            // Активный хедер: стекло БЕЗ любых бордеров/рамок
+            ? 'backdrop-blur-[var(--glass-blur)] bg-[--glass-bg] border-none shadow-none'
             : 'bg-gradient-to-b from-black/50 to-transparent'
         }`}
+
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-20">
-            {/* Logo → scroll to Hero via hash (handled globally) */}
-            <Link to="/#hero" aria-label="Перейти к началу" className="cursor-pointer">
+            {/* Logo: если уже на "/", ловим клик и скроллим к Hero; иначе обычный переход на /#hero */}
+            <Link
+              to="/#hero"
+              aria-label="Перейти к началу"
+              className="cursor-pointer"
+              onClick={(e) => {
+                if (location.pathname === '/') {
+                  e.preventDefault();
+                  scrollToSection('hero');
+                }
+              }}
+            >
+
               <motion.div whileHover={{ scale: 1.05 }}>
                 <img
                   src="/logo/Logo_IPS.svg"
