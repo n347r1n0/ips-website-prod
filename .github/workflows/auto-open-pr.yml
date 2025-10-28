@@ -1,0 +1,129 @@
+name: Auto open/update PR on branch push
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+      - 'refactor/**'
+
+permissions:
+  contents: write        # нужно для коммита очистки meta-файлов
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Read PR meta (title/body)
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title=""
+          body=""
+
+          if [[ -f ".github/pr.md" ]]; then
+            # Первая строка начинающаяся с '# ' — это заголовок
+            title="$(sed -n 's/^# \+\(.*\)$/\1/p' .github/pr.md | head -n1)"
+            # Тело — всё после первой заголовочной строки
+            awk 'f{print} /^# /{f=1}' .github/pr.md | tail -n +2 > /tmp/pr_body.md
+            body="$(cat /tmp/pr_body.md)"
+          else
+            # Альтернатива: раздельные файлы
+            [[ -f ".github/pr-title.txt" ]] && title="$(cat .github/pr-title.txt)"
+            [[ -f ".github/pr-body.md"  ]] && body="$(cat .github/pr-body.md)"
+          fi
+
+          # Фолбэки
+          if [[ -z "$title" ]]; then
+            title="$(git log -1 --pretty=%s)"
+          fi
+          if [[ -z "$body" ]]; then
+            body=$'Auto-opened PR on push.\n\nBranch: '"${GITHUB_REF#refs/heads/}"
+          fi
+
+          # Выводы для следующих шагов
+          {
+            echo "title<<EOF"
+            echo "$title"
+            echo "EOF"
+            echo "body<<EOF"
+            echo "$body"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+
+      - name: Create or update PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const head  = context.ref.replace('refs/heads/','');
+            const base  = process.env.PR_BASE || 'main';
+            const title = (process.env.PR_TITLE || '').trim() || '(no title)';
+            const body  = (process.env.PR_BODY  || '').trim() || `Auto-opened PR\n\nBranch: ${head}`;
+      
+            // ищем уже открытый PR из этой ветки
+            const { data: existing } = await github.rest.pulls.list({
+              owner, repo, state: 'open', head: `${owner}:${head}`, base
+            });
+      
+            if (existing.length > 0) {
+              const pr = existing[0];
+              await github.rest.pulls.update({ owner, repo, pull_number: pr.number, title, body });
+              core.setOutput('number', pr.number.toString());
+              return;
+            }
+      
+            const { data: pr } = await github.rest.pulls.create({ owner, repo, head, base, title, body, draft: false });
+            core.setOutput('number', pr.number.toString());
+        env:
+          PR_TITLE: ${{ steps.meta.outputs.title }}
+          PR_BODY:  ${{ steps.meta.outputs.body }}
+          PR_BASE:  ${{ vars.PR_BASE || 'main' }}
+      
+
+      - name: Optionally add labels/reviewers from .github/pr-meta.json
+        if: ${{ hashFiles('.github/pr-meta.json') != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const meta = JSON.parse(fs.readFileSync('.github/pr-meta.json','utf8'));
+            const number = Number(core.getInput('number'));
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+
+            if (meta.labels?.length) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: meta.labels });
+            }
+            if (meta.reviewers?.length) {
+              await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers: meta.reviewers });
+            }
+        env:
+          number: ${{ steps.pr.outputs.number }}
+
+      - name: Cleanup PR meta files (optional via repo variable)
+        if: ${{ vars.CLEANUP_PR_META == 'true' }}
+        run: |
+          set -e
+          rm -f .github/pr.md .github/pr-title.txt .github/pr-body.md .github/pr-meta.json || true
+          if git diff --quiet; then
+            echo "No meta files to clean."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(pr): remove PR meta after PR #${{ steps.pr.outputs.number }}"
+          git push origin "${GITHUB_REF#refs/heads/}"
