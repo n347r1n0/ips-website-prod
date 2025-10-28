@@ -53,6 +53,11 @@ jobs:
             body=$'Auto-opened PR on push.\n\nBranch: '"${GITHUB_REF#refs/heads/}"
           fi
 
+          has_meta=0
+          if [[ -f ".github/pr.md" || -f ".github/pr-title.txt" || -f ".github/pr-body.md" ]]; then
+            has_meta=1
+          fi
+
           {
             echo "title<<EOF"
             echo "$title"
@@ -60,6 +65,7 @@ jobs:
             echo "body<<EOF"
             echo "$body"
             echo "EOF"
+            echo "has_meta=$has_meta"
           } >> "$GITHUB_OUTPUT"
 
       - name: Warn if title not Conventional Commit (non-blocking)
@@ -77,6 +83,7 @@ jobs:
           PR_TITLE: ${{ steps.meta.outputs.title }}
           PR_BODY:  ${{ steps.meta.outputs.body }}
           PR_BASE:  ${{ vars.PR_BASE || 'main' }}
+          HAS_META: ${{ steps.meta.outputs.has_meta }}
         with:
           script: |
             const owner = context.repo.owner;
@@ -85,6 +92,7 @@ jobs:
             const base  = process.env.PR_BASE || 'main';
             const title = (process.env.PR_TITLE || '').trim() || '(no title)';
             const body  = (process.env.PR_BODY  || '').trim() || `Auto-opened PR\n\nBranch: ${head}`;
+            const hasMeta = process.env.HAS_META === '1';
 
             // ищем уже открытый PR из этой ветки
             const { data: existing } = await github.rest.pulls.list({
@@ -93,6 +101,11 @@ jobs:
 
             if (existing.length > 0) {
               const pr = existing[0];
+              if (!hasMeta) {
+                core.info('PR exists and no PR meta present — leaving title/body unchanged.');
+                core.setOutput('number', pr.number.toString());
+                return;
+              }
               await github.rest.pulls.update({ owner, repo, pull_number: pr.number, title, body });
               core.setOutput('number', pr.number.toString());
               return;
