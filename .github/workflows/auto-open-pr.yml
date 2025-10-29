@@ -34,9 +34,7 @@ jobs:
           title=""
           body=""
           if [[ -f ".github/pr.md" ]]; then
-            # Заголовок = первая строка "# ..."
             title="$(sed -n 's/^# \+\(.*\)$/\1/p' .github/pr.md | head -n1)"
-            # Тело = всё после первой заголовочной строки
             awk 'f{print} /^# /{f=1}' .github/pr.md | tail -n +2 > /tmp/pr_body.md || true
             body="$(cat /tmp/pr_body.md || true)"
           else
@@ -62,9 +60,21 @@ jobs:
             echo "::warning::PR title is not Conventional Commit: '$title'"
           fi
 
+      # Detect PAT presence safely for later if-conditions
+      - name: Detect PAT presence
+        id: auth
+        env:
+          AUTO_PR_TOKEN: ${{ secrets.AUTO_PR_TOKEN }}
+        run: |
+          if [ -n "$AUTO_PR_TOKEN" ]; then
+            echo "has_pat=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_pat=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # ── Create/update PR using PAT (author = you)
       - name: Create or update PR (author = me via PAT)
-        if: ${{ secrets.AUTO_PR_TOKEN }}
+        if: ${{ steps.auth.outputs.has_pat == 'true' }}
         id: pr_pat
         uses: actions/github-script@v7
         with:
@@ -106,7 +116,7 @@ jobs:
 
       # ── Bot fallback
       - name: Create or update PR (bot fallback)
-        if: ${{ !secrets.AUTO_PR_TOKEN }}
+        if: ${{ steps.auth.outputs.has_pat != 'true' }}
         id: pr
         uses: actions/github-script@v7
         with:
