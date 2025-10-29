@@ -100,7 +100,7 @@ jobs:
             if (existing.length > 0) {
               const pr = existing[0];
               if (!hasMeta) {
-                core.info('PR exists; no meta → keep title/body.');
+                core.info('PR exists; no meta -> keep title/body.');
                 core.setOutput('number', pr.number.toString());
                 return;
               }
