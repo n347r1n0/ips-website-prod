@@ -70,23 +70,29 @@ jobs:
             const number = context.payload.pull_request.number;
             const marker = '[[CODEX-REVIEW-PING]]';
 
-            // Find existing bot ping to avoid duplicates
+            // Get existing comments and detect existing ping
             const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number, per_page: 100 });
-            const exists = comments.some(c =>
-              c.user?.type === 'Bot' && c.body && c.body.includes(marker)
-            );
+            const existing = comments.find(c => c.user?.type === 'Bot' && c.body && c.body.includes(marker));
 
-            if (exists) {
-              core.info('Ping comment already present — skipping.');
+            const body = [
+              marker,
+              '@codex review',
+              'Codex, please review this PR per your system rules and the pinned task context.',
+              `• PR: #${number} — "${context.payload.pull_request.title}"`,
+              `• Branch: ${context.payload.pull_request.head.ref}`,
+              'Use the repository CODEX.md + the PR\'s pinned brief for scope/criteria.'
+            ].join('\n');
+
+            if (existing) {
+              if (existing.body.includes('@codex review')) {
+                core.info('Ping with marker and @codex already present — skipping.');
+              } else {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+                core.info('Updated existing ping comment to include @codex review.');
+              }
             } else {
-              const body = [
-                marker,
-                'Codex, please review this PR per your system rules and the pinned task context.',
-                `• PR: #${number} — "${context.payload.pull_request.title}"`,
-                `• Branch: ${context.payload.pull_request.head.ref}`,
-                'Use the repository CODEX.md + the PR\'s pinned brief for scope/criteria.'
-              ].join('\n');
               await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+              core.info('Created new ping comment with @codex review.');
             }
 
       - name: Ping Codex to review
