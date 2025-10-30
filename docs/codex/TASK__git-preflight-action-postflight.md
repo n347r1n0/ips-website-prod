@@ -1,6 +1,4 @@
-# 1) Шаблон брифа для задач CODEX
-
-**Путь:** `docs/codex/TASK__git-preflight-action-postflight.md`
+#  Шаблон брифа для задач CODEX `docs/codex/TASK__git-preflight-action-postflight.md`
 
 ````md
 # Задача (CODEX): Preflight → Action → Postflight
@@ -32,7 +30,7 @@
   ```bash
   git switch <feature-branch>
   ```
-* (Опционально) подтянуть свежий main, если начинаешь новую ветку:
+* (Опционально) подтянуть свежий main при старте новой ветки:
 
   ```bash
   git switch main
@@ -47,13 +45,13 @@
 1. Внеси правки по задаче.
 2. Подготовь файлы для авто-PR **в этой же ветке**:
 
-   * `.github/pr.md` — заголовок (первая строка `# ...`) и тело PR (см. шаблон ниже)
+   * `.github/pr.md` — заголовок (первая строка `# type(scope): subject`) и тело PR (см. шаблон ниже)
    * (опционально) `.github/pr-meta.json` — labels/reviewers, например:
 
      ```json
      { "labels": ["mobile","ui"], "reviewers": ["n347r1n0"] }
      ```
-3. Проиндексируй и закоммить:
+3. Проиндексируй и запушь:
 
    ```bash
    git add -A
@@ -71,20 +69,20 @@
 * Проверь, что PR появился/обновился:
 
   * вкладка **Pull requests** (фильтр по твоей ветке), или
-  * Actions → последний ран → лог шага «Create or update PR».
+  * **Actions** → последний ран → лог шага «Create or update PR».
 * Если нужно поправить заголовок/описание PR:
 
-  * просто отредактируй `.github/pr.md` и сделай `git add/commit/push` — Action обновит PR.
-* (Опционально) Автоудаление `.github/pr.*`:
+  * отредактируй `.github/pr.md` и сделай `git add/commit/push` — Action обновит PR.
+* Авто-удаление `.github/pr.*`:
 
-  * если в настройках репо включена переменная `CLEANUP_PR_META=true`, Action сам коммитом удалит meta-файлы после открытия PR.
+  * В настройках репо включена переменная `CLEANUP_PR_META=true`, Action сам коммитом удалит meta-файлы после открытия PR.
 
 ---
 
 ## 4) PR body — шаблон (вкладывается в `.github/pr.md`)
 
 ```md
-# <type(scope): subject>
+# feat(header/mobile): replace section tabs with social actions + big auth
 
 **Почему**
 Коротко — зачем эта правка.
@@ -111,7 +109,7 @@
 ## 5) Частые ошибки и как избежать
 
 * ❌ Создание PR через `gh`/API → ✅ не нужно: PR откроет Action.
-* ❌ Пустой `.github/pr.md` → ✅ тогда заголовок возьмётся из последнего коммита, а тело — из fallback (неудобно).
+* ❌ Пустой `.github/pr.md` → ✅ тогда заголовок возьмётся из последнего коммита, тело — из fallback.
 * ❌ Пуш не в ту ветку → ✅ проверь `git branch -vv`.
 * ❌ Большие несвязанные правки в одном PR → ✅ дроби: один смысл — один PR.
 
@@ -119,8 +117,7 @@
 
 ---
 
-# 2) Шаблон файла для авто-PR  
-**Путь:** `.github/pr.md` (кладётся в ФИЧЕ-ветку каждым исполнителем)
+### `.github/pr.md` (примерный шаблон (ты пишешь каждый раз необходимый), кладётся в фиче-ветку)
 
 ```md
 # feat(header/mobile): replace section tabs with social actions + big auth
@@ -147,10 +144,22 @@
 - Социальные URL — placeholders, заменим на реальные перед релизом
 ````
 
-**(опционально)** `.github/pr-meta.json`:
+---
+
+### `.github/pr-meta.json` (опционально)
 
 ```json
 {
   "labels": ["mobile", "ui", "ready-for-review"],
   "reviewers": ["n347r1n0"]
 }
+
+
+
+
+
+
+
+
+
+
