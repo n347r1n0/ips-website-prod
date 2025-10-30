@@ -29,26 +29,28 @@ jobs:
         if: ${{ !github.event.pull_request.draft }}
         uses: actions/github-script@v7
         env:
-          CODEX_REVIEWERS: ${{ vars.CODEX_REVIEWERS }} # comma-separated, e.g. "your-codex-bot,co-reviewer"
+          CODEX_REVIEWERS: ${{ vars.CODEX_REVIEWERS }} # comma-separated, e.g. "user1,user2"
         with:
           script: |
             const fs = require('fs');
-            const owner = context.repo.owner;
-            const repo  = context.repo.repo;
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
             const number = context.payload.pull_request.number;
 
+            // Collect reviewers from .github/pr-meta.json (if present)
             let reviewers = [];
             try {
-              const raw = fs.readFileSync('.github/pr-meta.json','utf8');
+              const raw = fs.readFileSync('.github/pr-meta.json', 'utf8');
               const meta = JSON.parse(raw);
               if (Array.isArray(meta.reviewers)) {
-                reviewers = reviewers.concat(meta.reviewers.map(s => String(s).trim()).filter(Boolean));
+                reviewers = reviewers.concat(meta.reviewers.map(s => String(s).trim().replace(/^@+/, '')).filter(Boolean));
               }
-            } catch (_) { /* no meta file */ }
+            } catch (_) { /* no meta file — ignore */ }
 
+            // Collect reviewers from repo var
             const fromVar = (process.env.CODEX_REVIEWERS || '')
               .split(',')
-              .map(s => s.trim())
+              .map(s => s.trim().replace(/^@+/, ''))
               .filter(Boolean);
 
             reviewers = [...new Set([...reviewers, ...fromVar])];
@@ -60,58 +62,55 @@ jobs:
               core.info(`Requested reviewers: ${reviewers.join(', ')}`);
             }
 
-      - name: Ping Codex to review (idempotent)
+      - name: Ping Codex to review (commit-aware)
         if: ${{ !github.event.pull_request.draft }}
         uses: actions/github-script@v7
         with:
           script: |
-            const owner = context.repo.owner;
-            const repo  = context.repo.repo;
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
             const number = context.payload.pull_request.number;
-            const marker = '[[CODEX-REVIEW-PING]]';
+
+            const markerBase = '[[CODEX-REVIEW-PING]]';
+            const sha = context.payload.pull_request.head.sha.slice(0, 12);
+            const marker = `${markerBase}@${sha}`;
 
             // Read comments
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number, per_page: 100 });
-            const existing = comments.find(c => c.user?.type === 'Bot' && c.body && c.body.includes(marker));
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number: number, per_page: 100
+            });
 
-            // If a proper ping already exists — skip
-            if (existing && existing.body.includes('@codex review')) {
-              core.info('Ping with marker + @codex review already present — skipping.');
+            const isPingForSha = c => c.user?.type === 'Bot' && c.body && c.body.includes(marker);
+            const isAnyPing    = c => c.user?.type === 'Bot' && c.body && c.body.includes(markerBase);
+
+            const current = comments.find(isPingForSha);
+            const oldPings = comments.filter(isAnyPing).filter(c => !isPingForSha(c));
+
+            if (current) {
+              core.info(`Codex ping already exists for ${sha} — skip.`);
               return;
             }
 
-            // Always create a NEW comment to fire the connector
             const body = [
               marker,
               '@codex review',
               'Codex, please review this PR per your system rules and the pinned task context.',
               `• PR: #${number} — "${context.payload.pull_request.title}"`,
               `• Branch: ${context.payload.pull_request.head.ref}`,
+              `• Head: ${sha}`,
               'Use the repository CODEX.md + the PR\'s pinned brief for scope/criteria.'
             ].join('\n');
 
             const { data: created } = await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
-            core.info(`Created ping comment ${created.id} with @codex review trigger.`);
+            core.info(`Created Codex ping ${created.id} for ${sha}.`);
 
-            // Optional tidy-up: remove legacy ping without trigger
-            if (existing && !existing.body.includes('@codex review')) {
+            // Clean up previous pings so the thread stays tidy
+            for (const c of oldPings) {
               try {
-                await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
-                core.info(`Deleted legacy ping ${existing.id} (no trigger).`);
-              } catch { core.info('Could not delete legacy ping — ignore.'); }
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
+                core.info(`Deleted old Codex ping ${c.id}.`);
+              } catch { /* ignore */ }
             }
-
-      - name: Ping Codex to review
-        if: false
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Codex, please review this PR per your system rules and the pinned task context.
-            • PR: #${{ github.event.pull_request.number }} — "${{ github.event.pull_request.title }}"
-            • Branch: ${{ github.event.pull_request.head.ref }}
-            Use the repository CODEX.md + the PR's pinned brief for scope/criteria.
 
   build-check:
     runs-on: ubuntu-latest
