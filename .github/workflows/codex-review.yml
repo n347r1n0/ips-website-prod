@@ -105,12 +105,12 @@ jobs:
             core.info(`Created Codex ping ${created.id} for ${sha}.`);
 
             // Clean up previous pings so the thread stays tidy
-            for (const c of oldPings) {
-              try {
-                await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
-                core.info(`Deleted old Codex ping ${c.id}.`);
-              } catch { /* ignore */ }
-            }
+//          for (const c of oldPings) {
+//            try {
+//              await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
+//              core.info(`Deleted old Codex ping ${c.id}.`);
+//            } catch { /* ignore */ }
+//          }
 
   build-check:
     runs-on: ubuntu-latest
