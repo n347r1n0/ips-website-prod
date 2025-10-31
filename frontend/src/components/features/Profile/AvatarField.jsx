@@ -349,7 +349,7 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             aria-invalid={!urlValid || (urlInput && !urlPreviewOk)}
-            className={`w-full rounded-lg p-3 bg-[var(--panel-bg)] border ${(!urlValid || (urlInput && !urlPreviewOk)) ? 'border-amber-400/50' : 'border-[var(--glass-border)]'} text-white focus:outline-none focus:ring-2 focus:ring-[var(--glass-border)]`}
+            className={`w-full rounded-lg p-3 bg-[var(--panel-bg)] border ${(!urlValid || (urlInput && !urlPreviewOk)) ? 'border-[var(--glass-hover-border)]' : 'border-[var(--glass-border)]'} text-white focus:outline-none focus:ring-2 focus:ring-[var(--glass-border)]`}
           />
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="button" onClick={applyUrl} className="btn-clay btn-primary btn-md">
@@ -406,4 +406,3 @@ function dataURLToBlob(dataURL) {
 }
 
 export default AvatarField;
-
