@@ -328,6 +328,7 @@ export function DashboardPage() {
               </Button>
               <Button
                 type="submit"
+                form="profile-edit-form"
                 className="btn-clay btn-primary btn-md"
                 disabled={profileLoading}
               >
@@ -336,7 +337,7 @@ export function DashboardPage() {
             </>
           )}
         >
-          <form className="space-y-4" onSubmit={handleProfileUpdate}>
+          <form id="profile-edit-form" className="space-y-4" onSubmit={handleProfileUpdate}>
             <div>
               <label className="text-white/80 text-sm font-medium mb-2 block">Никнейм</label>
               <input
