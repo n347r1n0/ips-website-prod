@@ -14,10 +14,13 @@ import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Button } from '@/components/ui/Button';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/Toast';
+import { ModalBase } from '@/components/ui/ModalBase/ModalBase';
+import { AvatarField } from '@/components/features/Profile/AvatarField';
 
 export function DashboardPage() {
   const { user, profile, signOut, isAdmin, loadUserProfile } = useAuth();
   const toast = useToast();
+  const [isMobile, setIsMobile] = useState(false);
   
   // State for dashboard data
   const [dashboardData, setDashboardData] = useState({
@@ -149,6 +152,14 @@ export function DashboardPage() {
     loadDashboardData();
   }, [user, toast]);
 
+  // Viewport for fullScreen modal on mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 480);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   // Initialize profile form when profile loads
   useEffect(() => {
     if (profile) {
@@ -252,8 +263,8 @@ export function DashboardPage() {
         >
           <GlassPanel>
             <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center space-x-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div className="flex flex-col min-[381px]:flex-row items-center gap-4 sm:gap-6">
                   {/* Avatar */}
                   <div className="w-20 h-20 rounded-full neumorphic-inset flex items-center justify-center overflow-hidden">
                     {profile?.avatar_url ? (
@@ -266,7 +277,7 @@ export function DashboardPage() {
                   </div>
                   
                   {/* Profile Info */}
-                  <div>
+                  <div className="text-center min-[381px]:text-left">
                     <h1 className="text-3xl font-brand-role font-bold text-white mb-2">
                       Добро пожаловать, {displayName}!
                     </h1>
@@ -278,7 +289,7 @@ export function DashboardPage() {
                 </div>
                 
                 {/* Action buttons */}
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <Button
                     onClick={() => setIsEditingProfile(true)}
                     className="btn-clay btn-secondary p-2"
@@ -298,75 +309,69 @@ export function DashboardPage() {
           </GlassPanel>
         </motion.div>
 
-        {/* Profile Edit Modal */}
-        {isEditingProfile && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50"
-            onClick={() => setIsEditingProfile(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="glassmorphic-panel rounded-2xl p-6 max-w-md w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-xl font-brand-role font-bold text-white mb-4">Редактировать профиль</h2>
-              <form onSubmit={handleProfileUpdate} className="space-y-4">
-                <div>
-                  <label className="text-white/80 text-sm font-medium mb-2 block">Никнейм</label>
-                  <input
-                    type="text"
-                    value={profileForm.nickname}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, nickname: e.target.value }))}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-gold-accent/50"
-                    placeholder="Ваш игровой никнейм"
-                  />
-                </div>
-                <div>
-                  <label className="text-white/80 text-sm font-medium mb-2 block">Полное имя</label>
-                  <input
-                    type="text"
-                    value={profileForm.full_name}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-gold-accent/50"
-                    placeholder="Ваше полное имя"
-                  />
-                </div>
-                <div>
-                  <label className="text-white/80 text-sm font-medium mb-2 block">URL аватара</label>
-                  <input
-                    type="url"
-                    value={profileForm.avatar_url}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, avatar_url: e.target.value }))}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-gold-accent/50"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="flex space-x-3 pt-4">
-                  <Button
-                    type="submit"
-                    loading={profileLoading}
-                    className="btn-clay btn-primary btn-md flex-1"
-                  >
-                    Сохранить
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setIsEditingProfile(false)}
-                    className="btn-neutral btn-md"
-                  >
-                    Отмена
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
+        {/* Profile Edit Modal (ModalBase with portal/priority; fullScreen allowed on mobile) */}
+        <ModalBase
+          isOpen={isEditingProfile}
+          onClose={() => setIsEditingProfile(false)}
+          title="Редактировать профиль"
+          usePortal
+          priority
+          fullScreen={isMobile}
+          footerActions={(
+            <>
+              <Button
+                type="button"
+                onClick={() => setIsEditingProfile(false)}
+                className="btn-neutral btn-md"
+              >
+                Отмена
+              </Button>
+              <Button
+                type="button"
+                onClick={handleProfileUpdate}
+                className="btn-clay btn-primary btn-md"
+                disabled={profileLoading}
+              >
+                Сохранить
+              </Button>
+            </>
+          )}
+        >
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleProfileUpdate(e); }}>
+            <div>
+              <label className="text-white/80 text-sm font-medium mb-2 block">Никнейм</label>
+              <input
+                type="text"
+                value={profileForm.nickname}
+                onChange={(e) => setProfileForm(prev => ({ ...prev, nickname: e.target.value }))}
+                className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-gold-accent/50"
+                placeholder="Ваш игровой никнейм"
+              />
+            </div>
+            <div>
+              <label className="text-white/80 text-sm font-medium mb-2 block">Полное имя</label>
+              <input
+                type="text"
+                value={profileForm.full_name}
+                onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-gold-accent/50"
+                placeholder="Ваше полное имя"
+              />
+            </div>
+            <div>
+              <AvatarField
+                value={profileForm.avatar_url}
+                onChange={(url) => setProfileForm(prev => ({ ...prev, avatar_url: url }))}
+                initialValue={profile?.avatar_url || ''}
+                telegramHint={Boolean(profile?.telegram_id || (profile?.avatar_url && /t\.me|telegram|tg\./i.test(profile.avatar_url)))}
+                userId={user?.id || ''}
+              />
+            </div>
+          </form>
+        </ModalBase>
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
@@ -392,7 +397,7 @@ export function DashboardPage() {
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           {/* Upcoming Registrations */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
