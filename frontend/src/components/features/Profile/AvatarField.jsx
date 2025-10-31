@@ -190,8 +190,8 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
         upsert: true,
       });
       if (upErr) throw upErr;
-      const { data: pub } = await supabase.storage.from('avatars').getPublicUrl(path);
-      const publicUrl = pub?.publicUrl || pub?.publicURL || pub?.public_url || pub?.public_url; // tolerate
+      const { data } = await supabase.storage.from('avatars').getPublicUrl(path);
+      const publicUrl = data?.publicUrl;
       if (!publicUrl) throw new Error('Не удалось получить public URL');
       onChange(publicUrl);
       toast.success('Аватар загружен');

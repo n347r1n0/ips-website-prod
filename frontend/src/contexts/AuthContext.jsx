@@ -357,6 +357,7 @@ export function AuthProvider({ children }) {
     nickname: profile?.nickname,
     role: profile?.role,
     isAdmin: profile?.role === 'admin',
+    loadUserProfile,
   };
 
   return (
