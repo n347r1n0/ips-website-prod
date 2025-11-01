@@ -255,8 +255,7 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
         <div className="space-y-4">
           <input
             type="file"
-            accept="image/*"
-            capture="environment"
+            accept="image/*,.jpg,.jpeg,.png,.webp"
             onChange={handleFileChange}
             className="block w-full text-sm text-white/80 file:mr-3 file:rounded-lg file:border file:border-[var(--glass-border)] file:bg-[var(--panel-bg)] file:px-3 file:py-2 file:text-white/90"
           />
