@@ -316,7 +316,6 @@ export function DashboardPage() {
           title="Редактировать профиль"
           usePortal
           priority
-          fullScreen={isMobile}
           footerActions={(
             <>
               <Button
