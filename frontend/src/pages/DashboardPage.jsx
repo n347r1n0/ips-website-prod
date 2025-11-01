@@ -1,6 +1,6 @@
 // frontend/src/pages/DashboardPage.jsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LogOut, User, Trophy, Calendar, Settings, Edit3, Camera, 
@@ -20,6 +20,7 @@ import { AvatarField } from '@/components/features/Profile/AvatarField';
 export function DashboardPage() {
   const { user, profile, signOut, isAdmin, loadUserProfile } = useAuth();
   const toast = useToast();
+  const avatarRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   
   // State for dashboard data
@@ -203,13 +204,23 @@ export function DashboardPage() {
     setProfileLoading(true);
     try {
       await supabase.auth.getSession();
+      // Prepare avatar based on draft/delete flags from AvatarField
+      let avatarUrl = (profileForm.avatar_url || '').trim();
+      if (avatarRef.current?.isDeleteMarked?.()) {
+        avatarUrl = '';
+      } else if (avatarRef.current?.hasDraft?.()) {
+        const applied = await avatarRef.current.applyDraft();
+        if (applied?.url) {
+          avatarUrl = applied.url;
+        }
+      }
       
       const { error } = await supabase
         .from('club_members')
         .update({
           nickname: profileForm.nickname.trim(),
           full_name: profileForm.full_name.trim(),
-          avatar_url: profileForm.avatar_url.trim()
+          avatar_url: avatarUrl
         })
         .eq('user_id', user.id);
 
@@ -359,6 +370,7 @@ export function DashboardPage() {
             </div>
             <div>
               <AvatarField
+                ref={avatarRef}
                 value={profileForm.avatar_url}
                 onChange={(url) => setProfileForm(prev => ({ ...prev, avatar_url: url }))}
                 initialValue={profile?.avatar_url || ''}

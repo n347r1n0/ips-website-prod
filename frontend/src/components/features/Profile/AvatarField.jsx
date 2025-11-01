@@ -1,6 +1,6 @@
 // PROD:/frontend/src/components/features/Profile/AvatarField.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+// Buttons removed for this field (single Save handled by parent)
 import { useToast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -16,7 +16,10 @@ import { supabase } from '@/lib/supabaseClient';
  *  - telegramHint?: boolean
  *  - userId: string
  */
-export function AvatarField({ value, onChange, initialValue = '', telegramHint = false, userId }) {
+export const AvatarField = forwardRef(function AvatarField(
+  { value, onChange, initialValue = '', telegramHint = false, userId },
+  ref
+) {
   const toast = useToast();
 
   const [mode, setMode] = useState('file'); // 'file' | 'url'
@@ -27,10 +30,11 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
   const [urlPreviewOk, setUrlPreviewOk] = useState(!!value);
 
   // File mode state
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null); // draft file (not uploaded yet)
   const [objectUrl, setObjectUrl] = useState('');
   const imgRef = useRef(null);
   const [imgNatural, setImgNatural] = useState({ w: 0, h: 0 });
+  const [deleteMarked, setDeleteMarked] = useState(false);
 
   const containerSize = 220; // ~200–240px as per spec
   const containerRef = useRef(null);
@@ -173,66 +177,68 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
     });
   };
 
-  const handleUpload = async () => {
-    try {
-      const blob = await renderToCanvasBlob();
-      if (!blob) {
-        toast.error('Выберите изображение для загрузки');
-        return;
+  // Imperative API for parent submit flow
+  useImperativeHandle(ref, () => ({
+    hasDraft() {
+      const urlDraft = mode === 'url' && urlInput && urlValid && urlPreviewOk && urlInput.trim() !== (value || '');
+      return !!file || !!urlDraft;
+    },
+    async applyDraft() {
+      try {
+        if (deleteMarked) return null;
+        // URL draft
+        const isUrlDraft = mode === 'url' && urlInput && urlValid && urlPreviewOk;
+        if (isUrlDraft) {
+          return { url: urlInput.trim() };
+        }
+        // File draft → crop+upload
+        if (!file) return null;
+        if (!userId) throw new Error('Пользователь не определён');
+        const blob = await renderToCanvasBlob();
+        if (!blob) throw new Error('Нет данных для загрузки');
+        const path = `users/${userId}/avatar_${Date.now()}.jpg`;
+        const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+        if (upErr) throw upErr;
+        const { data } = await supabase.storage.from('avatars').getPublicUrl(path);
+        const publicUrl = data?.publicUrl;
+        if (!publicUrl) throw new Error('Не удалось получить public URL');
+        return { url: publicUrl, storagePath: path };
+      } catch (e) {
+        console.error('Avatar applyDraft error:', e);
+        toast.error('Не удалось подготовить аватар');
+        return null;
       }
-      if (!userId) {
-        toast.error('Пользователь не определён');
-        return;
-      }
-      const path = `users/${userId}/avatar_${Date.now()}.jpg`;
-      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, {
-        contentType: 'image/jpeg',
-        upsert: true,
-      });
-      if (upErr) throw upErr;
-      const { data } = await supabase.storage.from('avatars').getPublicUrl(path);
-      const publicUrl = data?.publicUrl;
-      if (!publicUrl) throw new Error('Не удалось получить public URL');
-      onChange(publicUrl);
-      toast.success('Аватар загружен');
-    } catch (e) {
-      console.error('Avatar upload error:', e);
-      toast.error('Хранилище аватаров не сконфигурировано');
-      setMode('url');
-    }
-  };
-
-  const clearValue = () => {
-    onChange('');
-    setUrlInput('');
-    setUrlPreviewOk(false);
-    setFile(null);
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    setObjectUrl('');
-  };
-
-  const resetToInitial = () => {
-    onChange(initialValue || '');
-    setUrlInput(initialValue || '');
-    setUrlPreviewOk(!!initialValue);
-    setFile(null);
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    setObjectUrl('');
-  };
-
-  const applyUrl = () => {
-    if (urlInput && urlValid && urlPreviewOk) {
-      onChange(urlInput.trim());
-      toast.success('URL применён');
-    } else {
-      toast.error('Укажите валидный URL изображения');
-    }
-  };
+    },
+    clearDraft() {
+      setFile(null);
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setObjectUrl('');
+      setUrlInput(initialValue || '');
+      setUrlPreviewOk(!!initialValue);
+      setScale(1);
+      setOffset({ x: 0, y: 0 });
+    },
+    isDeleteMarked() { return !!deleteMarked; },
+    clearDeleteMark() { setDeleteMarked(false); },
+  }));
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <label className="text-white/90 text-sm font-medium">Аватар</label>
+        <div className="flex items-center gap-3">
+          {(initialValue || value) && !deleteMarked && (
+            <button type="button" onClick={() => setDeleteMarked(true)} className="text-secondary text-xs underline">
+              Удалить
+            </button>
+          )}
+          {deleteMarked && (
+            <span className="text-secondary text-xs">Будет удалён при сохранении</span>
+          )}
+        </div>
         <div className="inline-flex rounded-lg border border-[var(--glass-border)] overflow-hidden">
           <button
             type="button"
@@ -255,7 +261,7 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
         <div className="space-y-4">
           <input
             type="file"
-            accept="image/*,.jpg,.jpeg,.png,.webp"
+            accept="image/*"
             onChange={handleFileChange}
             className="block w-full text-sm text-white/80 file:mr-3 file:rounded-lg file:border file:border-[var(--glass-border)] file:bg-[var(--panel-bg)] file:px-3 file:py-2 file:text-white/90"
           />
@@ -315,18 +321,20 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
                     className="w-full"
                   />
                 </div>
-
-                <div className="flex items-center gap-3 flex-wrap">
-                  <Button type="button" onClick={handleUpload} className="btn-clay btn-primary btn-md">
-                    Загрузить
-                  </Button>
-                  <Button type="button" onClick={clearValue} className="btn-neutral btn-md">
-                    Очистить
-                  </Button>
-                  <Button type="button" onClick={resetToInitial} className="btn-glass btn-md">
-                    Сбросить
-                  </Button>
-                </div>
+                { (file || (mode==='url' && urlInput)) && (
+                  <button type="button" className="text-secondary text-xs underline" onClick={() => {
+                    // cancel local changes
+                    setFile(null);
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                    setObjectUrl('');
+                    setUrlInput(initialValue || '');
+                    setUrlPreviewOk(!!initialValue);
+                    setScale(1);
+                    setOffset({ x: 0, y: 0 });
+                  }}>
+                    Отменить изменения
+                  </button>
+                )}
                 <p className="text-secondary text-xs">Финальный размер: 512×512 JPEG</p>
               </div>
             </div>
@@ -350,17 +358,14 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
             aria-invalid={!urlValid || (urlInput && !urlPreviewOk)}
             className={`w-full rounded-lg p-3 bg-[var(--panel-bg)] border ${(!urlValid || (urlInput && !urlPreviewOk)) ? 'border-[var(--glass-hover-border)]' : 'border-[var(--glass-border)]'} text-white focus:outline-none focus:ring-2 focus:ring-[var(--glass-border)]`}
           />
-          <div className="flex items-center gap-3 flex-wrap">
-            <Button type="button" onClick={applyUrl} className="btn-clay btn-primary btn-md">
-              Применить URL
-            </Button>
-            <Button type="button" onClick={clearValue} className="btn-neutral btn-md">
-              Очистить
-            </Button>
-            <Button type="button" onClick={resetToInitial} className="btn-glass btn-md">
-              Сбросить
-            </Button>
-          </div>
+          {(mode==='url' && urlInput) && (
+            <button type="button" className="text-secondary text-xs underline" onClick={() => {
+              setUrlInput(initialValue || '');
+              setUrlPreviewOk(!!initialValue);
+            }}>
+              Отменить изменения
+            </button>
+          )}
           {urlInput && (
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg overflow-hidden border border-[var(--glass-border)] bg-[var(--panel-bg)]">
@@ -385,7 +390,7 @@ export function AvatarField({ value, onChange, initialValue = '', telegramHint =
       )}
     </div>
   );
-}
+});
 
 function getPoint(e) {
   if (e.touches && e.touches[0]) {
