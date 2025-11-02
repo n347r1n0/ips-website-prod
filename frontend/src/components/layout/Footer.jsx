@@ -151,6 +151,9 @@ export default function Footer() {
               <button className="hover:text-gold-accent transition-colors">
                 Конфиденциальность
               </button>
+              <a href="/legal/oferta" className="hover:text-gold-accent transition-colors">
+                Договор оферты
+              </a>
             </div>
           </div>
         </motion.div>
