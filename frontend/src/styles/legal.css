@@ -1,0 +1,30 @@
+@layer components {
+  /* Белая подложка и чёрный текст при печати PDF */
+  @media print {
+    /* Заголовки в статье: принудительно чёрные на бумаге */
+    .legal-article h1,
+    .legal-article h2,
+    .legal-article h3 {
+      color: var(--print-fg) !important;
+    }
+
+    /* Заголовок страницы на принте всегда чёрный */
+    .legal-title {
+      color: var(--print-fg) !important;
+    }
+    .legal-article {
+      background: var(--print-bg, #fff) !important;
+      color: var(--print-fg, #000) !important;
+      box-shadow: none !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      background: var(--print-bg, #fff) !important;
+    }
+    @page {
+      size: A4;
+      margin: 16mm;
+    }
+  }
+}

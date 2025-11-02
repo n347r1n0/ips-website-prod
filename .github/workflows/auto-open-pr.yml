@@ -26,42 +26,80 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Read PR meta (title/body)
+      # ── Guard: optionally skip on cleanup commit
+      - name: Guard skip
+        id: guard
+        shell: bash
+        run: |
+          msg="${{ github.event.head_commit.message }}"
+          if echo "$msg" | grep -Eq '\[skip pr-sync\]|remove PR meta'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read PR meta (title/body, safe partials)
+        if: ${{ steps.guard.outputs.skip != 'true' }}
         id: meta
         shell: bash
         run: |
           set -euo pipefail
+
+          # defaults
           title=""
           body=""
+          want_title=0
+          want_body=0
+
+          # If pr.md exists, extract title from first H1 and body = lines after H1
           if [[ -f ".github/pr.md" ]]; then
-            title="$(sed -n 's/^# \+\(.*\)$/\1/p' .github/pr.md | head -n1)"
-            awk 'f{print} /^# /{f=1}' .github/pr.md | tail -n +2 > /tmp/pr_body.md || true
-            body="$(cat /tmp/pr_body.md || true)"
-          else
-            [[ -f ".github/pr-title.txt" ]] && title="$(cat .github/pr-title.txt)"
-            [[ -f ".github/pr-body.md"  ]] && body="$(cat .github/pr-body.md)"
+            t_from_md="$(sed -n 's/^# \+\(.*\)$/\1/p' .github/pr.md | head -n1 | sed 's/[[:space:]]*$//')"
+            b_from_md="$(awk 'f{print} /^# /{f=1}' .github/pr.md | tail -n +2 || true)"
+            if [[ -n "${t_from_md// /}" ]]; then title="$t_from_md"; want_title=1; fi
+            # body from md considered only if non-empty after trimming
+            if [[ -n "$(printf "%s" "$b_from_md" | sed 's/[[:space:]]//g')" ]]; then
+              body="$b_from_md"; want_body=1
+            fi
           fi
-          [[ -z "$title" ]] && title="$(git log -1 --pretty=%s)"
-          [[ -z "$body"  ]] && body=$'Auto-opened PR on push.\n\nBranch: '"${GITHUB_REF#refs/heads/}"
-          has_meta=0
-          if [[ -f ".github/pr.md" || -f ".github/pr-title.txt" || -f ".github/pr-body.md" ]]; then
-            has_meta=1
+
+          # Fallbacks from separate files
+          if [[ -f ".github/pr-title.txt" ]]; then
+            t_from_file="$(cat .github/pr-title.txt)"
+            if [[ -n "$(printf "%s" "$t_from_file" | sed 's/[[:space:]]//g')" ]]; then
+              title="$t_from_file"; want_title=1
+            fi
           fi
+          if [[ -f ".github/pr-body.md" ]]; then
+            b_from_file="$(cat .github/pr-body.md)"
+            if [[ -n "$(printf "%s" "$b_from_file" | sed 's/[[:space:]]//g')" ]]; then
+              body="$b_from_file"; want_body=1
+            fi
+          fi
+
+          # Flags:
+          # has_text_meta — есть ли вообще какие-то текстовые метаданные для обновления
+          # has_pr_meta_json — есть ли json для лейблов/ревьюеров
+          has_text_meta=0
+          [[ $want_title -eq 1 || $want_body -eq 1 ]] && has_text_meta=1
+
+          has_pr_meta_json=0
+          [[ -f ".github/pr-meta.json" ]] && has_pr_meta_json=1
+
+          # Default body text ONLY used on PR creation without any text meta
+          default_body=$'Auto-opened PR on push.\n\nBranch: '"${GITHUB_REF#refs/heads/}"
+
           {
             echo "title<<EOF"; echo "$title"; echo "EOF"
             echo "body<<EOF";  echo "$body";  echo "EOF"
-            echo "has_meta=$has_meta"
+            echo "want_title=$want_title"
+            echo "want_body=$want_body"
+            echo "has_text_meta=$has_text_meta"
+            echo "has_pr_meta_json=$has_pr_meta_json"
+            echo "default_body<<EOF"; echo "$default_body"; echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Warn if title not Conventional Commit (non-blocking)
-        run: |
-          title="${{ steps.meta.outputs.title }}"
-          if ! echo "$title" | grep -Eq '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([^)]+\))?: .+'; then
-            echo "::warning::PR title is not Conventional Commit: '$title'"
-          fi
-
-      # Detect PAT presence safely for later if-conditions
       - name: Detect PAT presence
+        if: ${{ steps.guard.outputs.skip != 'true' }}
         id: auth
         env:
           AUTO_PR_TOKEN: ${{ secrets.AUTO_PR_TOKEN }}
@@ -72,9 +110,9 @@ jobs:
             echo "has_pat=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # ── Create/update PR using PAT (author = you)
-      - name: Create or update PR (author = me via PAT)
-        if: ${{ steps.auth.outputs.has_pat == 'true' }}
+      # ── Create/update PR (author = you via PAT)
+      - name: Create or update PR (PAT)
+        if: ${{ steps.guard.outputs.skip != 'true' && steps.auth.outputs.has_pat == 'true' }}
         id: pr_pat
         uses: actions/github-script@v7
         with:
@@ -84,39 +122,56 @@ jobs:
             const repo  = context.repo.repo;
             const head  = context.ref.replace('refs/heads/','');
             const base  = process.env.PR_BASE || 'main';
-            const title = (process.env.PR_TITLE || '').trim() || '(no title)';
-            const body  = (process.env.PR_BODY  || '').trim() || `Auto-opened PR\n\nBranch: ${head}`;
-            const hasMeta = process.env.HAS_META === '1';
 
-            const { data: existing } = await github.rest.pulls.list({
-              owner, repo, state: 'open', head: `${owner}:${head}`, base
-            });
+            const hasTextMeta  = process.env.HAS_TEXT_META === '1';
+            const wantTitle    = process.env.WANT_TITLE   === '1';
+            const wantBody     = process.env.WANT_BODY    === '1';
+            const title        = (process.env.PR_TITLE || '').trim();
+            const body         = (process.env.PR_BODY  || '');
+            const defaultBody  = (process.env.DEFAULT_BODY || '');
 
-            if (existing.length > 0) {
-              const pr = existing[0];
-              if (!hasMeta) {
-                core.info('PR exists; no meta -> keep title/body.');
-                core.setOutput('number', pr.number.toString());
+            const list = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${head}`, base });
+            if (list.data.length) {
+              const pr = list.data[0];
+              if (!hasTextMeta) {
+                core.info('PR exists; no text meta -> keep title/body.');
+                core.setOutput('number', String(pr.number));
                 return;
               }
-              await github.rest.pulls.update({ owner, repo, pull_number: pr.number, title, body });
-              core.setOutput('number', pr.number.toString());
+              const update = { owner, repo, pull_number: pr.number };
+              if (wantTitle) update.title = title;
+              if (wantBody)  update.body  = body;
+              if (update.title || update.body) {
+                await github.rest.pulls.update(update);
+                core.info(`Updated PR #${pr.number} ${update.title ? 'title' : ''} ${update.body ? 'body' : ''}`.trim());
+              } else {
+                core.info('Text meta present but empty; keeping current title/body.');
+              }
+              core.setOutput('number', String(pr.number));
               return;
             }
 
-            const { data: pr } = await github.rest.pulls.create({
-              owner, repo, head, base, title, body, draft: false
-            });
-            core.setOutput('number', pr.number.toString());
+            // Create PR (first push of branch)
+            const create = {
+              owner, repo, head, base,
+              title: title || '(no title)',
+              body : (body.trim() || defaultBody),
+              draft: false
+            };
+            const created = await github.rest.pulls.create(create);
+            core.setOutput('number', String(created.data.number));
         env:
-          PR_TITLE: ${{ steps.meta.outputs.title }}
-          PR_BODY:  ${{ steps.meta.outputs.body }}
-          PR_BASE:  ${{ vars.PR_BASE || 'main' }}
-          HAS_META: ${{ steps.meta.outputs.has_meta }}
+          PR_TITLE:      ${{ steps.meta.outputs.title }}
+          PR_BODY:       ${{ steps.meta.outputs.body }}
+          PR_BASE:       ${{ vars.PR_BASE || 'main' }}
+          HAS_TEXT_META: ${{ steps.meta.outputs.has_text_meta }}
+          WANT_TITLE:    ${{ steps.meta.outputs.want_title }}
+          WANT_BODY:     ${{ steps.meta.outputs.want_body }}
+          DEFAULT_BODY:  ${{ steps.meta.outputs.default_body }}
 
       # ── Bot fallback
-      - name: Create or update PR (bot fallback)
-        if: ${{ steps.auth.outputs.has_pat != 'true' }}
+      - name: Create or update PR (bot)
+        if: ${{ steps.guard.outputs.skip != 'true' && steps.auth.outputs.has_pat != 'true' }}
         id: pr
         uses: actions/github-script@v7
         with:
@@ -126,38 +181,53 @@ jobs:
             const repo  = context.repo.repo;
             const head  = context.ref.replace('refs/heads/','');
             const base  = process.env.PR_BASE || 'main';
-            const title = (process.env.PR_TITLE || '').trim() || '(no title)';
-            const body  = (process.env.PR_BODY  || '').trim() || `Auto-opened PR\n\nBranch: ${head}`;
-            const hasMeta = process.env.HAS_META === '1';
 
-            const { data: existing } = await github.rest.pulls.list({
-              owner, repo, state: 'open', head: `${owner}:${head}`, base
-            });
+            const hasTextMeta  = process.env.HAS_TEXT_META === '1';
+            const wantTitle    = process.env.WANT_TITLE   === '1';
+            const wantBody     = process.env.WANT_BODY    === '1';
+            const title        = (process.env.PR_TITLE || '').trim();
+            const body         = (process.env.PR_BODY  || '');
+            const defaultBody  = (process.env.DEFAULT_BODY || '');
 
-            if (existing.length > 0) {
-              const pr = existing[0];
-              if (!hasMeta) {
-                core.info('PR exists; no meta -> keep title/body.');
-                core.setOutput('number', pr.number.toString());
+            const list = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${head}`, base });
+            if (list.data.length) {
+              const pr = list.data[0];
+              if (!hasTextMeta) {
+                core.info('PR exists; no text meta -> keep title/body.');
+                core.setOutput('number', String(pr.number));
                 return;
               }
-              await github.rest.pulls.update({ owner, repo, pull_number: pr.number, title, body });
-              core.setOutput('number', pr.number.toString());
+              const update = { owner, repo, pull_number: pr.number };
+              if (wantTitle) update.title = title;
+              if (wantBody)  update.body  = body;
+              if (update.title || update.body) {
+                await github.rest.pulls.update(update);
+                core.info(`Updated PR #${pr.number} ${update.title ? 'title' : ''} ${update.body ? 'body' : ''}`.trim());
+              } else {
+                core.info('Text meta present but empty; keeping current title/body.');
+              }
+              core.setOutput('number', String(pr.number));
               return;
             }
 
-            const { data: pr } = await github.rest.pulls.create({
-              owner, repo, head, base, title, body, draft: false
+            const created = await github.rest.pulls.create({
+              owner, repo, head, base,
+              title: title || '(no title)',
+              body : (body.trim() || defaultBody),
+              draft: false
             });
-            core.setOutput('number', pr.number.toString());
+            core.setOutput('number', String(created.data.number));
         env:
-          PR_TITLE: ${{ steps.meta.outputs.title }}
-          PR_BODY:  ${{ steps.meta.outputs.body }}
-          PR_BASE:  ${{ vars.PR_BASE || 'main' }}
-          HAS_META: ${{ steps.meta.outputs.has_meta }}
+          PR_TITLE:      ${{ steps.meta.outputs.title }}
+          PR_BODY:       ${{ steps.meta.outputs.body }}
+          PR_BASE:       ${{ vars.PR_BASE || 'main' }}
+          HAS_TEXT_META: ${{ steps.meta.outputs.has_text_meta }}
+          WANT_TITLE:    ${{ steps.meta.outputs.want_title }}
+          WANT_BODY:     ${{ steps.meta.outputs.want_body }}
+          DEFAULT_BODY:  ${{ steps.meta.outputs.default_body }}
 
       - name: Optionally add labels/reviewers from .github/pr-meta.json
-        if: ${{ hashFiles('.github/pr-meta.json') != '' }}
+        if: ${{ steps.guard.outputs.skip != 'true' && hashFiles('.github/pr-meta.json') != '' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -172,13 +242,17 @@ jobs:
               await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: meta.labels });
             }
             if (Array.isArray(meta.reviewers) && meta.reviewers.length) {
-              await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers: meta.reviewers });
+              try {
+                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers: meta.reviewers });
+              } catch (e) {
+                core.warning(`requestReviewers failed: ${e.message}`);
+              }
             }
         env:
           NUMBER: ${{ steps.pr_pat.outputs.number || steps.pr.outputs.number }}
 
       - name: Cleanup PR meta files (optional via repo variable)
-        if: ${{ vars.CLEANUP_PR_META == 'true' }}
+        if: ${{ steps.guard.outputs.skip != 'true' && vars.CLEANUP_PR_META == 'true' }}
         run: |
           set -e
           rm -f .github/pr.md .github/pr-title.txt .github/pr-body.md .github/pr-meta.json || true
@@ -189,5 +263,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore(pr): remove PR meta after PR #${{ steps.pr_pat.outputs.number || steps.pr.outputs.number }} [skip ci]"
+          git commit -m "chore(pr): remove PR meta after PR #${{ steps.pr_pat.outputs.number || steps.pr.outputs.number }} [skip ci] [skip pr-sync]"
           git push origin "${GITHUB_REF#refs/heads/}"

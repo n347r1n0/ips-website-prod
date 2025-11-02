@@ -138,7 +138,7 @@ export default function Footer() {
           </div>
 
           {/* Bottom Section */}
-          <div className="art-deco-divider my-8" />
+          <div className="art-deco-divider mt-4 mb-2" />
 
           <div className="flex flex-col md:flex-row justify-between items-center pt-8">
             <p className="text-gray-400 font-body text-lg mb-4 md:mb-0">
@@ -151,9 +151,14 @@ export default function Footer() {
               <button className="hover:text-gold-accent transition-colors">
                 Конфиденциальность
               </button>
+              <a href="/legal/oferta" className="hover:text-gold-accent transition-colors">
+                Договор оферты
+              </a>
             </div>
           </div>
         </motion.div>
+        {/* Scroll buffer, чтобы плавающий виджет не наезжал на футер */}
+        <div className="pointer-events-none h-[var(--footer-scroll-buffer)]" aria-hidden="true" />
       </div>
     </footer>
   );

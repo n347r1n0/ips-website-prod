@@ -15,6 +15,7 @@ import { AdminRoute } from './components/features/Admin/AdminRoute.jsx';
 import { ToastProvider } from './components/ui/Toast.jsx';
 // --- ИЗМЕНЕНИЕ №1: Импортируем новую страницу ---
 import { TelegramCallbackPage } from './pages/TelegramCallbackPage.jsx';
+import OfferContractPage from './pages/legal/OfferContractPage.jsx';
 
 
 function PrivateRoute({ children }) {
@@ -43,6 +44,8 @@ function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           {/* --- ИЗМЕНЕНИЕ №2: Добавляем роут для колбэка Telegram --- */}
           <Route path="/auth/telegram/callback" element={<TelegramCallbackPage />} />
+          {/* --- Legal pages --- */}
+          <Route path="/legal/oferta" element={<OfferContractPage />} />
 
           {/* --- Приватный роут (защищенный "охранником") --- */}
           <Route

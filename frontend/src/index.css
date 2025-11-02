@@ -4,6 +4,7 @@
 @import './styles/buttons.css';
 @import './styles/panels.css';
 @import './styles/helpers.css';
+@import './styles/legal.css'; /* print/layout for legal pages */
 
 /* Директивы @tailwind */
 @tailwind base;
