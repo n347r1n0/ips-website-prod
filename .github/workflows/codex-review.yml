@@ -14,45 +14,13 @@ concurrency:
   group: codex-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# 1) Сборка/проверка — сначала
 jobs:
-  build-check:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - run: npm ci
-      - run: npm run build
-        env:
-          CI: "true"
-
-      - name: Upload preview artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist
-
-      - name: Bundle size summary
-        run: |
-          du -sh dist || true
-          find dist -type f -maxdepth 2 | wc -l || true
-
-# 2) Лейбл + пинг — строго ПОСЛЕ build-check (и после возможных внешних автокоммитов)
   label-and-ping:
-    needs: build-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      # Ставим метку для визуального контроля
       - name: Add review label
         if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
         uses: actions-ecosystem/action-add-labels@v1
@@ -60,7 +28,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: codex:review
 
-      - name: Request reviewers (from pr-meta.json or repo var, excluding author)
+      # (опционально) запрос ревьюверов, исключая автора PR
+      - name: Request reviewers (from pr-meta.json or repo var; skip author)
         if: ${{ !github.event.pull_request.draft }}
         uses: actions/github-script@v7
         env:
@@ -78,53 +47,29 @@ jobs:
               const raw = fs.readFileSync('.github/pr-meta.json', 'utf8');
               const meta = JSON.parse(raw);
               if (Array.isArray(meta.reviewers)) {
-                reviewers.push(...meta.reviewers.map(s => String(s).trim().replace(/^@+/, '')));
+                reviewers = reviewers.concat(meta.reviewers);
               }
-            } catch (_) { /* meta optional */ }
+            } catch (_) {}
 
             const fromVar = (process.env.CODEX_REVIEWERS || '')
               .split(',')
-              .map(s => s.trim().replace(/^@+/, ''))
+              .map(s => s.trim())
               .filter(Boolean);
 
             reviewers = [...new Set([...reviewers, ...fromVar])]
-              .filter(r => r.toLowerCase() !== author);
+              .map(s => s.replace(/^@+/, '').toLowerCase())
+              .filter(r => r && r !== author);
 
             if (reviewers.length === 0) {
-              core.info('No reviewers (or only author). Skipping requestReviewers.');
+              core.info('No non-author reviewers configured; skipping.');
               return;
             }
-
             await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers });
             core.info(`Requested reviewers: ${reviewers.join(', ')}`);
 
-      # Получаем АКТУАЛЬНЫЙ head SHA прямо перед пингом (если был автокоммит — увидим его)
-      - name: Finalize latest head SHA (stabilized)
+      # Ждём возможный пост-коммит очистки меты и берём САМЫЙ свежий head SHA
+      - name: Wait for cleanup & fetch freshest head SHA
         id: head
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const prNum = context.payload.pull_request.number;
-
-            async function getHead() {
-              const { data } = await github.rest.pulls.get({ owner, repo, pull_number: prNum });
-              return data.head.sha;
-            }
-
-            // короткий стабилизатор: 3 попытки с паузами
-            const sleep = ms => new Promise(r => setTimeout(r, ms));
-            let sha1 = await getHead();
-            await sleep(3000);
-            let sha2 = await getHead();
-            if (sha1 !== sha2) {
-              await sleep(3000);
-              sha2 = await getHead();
-            }
-            core.setOutput('sha', sha2);
-
-      - name: Ping Codex to review (new comment per push, after all)
-        if: ${{ !github.event.pull_request.draft }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -132,16 +77,67 @@ jobs:
             const repo   = context.repo.repo;
             const number = context.payload.pull_request.number;
 
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+            let latest = null;
+
+            // до 60 сек ждём «устаканивания» хвоста (очистка с [skip ci] и т.п.)
+            for (let i = 0; i < 12; i++) {
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: number });
+              if (!latest || latest !== pr.head.sha) {
+                latest = pr.head.sha;
+              }
+              await sleep(5000);
+            }
+
+            core.setOutput('sha', latest);
+
+      # Пингуем Codex НОВЫМ комментарием от лица пользователя (PAT), не ботом
+      - name: Ping Codex to review (new comment, authored by user PAT)
+        if: ${{ !github.event.pull_request.draft }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.AUTO_PR_TOKEN }}  # важно: не GITHUB_TOKEN
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const number = context.payload.pull_request.number;
+
+            // Берём самый свежий SHA из предыдущего шага
             const sha = '${{ steps.head.outputs.sha }}'.slice(0, 12);
+
             const body = [
               `[[CODEX-REVIEW-PING]]@${sha}`,
-              '@codex review',
-              '',
-              `PR: #${number} — "${context.payload.pull_request.title}"`,
-              `Branch: ${context.payload.pull_request.head.ref}`,
-              `Head: ${sha}`,
-              "Use the repository CODEX.md + the PR's pinned brief for scope/criteria."
+              `@codex review`,
+              `Codex, please review this PR per repository rules (see CODEX.md / AGENTS.md).`,
+              `• PR: #${number} — "${context.payload.pull_request.title}"`,
+              `• Branch: ${context.payload.pull_request.head.ref}`,
+              `• Head: ${sha}`
             ].join('\n');
 
-            await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
-            core.info(`Created Codex ping for head ${sha}.`)
+            const { data: created } = await github.rest.issues.createComment({
+              owner, repo, issue_number: number, body
+            });
+            core.info(`Created Codex ping comment ${created.id} for ${sha}.`)
+
+  build-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env: { CI: "true" }
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with: { name: frontend-dist, path: frontend/dist }
+      - name: Bundle size summary
+        run: |
+          du -sh dist || true
+          find dist -type f -maxdepth 2 | wc -l || true
