@@ -151,12 +151,23 @@ export const AvatarField = forwardRef(function AvatarField(
   }, [urlInput]);
 
   const renderToCanvasBlob = async () => {
-    if (!imgRef.current || !imgNatural.w) return null;
+    const imgEl = imgRef.current;
+    if (!imgEl) return null;
+
+    // Ensure image is fully loaded before rendering
+    if (!imgEl.complete || imgEl.naturalWidth === 0 || imgEl.naturalHeight === 0) {
+      try { await imgEl.decode?.(); } catch (_) { /* ignore */ }
+    }
+    const naturalW = imgEl.naturalWidth || imgNatural.w;
+    const naturalH = imgEl.naturalHeight || imgNatural.h;
+    if (!naturalW || !naturalH) return null;
+
     const canvas = document.createElement('canvas');
     const target = 512;
     canvas.width = target;
     canvas.height = target;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
 
     const scaleFactor = totalScale; // natural -> displayed scale
     const dispW = displayed.w;
@@ -166,14 +177,33 @@ export const AvatarField = forwardRef(function AvatarField(
     const imgLeft = containerCenter - dispW / 2 + offset.x;
     const imgTop = containerCenter - dispH / 2 + offset.y;
 
-    const sx = -imgLeft / scaleFactor;
-    const sy = -imgTop / scaleFactor;
-    const sSize = containerSize / scaleFactor;
+    // Source rect in natural units
+    let sx = -imgLeft / scaleFactor;
+    let sy = -imgTop / scaleFactor;
+    let sSize = containerSize / scaleFactor;
+
+    // Clamp to image bounds
+    sSize = Math.max(1, Math.min(sSize, Math.min(naturalW, naturalH)));
+    sx = Math.max(0, Math.min(naturalW - sSize, sx));
+    sy = Math.max(0, Math.min(naturalH - sSize, sy));
 
     return new Promise((resolve) => {
-      canvas.toBlob = canvas.toBlob || ((cb, type, quality) => cb(dataURLToBlob(canvas.toDataURL(type, quality))));
-      ctx.drawImage(imgRef.current, sx, sy, sSize, sSize, 0, 0, target, target);
-      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+      const done = (blob) => {
+        if (blob) return resolve(blob);
+        // Fallback: toDataURL path
+        try {
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          resolve(dataURLToBlob(dataUrl));
+        } catch (_) {
+          resolve(null);
+        }
+      };
+      ctx.drawImage(imgEl, sx, sy, sSize, sSize, 0, 0, target, target);
+      if (canvas.toBlob) {
+        canvas.toBlob(done, 'image/jpeg', 0.85);
+      } else {
+        done(null);
+      }
     });
   };
 
@@ -189,7 +219,9 @@ export const AvatarField = forwardRef(function AvatarField(
         // URL draft
         const isUrlDraft = mode === 'url' && urlInput && urlValid && urlPreviewOk;
         if (isUrlDraft) {
-          return { url: urlInput.trim() };
+          const url = urlInput.trim();
+          onChange?.(url);
+          return url;
         }
         // File draft → crop+upload
         if (!file) return null;
@@ -201,11 +233,18 @@ export const AvatarField = forwardRef(function AvatarField(
           contentType: 'image/jpeg',
           upsert: true,
         });
-        if (upErr) throw upErr;
+        if (upErr) {
+          toast.error('Хранилище недоступно: avatars (проверьте bucket/policies)');
+          return null;
+        }
         const { data } = await supabase.storage.from('avatars').getPublicUrl(path);
         const publicUrl = data?.publicUrl;
-        if (!publicUrl) throw new Error('Не удалось получить public URL');
-        return { url: publicUrl, storagePath: path };
+        if (!publicUrl) {
+          toast.error('Хранилище недоступно: avatars (public URL не получен)');
+          return null;
+        }
+        onChange?.(publicUrl);
+        return publicUrl;
       } catch (e) {
         console.error('Avatar applyDraft error:', e);
         toast.error('Не удалось подготовить аватар');

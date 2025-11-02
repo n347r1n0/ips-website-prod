@@ -205,15 +205,8 @@ export function DashboardPage() {
     try {
       await supabase.auth.getSession();
       // Prepare avatar based on draft/delete flags from AvatarField
-      let avatarUrl = (profileForm.avatar_url || '').trim();
-      if (avatarRef.current?.isDeleteMarked?.()) {
-        avatarUrl = '';
-      } else if (avatarRef.current?.hasDraft?.()) {
-        const applied = await avatarRef.current.applyDraft();
-        if (applied?.url) {
-          avatarUrl = applied.url;
-        }
-      }
+      const uploadedUrl = await avatarRef.current?.applyDraft?.();
+      const avatarUrl = uploadedUrl ?? (profileForm.avatar_url || '').trim() ?? '';
       
       const { error } = await supabase
         .from('club_members')
