@@ -54,16 +54,18 @@ export const AvatarField = forwardRef(function AvatarField(
   }, [imgNatural]);
 
   const totalScale = minScale * scale;
-
-  const displayed = useMemo(() => {
-    const { w, h } = imgNatural;
-    return { w: w * totalScale, h: h * totalScale };
-  }, [imgNatural, totalScale]);
+  // Base size at minimal cover; preview scales isotropically via transform scale()
+  const baseW = useMemo(() => (imgNatural.w ? imgNatural.w * minScale : 0), [imgNatural.w, minScale]);
+  const baseH = useMemo(() => (imgNatural.h ? imgNatural.h * minScale : 0), [imgNatural.h, minScale]);
+  const dispW = useMemo(() => baseW * scale, [baseW, scale]);
+  const dispH = useMemo(() => baseH * scale, [baseH, scale]);
+  // Keep previous "displayed" for canvas math compatibility
+  const displayed = useMemo(() => ({ w: imgNatural.w * totalScale, h: imgNatural.h * totalScale }), [imgNatural.w, imgNatural.h, totalScale]);
 
   // Clamp offset so image always covers square (no empty borders)
   const clampOffset = (x, y) => {
-    const maxX = Math.max(0, (displayed.w - containerSize) / 2);
-    const maxY = Math.max(0, (displayed.h - containerSize) / 2);
+    const maxX = Math.max(0, (dispW - containerSize) / 2);
+    const maxY = Math.max(0, (dispH - containerSize) / 2);
     return {
       x: Math.min(maxX, Math.max(-maxX, x)),
       y: Math.min(maxY, Math.max(-maxY, y)),
@@ -333,9 +335,9 @@ export const AvatarField = forwardRef(function AvatarField(
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    width: `${displayed.w}px`,
-                    height: `${displayed.h}px`,
-                    transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
+                    width: `${baseW}px`,
+                    height: `${baseH}px`,
+                    transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`,
                   }}
                 />
                 {/* Square overlay hint (subtle) */}
