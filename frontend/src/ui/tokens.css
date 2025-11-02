@@ -171,4 +171,7 @@
   --acc3d-inset-dark:     inset 0 -8px 18px rgba(0,0,0,.35);
   --acc3d-drop:           0 6px 16px rgba(0,0,0,.28);
   --acc3d-border:         1px solid rgba(255,255,255,.12);
+
+  /* Layout helpers */
+  --footer-scroll-buffer: clamp(48px, 8vh, 96px);
 }
