@@ -161,13 +161,13 @@ jobs:
             const created = await github.rest.pulls.create(create);
             core.setOutput('number', String(created.data.number));
         env:
-          PR_TITLE:     ${{ steps.meta.outputs.title }}
-          PR_BODY:      ${{ steps.meta.outputs.body }}
-          PR_BASE:      ${{ vars.PR_BASE || 'main' }}
-          HAS_TEXT_META:${{ steps.meta.outputs.has_text_meta }}
-          WANT_TITLE:   ${{ steps.meta.outputs.want_title }}
-          WANT_BODY:    ${{ steps.meta.outputs.want_body }}
-          DEFAULT_BODY: ${{ steps.meta.outputs.default_body }}
+          PR_TITLE:      ${{ steps.meta.outputs.title }}
+          PR_BODY:       ${{ steps.meta.outputs.body }}
+          PR_BASE:       ${{ vars.PR_BASE || 'main' }}
+          HAS_TEXT_META: ${{ steps.meta.outputs.has_text_meta }}
+          WANT_TITLE:    ${{ steps.meta.outputs.want_title }}
+          WANT_BODY:     ${{ steps.meta.outputs.want_body }}
+          DEFAULT_BODY:  ${{ steps.meta.outputs.default_body }}
 
       # ── Bot fallback
       - name: Create or update PR (bot)
@@ -218,13 +218,13 @@ jobs:
             });
             core.setOutput('number', String(created.data.number));
         env:
-          PR_TITLE:     ${{ steps.meta.outputs.title }}
-          PR_BODY:      ${{ steps.meta.outputs.body }}
-          PR_BASE:      ${{ vars.PR_BASE || 'main' }}
-          HAS_TEXT_META:${{ steps.meta.outputs.has_text_meta }}
-          WANT_TITLE:   ${{ steps.meta.outputs.want_title }}
-          WANT_BODY:    ${{ steps.meta.outputs.want_body }}
-          DEFAULT_BODY: ${{ steps.meta.outputs.default_body }}
+          PR_TITLE:      ${{ steps.meta.outputs.title }}
+          PR_BODY:       ${{ steps.meta.outputs.body }}
+          PR_BASE:       ${{ vars.PR_BASE || 'main' }}
+          HAS_TEXT_META: ${{ steps.meta.outputs.has_text_meta }}
+          WANT_TITLE:    ${{ steps.meta.outputs.want_title }}
+          WANT_BODY:     ${{ steps.meta.outputs.want_body }}
+          DEFAULT_BODY:  ${{ steps.meta.outputs.default_body }}
 
       - name: Optionally add labels/reviewers from .github/pr-meta.json
         if: ${{ steps.guard.outputs.skip != 'true' && hashFiles('.github/pr-meta.json') != '' }}
@@ -265,4 +265,3 @@ jobs:
           git add -A
           git commit -m "chore(pr): remove PR meta after PR #${{ steps.pr_pat.outputs.number || steps.pr.outputs.number }} [skip ci] [skip pr-sync]"
           git push origin "${GITHUB_REF#refs/heads/}"
-
