@@ -52,7 +52,11 @@ export function ModalBase({
     <>
       {/* Fixed Header */}
       {(title || headerActions) && (
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-[var(--divider-weak)]">
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-transparent relative
+                        after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-[-1px]
+                        after:h-[var(--divider-thickness,1px)] after:pointer-events-none
+                        after:bg-[linear-gradient(to_right,transparent,var(--divider-accent-strong,var(--gold)),transparent)]
+                        after:[box-shadow:0_0_var(--divider-glow-radius,12px)_var(--divider-glow-color,rgba(212,175,55,.35))]">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 pr-3 sm:pr-4">
               {title && (
@@ -75,8 +79,7 @@ export function ModalBase({
             </div>
           </div>
           
-          {/* Elegant divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-gold-accent/30 to-transparent" />
+          {/* seam via pseudo-element (see container classes) */}
         </div>
       )}
       
@@ -89,7 +92,11 @@ export function ModalBase({
       
       {/* Fixed Footer */}
       {footerActions && (
-        <div className="flex-shrink-0 px-6 py-6 border-t border-[var(--divider-weak)]">
+        <div className="flex-shrink-0 px-6 py-6 border-t border-transparent relative
+                        after:content-[''] after:absolute after:left-0 after:right-0 after:top-[-1px]
+                        after:h-[var(--divider-thickness,1px)] after:pointer-events-none
+                        after:bg-[linear-gradient(to_right,transparent,var(--divider-accent-strong,var(--gold)),transparent)]
+                        after:[box-shadow:0_0_var(--divider-glow-radius,12px)_var(--divider-glow-color,rgba(212,175,55,.35))]">
           <div className="flex items-center justify-end space-x-3">
             {footerActions}
           </div>
