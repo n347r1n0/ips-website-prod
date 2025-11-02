@@ -1,6 +1,10 @@
 @layer components {
   /* Белая подложка и чёрный текст при печати PDF */
   @media print {
+    /* Заголовок страницы на принте всегда чёрный */
+    .legal-title {
+      color: var(--print-fg) !important;
+    }
     .legal-article {
       background: var(--print-bg, #fff) !important;
       color: var(--print-fg, #000) !important;

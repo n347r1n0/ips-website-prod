@@ -25,7 +25,7 @@ export default function OfferContractPage() {
     </article>
   );
 
-  const H1  = (p) => <h1 className="text-3xl sm:text-4xl font-brand text-white mb-6 sm:mb-8">{p.children}</h1>;
+  const H1  = (p) => <h1 className="text-3xl sm:text-4xl font-brand text-white mb-6 sm:mb-8 legal-title">{p.children}</h1>;
   const H2  = (p) => <h2 className="text-xl sm:text-2xl font-semibold text-white mt-8 mb-4">{p.children}</h2>;
   const P   = (p) => <p className="mb-4">{p.children}</p>;
   const Ul  = (p) => <ul className="list-disc pl-5 space-y-2 mb-4">{p.children}</ul>;
@@ -144,4 +144,3 @@ export default function OfferContractPage() {
     </Wrap>
   );
 }
-
