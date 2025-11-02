@@ -108,6 +108,7 @@ export function ModalBase({
           exit={{ y: '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="neumorphic-container flex flex-col"
+          style={{ zIndex: priority ? 60 : 40 }}
           {...props}
         >
           {modalContent}
