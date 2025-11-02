@@ -14,108 +14,10 @@ concurrency:
   group: codex-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# ──────────────────────────────────────────────────────────────────────────────
+# JOB 1. Build/check (идёт раньше), чтобы пинг улетал уже по финальному состоянию
+# ──────────────────────────────────────────────────────────────────────────────
 jobs:
-  label-and-ping:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Add review label
-        if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: codex:review
-
-      - name: Request reviewers (from pr-meta.json or repo var)
-        if: ${{ !github.event.pull_request.draft }}
-        uses: actions/github-script@v7
-        env:
-          CODEX_REVIEWERS: ${{ vars.CODEX_REVIEWERS }}
-        with:
-          script: |
-            const fs = require('fs');
-            const owner  = context.repo.owner;
-            const repo   = context.repo.repo;
-            const number = context.payload.pull_request.number;
-
-            // Try to read .github/pr-meta.json
-            let reviewers = [];
-            try {
-              const raw = fs.readFileSync('.github/pr-meta.json', 'utf8');
-              const meta = JSON.parse(raw);
-              if (Array.isArray(meta.reviewers)) {
-                reviewers = reviewers.concat(
-                  meta.reviewers.map(s => String(s).trim().replace(/^@+/, '')).filter(Boolean)
-                );
-              }
-            } catch (_) { /* no meta file */ }
-
-            // Merge with repo variable
-            const fromVar = (process.env.CODEX_REVIEWERS || '')
-              .split(',')
-              .map(s => s.trim().replace(/^@+/, ''))
-              .filter(Boolean);
-
-            reviewers = [...new Set([...reviewers, ...fromVar])];
-
-            if (reviewers.length === 0) {
-              core.info('No reviewers configured; skipping requestReviewers.');
-            } else {
-              await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers });
-              core.info(`Requested reviewers: ${reviewers.join(', ')}`);
-            }
-
-      - name: Ping Codex to review (commit-aware)
-        if: ${{ !github.event.pull_request.draft }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const owner  = context.repo.owner;
-            const repo   = context.repo.repo;
-            const number = context.payload.pull_request.number;
-
-            const markerBase = '[[CODEX-REVIEW-PING]]';
-            const sha = context.payload.pull_request.head.sha.slice(0, 12);
-            const marker = `${markerBase}@${sha}`;
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner, repo, issue_number: number, per_page: 100
-            });
-
-            const isPingForSha = c => c.user?.type === 'Bot' && c.body && c.body.includes(marker);
-            const isAnyPing    = c => c.user?.type === 'Bot' && c.body && c.body.includes(markerBase);
-
-            const current  = comments.find(isPingForSha);
-            const oldPings = comments.filter(isAnyPing).filter(c => !isPingForSha(c));
-
-            if (current) {
-              core.info(`Codex ping already exists for ${sha} — skip.`);
-            } else {
-              const body = [
-                marker,
-                '@codex review',
-                'Codex, please review this PR per your system rules and the pinned task context.',
-                `• PR: #${number} — "${context.payload.pull_request.title}"`,
-                `• Branch: ${context.payload.pull_request.head.ref}`,
-                `• Head: ${sha}`,
-                "Use the repository CODEX.md + the PR's pinned brief for scope/criteria."
-              ].join('\n');
-
-              const { data: created } = await github.rest.issues.createComment({
-                owner, repo, issue_number: number, body
-              });
-              core.info(`Created Codex ping ${created.id} for ${sha}.`);
-            }
-
-            // Optional: clean up old pings (kept disabled to preserve history)
-            // for (const c of oldPings) {
-            //   try {
-            //     await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
-            //     core.info(`Deleted old Codex ping ${c.id}.`);
-            //   } catch {}
-            // }
-
   build-check:
     runs-on: ubuntu-latest
     defaults:
@@ -145,3 +47,135 @@ jobs:
         run: |
           du -sh dist || true
           find dist -type f -maxdepth 2 | wc -l || true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# JOB 2. Labels + ping (строго после build-check)
+# ──────────────────────────────────────────────────────────────────────────────
+  label-and-ping:
+    needs: build-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add review label
+        if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: codex:review
+
+      - name: Request reviewers (from pr-meta.json or repo var; skip author)
+        if: ${{ !github.event.pull_request.draft }}
+        uses: actions/github-script@v7
+        env:
+          CODEX_REVIEWERS: ${{ vars.CODEX_REVIEWERS }}
+        with:
+          script: |
+            const fs = require('fs');
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const number = context.payload.pull_request.number;
+            const author = context.payload.pull_request.user.login.toLowerCase();
+
+            let reviewers = [];
+            try {
+              const raw = fs.readFileSync('.github/pr-meta.json', 'utf8');
+              const meta = JSON.parse(raw);
+              if (Array.isArray(meta.reviewers)) reviewers.push(...meta.reviewers);
+            } catch (_) {}
+
+            const fromVar = (process.env.CODEX_REVIEWERS || '')
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            reviewers = [...new Set([...reviewers, ...fromVar])]
+              .map(s => s.replace(/^@+/, '').toLowerCase())
+              .filter(r => r && r !== author);
+
+            if (reviewers.length === 0) {
+              core.info('No non-author reviewers configured; skipping.');
+            } else {
+              await github.rest.pulls.requestReviewers({ owner, repo, pull_number: number, reviewers });
+              core.info(`Requested reviewers: ${reviewers.join(', ')}`);
+            }
+
+      # Берём максимально свежий head SHA (короткий стабилизатор на случай пост-коммита)
+      - name: Finalize latest head SHA (stabilized)
+        id: head
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNum = context.payload.pull_request.number;
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+            async function getHead() {
+              const { data } = await github.rest.pulls.get({ owner, repo, pull_number: prNum });
+              return data.head.sha;
+            }
+
+            let a = await getHead();
+            await sleep(3000);
+            let b = await getHead();
+            if (a !== b) {
+              await sleep(3000);
+              b = await getHead();
+            }
+            core.setOutput('sha', b);
+
+      # ВАЖНО: этот шаг использует PAT и пишет комментарий от твоего имени.
+      # Требуется секрет AUTO_PR_TOKEN с правами: Pull requests (read/write), Issues (read/write) на этот репозиторий.
+      - name: Ping Codex to review (new comment, authored by user PAT)
+        if: ${{ !github.event.pull_request.draft }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.AUTO_PR_TOKEN }}  # НЕ GITHUB_TOKEN
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const number = context.payload.pull_request.number;
+            const sha    = '${{ steps.head.outputs.sha }}'.slice(0, 12);
+
+            const body = [
+              `[[CODEX-REVIEW-PING]]@${sha}`,
+              `@codex review`,
+              ``,
+              `PR: #${number} — "${context.payload.pull_request.title}"`,
+              `Branch: ${context.payload.pull_request.head.ref}`,
+              `Head: ${sha}`,
+              `Use the repository CODEX.md + the PR's pinned brief for scope/criteria.`
+            ].join('\n');
+
+            await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+            core.info(`Created Codex ping for head ${sha}.`);
+
+      # ────────────────────────────────────────────────────────────────────────
+      # [Опционально, на будущее — fallback для FORK PRs]
+      #
+      # Если когда-нибудь откроются PR из форков, секреты (включая AUTO_PR_TOKEN)
+      # им недоступны. Тогда этот шаг с PAT даст 401. Чтобы не падать, можно
+      # включить бот-fallback: тот же пинг, но от github-actions[bot] (GITHUB_TOKEN).
+      #
+      # Для включения: УБЕРИ решётки с блока ниже.
+      #
+      # - name: Ping Codex to review (bot fallback for forks)
+      #   if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name != github.repository }}
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const owner  = context.repo.owner;
+      #       const repo   = context.repo.repo;
+      #       const number = context.payload.pull_request.number;
+      #       const sha    = '${{ steps.head.outputs.sha }}'.slice(0, 12);
+      #       const body = [
+      #         `[[CODEX-REVIEW-PING]]@${sha}`,
+      #         `@codex review`,
+      #         ``,
+      #         `PR: #${number} — "${context.payload.pull_request.title}"`,
+      #         `Branch: ${context.payload.pull_request.head.ref}`,
+      #         `Head: ${sha}`
+      #       ].join('\n');
+      #       await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+      #       core.info(`Fork fallback ping posted for head ${sha}.`);
