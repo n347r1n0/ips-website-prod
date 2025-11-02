@@ -43,6 +43,12 @@
   /* Dividers (map from border-white/5) */
   --divider-weak: rgba(255, 255, 255, 0.05);
 
+  /* Modal deco seam (safe defaults; can be overridden) */
+  --divider-thickness: 1px;
+  --divider-glow-radius: 12px;
+  --divider-glow-color: rgba(212,175,55,.35);
+  --divider-accent-strong: var(--gold);
+
   /* Radii (map to Tailwind scales for consistency) */
   --r-s:   0.5rem;  /* rounded-lg */
   --r-m:   0.75rem; /* rounded-xl */
