@@ -1,111 +1,66 @@
--- 1) Создаём bucket `avatars` (публичный) — идемпотентно
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'avatars') THEN
-    INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-    VALUES (
-      'avatars',
-      'avatars',
-      true,                                   -- публичный: нужен getPublicUrl + внешняя раздача
-      5*1024*1024,                            -- лимит 5MB (можно поменять)
-      ARRAY['image/jpeg','image/png','image/webp']
-    );
-  ELSE
-    -- Если bucket уже есть, просто синхронизируем ключевые поля (безопасно)
-    UPDATE storage.buckets
-       SET public = true,
-           file_size_limit = COALESCE(file_size_limit, 5*1024*1024),
-           allowed_mime_types = COALESCE(allowed_mime_types, ARRAY['image/jpeg','image/png','image/webp'])
-     WHERE id = 'avatars';
-  END IF;
-END
-$$;
+-- 20251102032053_storage_avatars.sql
+-- Create public bucket "avatars" + RLS policies on storage.objects
+-- No ALTER TABLE, no SET ROLE. Idempotent.
 
--- 2) Убедимся, что RLS включён на таблице объектов (обычно уже включён в Supabase)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+begin;
 
--- 3) Политики для bucket `avatars`
+-- 1) Ensure bucket exists (public)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'avatars',
+  'avatars',
+  true,
+  null,  -- при желании поставь лимит (байты), напр. 5242880
+  array['image/jpeg','image/png','image/webp']::text[]
+)
+on conflict (id) do update
+  set public = excluded.public,
+      allowed_mime_types = coalesce(excluded.allowed_mime_types, storage.buckets.allowed_mime_types),
+      file_size_limit   = coalesce(excluded.file_size_limit,   storage.buckets.file_size_limit);
 
--- 3.1) Публичное чтение (и anon, и authenticated могут читать из avatars)
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-     WHERE schemaname = 'storage' AND tablename = 'objects'
-       AND policyname = 'avatars_public_read'
-  ) THEN
-    CREATE POLICY "avatars_public_read"
-      ON storage.objects
-      FOR SELECT
-      TO anon, authenticated
-      USING (bucket_id = 'avatars');
-  END IF;
-END
-$$;
+-- 2) Policies on storage.objects (create-if-not-exists)
 
--- 3.2) Загрузка только в свою папку: avatars/users/{auth.uid()}/...
--- Разрешаем INSERT аутентифицированным, причём путь должен начинаться с users/<uid>/
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-     WHERE schemaname = 'storage' AND tablename = 'objects'
-       AND policyname = 'avatars_user_insert_own_folder'
-  ) THEN
-    CREATE POLICY "avatars_user_insert_own_folder"
-      ON storage.objects
-      FOR INSERT
-      TO authenticated
-      WITH CHECK (
-        bucket_id = 'avatars'
-        AND name LIKE ('users/' || auth.uid()::text || '/%')
-      );
-  END IF;
-END
-$$;
+do $$
+begin
+  -- public read
+  if not exists (
+    select 1 from pg_policies
+    where schemaname='storage' and tablename='objects'
+      and policyname='avatars public read'
+  ) then
+    create policy "avatars public read"
+      on storage.objects
+      for select
+      to public
+      using (bucket_id = 'avatars');
+  end if;
 
--- 3.3) Обновление своих файлов в своей папке
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-     WHERE schemaname = 'storage' AND tablename = 'objects'
-       AND policyname = 'avatars_user_update_own'
-  ) THEN
-    CREATE POLICY "avatars_user_update_own"
-      ON storage.objects
-      FOR UPDATE
-      TO authenticated
-      USING (
-        bucket_id = 'avatars'
-        AND name LIKE ('users/' || auth.uid()::text || '/%')
-      )
-      WITH CHECK (
-        bucket_id = 'avatars'
-        AND name LIKE ('users/' || auth.uid()::text || '/%')
-      );
-  END IF;
-END
-$$;
+  -- authenticated insert (allow create in avatars; owner проставится триггером)
+  if not exists (
+    select 1 from pg_policies
+    where schemaname='storage' and tablename='objects'
+      and policyname='avatars user insert'
+  ) then
+    create policy "avatars user insert"
+      on storage.objects
+      for insert
+      to authenticated
+      with check (bucket_id = 'avatars');
+  end if;
 
--- 3.4) Удаление своих файлов в своей папке
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-     WHERE schemaname = 'storage' AND tablename = 'objects'
-       AND policyname = 'avatars_user_delete_own'
-  ) THEN
-    CREATE POLICY "avatars_user_delete_own"
-      ON storage.objects
-      FOR DELETE
-      TO authenticated
-      USING (
-        bucket_id = 'avatars'
-        AND name LIKE ('users/' || auth.uid()::text || '/%')
-      );
-  END IF;
-END
-$$;
+  -- authenticated update/delete (only owner)
+  if not exists (
+    select 1 from pg_policies
+    where schemaname='storage' and tablename='objects'
+      and policyname='avatars owner write'
+  ) then
+    create policy "avatars owner write"
+      on storage.objects
+      for all
+      to authenticated
+      using  (bucket_id = 'avatars' and owner = auth.uid())
+      with check (bucket_id = 'avatars' and owner = auth.uid());
+  end if;
+end $$;
 
--- (Не меняем GRANT'ы: у Supabase они уже проставлены для anon/authenticated на storage.objects.)
+commit;
