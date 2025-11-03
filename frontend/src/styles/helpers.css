@@ -1,22 +1,35 @@
 /* styles/helpers.css — micro-утилиты без визуала */
 
-/* ── Home hero section paddings (outside the glass panel) */
+/* ── Home hero paddings & anchor offsets (with dvh fallbacks) */
 :root{
   --home-hero-pt-min: 12px;
-  --home-hero-pt-ideal: 6dvh;   /* верх сильнее сжимается на коротких экранах */
-  --home-hero-pt-max: 9dvh;
+  /* Fallbacks: vh по умолчанию — работает везде */
+  --home-hero-pt-ideal: 6vh;   /* верх сильнее сжимается на коротких экранах */
+  --home-hero-pt-max: 9vh;
 
   --home-hero-pb-min: 10px;
-  --home-hero-pb-ideal: 2.5dvh;
-  --home-hero-pb-max: 4dvh;
+  --home-hero-pb-ideal: 2.5vh;
+  --home-hero-pb-max: 4vh;
 
   /* Anchor offset for section jump positions */
-  --anchor-offset: 12dvh; /* можно тюнить при ревью */
+  --anchor-offset: 12vh; /* можно тюнить при ревью */
+}
+
+/* dvh — только при поддержке */
+@supports (height: 100dvh){
+  :root{
+    --home-hero-pt-ideal: 6dvh;
+    --home-hero-pt-max: 9dvh;
+
+    --home-hero-pb-ideal: 2.5dvh;
+    --home-hero-pb-max: 4dvh;
+
+    --anchor-offset: 12dvh;
+  }
 }
 
 @layer components {
-  .home-hero-section{
-    /* fallback для браузеров без dvh автоматически перейдёт к vh при вычислении */
+  .home-hero-foreground{
     padding-top: clamp(var(--home-hero-pt-min), var(--home-hero-pt-ideal), var(--home-hero-pt-max));
     padding-bottom: clamp(var(--home-hero-pb-min), var(--home-hero-pb-ideal), var(--home-hero-pb-max));
   }
@@ -28,7 +41,12 @@
 
 /* На очень коротких вьюпортах чуть выше останавливаем */
 @media (max-height: 700px){
-  :root{ --anchor-offset: 14dvh; }
+  :root{ --anchor-offset: 14vh; }
+}
+@supports (height: 100dvh){
+  @media (max-height: 700px){
+    :root{ --anchor-offset: 14dvh; }
+  }
 }
 
 @layer components {
