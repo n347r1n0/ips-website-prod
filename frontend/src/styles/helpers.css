@@ -3,9 +3,9 @@
 /* ── Home hero paddings & anchor offsets (with dvh fallbacks) */
 :root{
   --home-hero-pt-min: 8px;
-  /* Fallbacks: vh по умолчанию — работает везде */
-  --home-hero-pt-ideal: 3.5vh;  /* было 6vh */
-  --home-hero-pt-max: 6vh;      /* было 9vh */
+  /* ↑ поднимаем панель: было 3.5/6 → стало 8/12 */
+  --home-hero-pt-ideal: 8vh;
+  --home-hero-pt-max: 12vh;
 
   --home-hero-pb-min: 6px;
   --home-hero-pb-ideal: 1.25vh; /* было 2.5vh */
@@ -23,8 +23,8 @@
 /* dvh — только при поддержке (iOS 16.4+/modern WebViews) */
 @supports (height: 100dvh){
   :root{
-    --home-hero-pt-ideal: 3.5dvh;
-    --home-hero-pt-max: 6dvh;
+    --home-hero-pt-ideal: 8dvh;
+    --home-hero-pt-max: 12dvh;
 
     --home-hero-pb-ideal: 1.25dvh;
     --home-hero-pb-max: 2dvh;
@@ -60,10 +60,12 @@
 }
 
 /* Очень низкие вьюпорты: увеличиваем запас сверху/снизу */
-@media (max-height: 700px){
-  .section-anchor-offset{
-    scroll-margin-top: var(--anchor-offset-top-short);
-    scroll-margin-bottom: var(--anchor-offset-bottom-short);
+@layer components{
+  @media (max-height: 700px){
+    .section-anchor-offset{
+      scroll-margin-top: var(--anchor-offset-top-short);
+      scroll-margin-bottom: var(--anchor-offset-bottom-short);
+    }
   }
 }
 
