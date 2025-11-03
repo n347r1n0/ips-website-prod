@@ -3,9 +3,10 @@
 /* ── Home hero paddings & anchor offsets (with dvh fallbacks) */
 :root{
   --home-hero-pt-min: 8px;
-  /* ↑ поднимаем панель: было 3.5/6 → стало 8/12 */
-  --home-hero-pt-ideal: 8vh;
-  --home-hero-pt-max: 12vh;
+
+  /* ↑ ещё опускаем панель: было 8/12 → стало 10/16 */
+  --home-hero-pt-ideal: 18vh;
+  --home-hero-pt-max: 24vh;
 
   --home-hero-pb-min: 6px;
   --home-hero-pb-ideal: 1.25vh; /* было 2.5vh */
@@ -23,8 +24,8 @@
 /* dvh — только при поддержке (iOS 16.4+/modern WebViews) */
 @supports (height: 100dvh){
   :root{
-    --home-hero-pt-ideal: 8dvh;
-    --home-hero-pt-max: 12dvh;
+    --home-hero-pt-ideal: 18dvh;
+    --home-hero-pt-max: 24dvh;
 
     --home-hero-pb-ideal: 1.25dvh;
     --home-hero-pb-max: 2dvh;
