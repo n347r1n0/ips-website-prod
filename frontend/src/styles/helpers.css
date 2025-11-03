@@ -19,6 +19,10 @@
   /* Short viewport adjustments */
   --anchor-offset-top-short: 14vh;
   --anchor-offset-bottom-short: 16vh;
+
+  /* фикс-хедер и небольшой “breathing room” */
+  --header-h: 80px;
+  --anchor-top-extra: 8px;
 }
 
 /* dvh — только при поддержке (iOS 16.4+/modern WebViews) */
@@ -44,9 +48,17 @@
     margin-bottom: clamp(var(--home-hero-pb-min), var(--home-hero-pb-ideal), var(--home-hero-pb-max));
   }
 
+  /* Фолбэк для старых движков: просто vh-значение */
   .section-anchor-offset{
-    scroll-margin-top: var(--anchor-offset-top);
+    scroll-margin-top: 14vh;
     scroll-margin-bottom: var(--anchor-offset-bottom);
+  }
+
+  /* Если доступен max() — никогда не ниже высоты хедера */
+  @supports (scroll-margin-top: max(1px, 1vh)){
+    .section-anchor-offset{
+      scroll-margin-top: max(calc(var(--header-h) + var(--anchor-top-extra)), 14vh);
+    }
   }
 }
 
@@ -63,9 +75,67 @@
 /* Очень низкие вьюпорты: увеличиваем запас сверху/снизу */
 @layer components{
   @media (max-height: 700px){
+    /* фолбэк */
     .section-anchor-offset{
-      scroll-margin-top: var(--anchor-offset-top-short);
+      scroll-margin-top: 16vh;
       scroll-margin-bottom: var(--anchor-offset-bottom-short);
+    }
+    /* надёжная защита “не ниже хедера” */
+    @supports (scroll-margin-top: max(1px, 1vh)){
+      .section-anchor-offset{
+        scroll-margin-top: max(calc(var(--header-h) + var(--anchor-top-extra)), 16vh);
+      }
+    }
+  }
+}
+
+/* dvh-ветка (динамическая высота) */
+@supports ((height: 100dvh) and (scroll-margin-top: max(1px, 1vh))){
+  @layer components{
+    .section-anchor-offset{
+      scroll-margin-top: max(calc(var(--header-h) + var(--anchor-top-extra)), 14dvh);
+    }
+  }
+}
+
+/* dvh-вариант для коротких экранов */
+@supports ((height: 100dvh) and (scroll-margin-top: max(1px, 1vh))){
+  @layer components{
+    @media (max-height: 700px){
+      .section-anchor-offset{
+        scroll-margin-top: max(calc(var(--header-h) + var(--anchor-top-extra)), 16dvh);
+      }
+    }
+  }
+}
+
+/* Hero: адаптивный верхний внешний отступ (margin-top) для коротких экранов */
+@media (max-height: 700px){
+  :root{
+    --home-hero-pt-ideal: 10vh;
+    --home-hero-pt-max:   14vh;
+  }
+}
+@supports (height: 100dvh){
+  @media (max-height: 700px){
+    :root{
+      --home-hero-pt-ideal: 10dvh;
+      --home-hero-pt-max:   14dvh;
+    }
+  }
+}
+
+@media (max-height: 600px){
+  :root{
+    --home-hero-pt-ideal: 8vh;
+    --home-hero-pt-max:   12vh;
+  }
+}
+@supports (height: 100dvh){
+  @media (max-height: 600px){
+    :root{
+      --home-hero-pt-ideal: 8dvh;
+      --home-hero-pt-max:   12dvh;
     }
   }
 }
