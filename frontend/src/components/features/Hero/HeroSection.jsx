@@ -18,7 +18,7 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths
   }
 
   return (
-    <div className="relative h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="home-hero-container relative flex flex-col items-center justify-start px-4 overflow-hidden">
       <div className="absolute inset-0">
         <AnimatePresence>
           {videoSources.map((src, index) => (
@@ -47,7 +47,7 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths
         initial={{ opacity: 0, y: 50, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md sm:max-w-lg md:max-w-2xl"
+        className="home-hero-foreground relative z-10 w-full max-w-md sm:max-w-lg md:max-w-2xl"
       >
         <GlassPanel>
           <div className="text-center text-white p-4 md:p-8">

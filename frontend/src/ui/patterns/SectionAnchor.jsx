@@ -19,12 +19,7 @@ export function SectionAnchor({ id, register, children }) {
       id={`section-${id}`}
       data-nav-id={id}
       ref={register(id)}
-      style={{
-        // ставим «окно внимания»: верхний отступ ~30% высоты окна
-        scrollMarginTop: '30vh',
-        // и небольшой нижний отступ, чтобы нижние секции не прятались за нижние контролы
-        scrollMarginBottom: '20vh',
-      }}
+      className="section-anchor-offset"
     >
       {children}
     </div>
