@@ -2,29 +2,38 @@
 
 /* ── Home hero paddings & anchor offsets (with dvh fallbacks) */
 :root{
-  --home-hero-pt-min: 12px;
+  --home-hero-pt-min: 8px;
   /* Fallbacks: vh по умолчанию — работает везде */
-  --home-hero-pt-ideal: 6vh;   /* верх сильнее сжимается на коротких экранах */
-  --home-hero-pt-max: 9vh;
+  --home-hero-pt-ideal: 3.5vh;  /* было 6vh */
+  --home-hero-pt-max: 6vh;      /* было 9vh */
 
-  --home-hero-pb-min: 10px;
-  --home-hero-pb-ideal: 2.5vh;
-  --home-hero-pb-max: 4vh;
+  --home-hero-pb-min: 6px;
+  --home-hero-pb-ideal: 1.25vh; /* было 2.5vh */
+  --home-hero-pb-max: 2vh;      /* было 4vh */
 
-  /* Anchor offset for section jump positions */
-  --anchor-offset: 12vh; /* можно тюнить при ревью */
+  /* Anchor offsets (vh defaults) */
+  --anchor-offset-top: 12vh;
+  --anchor-offset-bottom: 14vh;
+
+  /* Short viewport adjustments */
+  --anchor-offset-top-short: 14vh;
+  --anchor-offset-bottom-short: 16vh;
 }
 
 /* dvh — только при поддержке (iOS 16.4+/modern WebViews) */
 @supports (height: 100dvh){
   :root{
-    --home-hero-pt-ideal: 6dvh;
-    --home-hero-pt-max: 9dvh;
+    --home-hero-pt-ideal: 3.5dvh;
+    --home-hero-pt-max: 6dvh;
 
-    --home-hero-pb-ideal: 2.5dvh;
-    --home-hero-pb-max: 4dvh;
+    --home-hero-pb-ideal: 1.25dvh;
+    --home-hero-pb-max: 2dvh;
 
-    --anchor-offset: 12dvh;
+    --anchor-offset-top: 12dvh;
+    --anchor-offset-bottom: 14dvh;
+
+    --anchor-offset-top-short: 14dvh;
+    --anchor-offset-bottom-short: 16dvh;
   }
 }
 
@@ -35,17 +44,16 @@
   }
 
   .section-anchor-offset{
-    scroll-margin-top: var(--anchor-offset);
+    scroll-margin-top: var(--anchor-offset-top);
+    scroll-margin-bottom: var(--anchor-offset-bottom);
   }
 }
 
-/* На очень коротких вьюпортах чуть выше останавливаем */
+/* Очень низкие вьюпорты: увеличиваем запас сверху/снизу */
 @media (max-height: 700px){
-  :root{ --anchor-offset: 14vh; }
-}
-@supports (height: 100dvh){
-  @media (max-height: 700px){
-    :root{ --anchor-offset: 14dvh; }
+  .section-anchor-offset{
+    scroll-margin-top: var(--anchor-offset-top-short);
+    scroll-margin-bottom: var(--anchor-offset-bottom-short);
   }
 }
 
