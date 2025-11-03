@@ -18,7 +18,7 @@ export function HeroSection({ videoSources, currentVideoIndex, scrollToUserPaths
   }
 
   return (
-    <div className="relative h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="home-hero-container relative flex flex-col items-center justify-start px-4 overflow-hidden">
       <div className="absolute inset-0">
         <AnimatePresence>
           {videoSources.map((src, index) => (

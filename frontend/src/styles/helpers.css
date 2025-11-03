@@ -39,13 +39,23 @@
 
 @layer components {
   .home-hero-foreground{
-    padding-top: clamp(var(--home-hero-pt-min), var(--home-hero-pt-ideal), var(--home-hero-pt-max));
-    padding-bottom: clamp(var(--home-hero-pb-min), var(--home-hero-pb-ideal), var(--home-hero-pb-max));
+    margin-top: clamp(var(--home-hero-pt-min), var(--home-hero-pt-ideal), var(--home-hero-pt-max));
+    margin-bottom: clamp(var(--home-hero-pb-min), var(--home-hero-pb-ideal), var(--home-hero-pb-max));
   }
 
   .section-anchor-offset{
     scroll-margin-top: var(--anchor-offset-top);
     scroll-margin-bottom: var(--anchor-offset-bottom);
+  }
+}
+
+/* контейнер hero: меньше экрана и адаптивно */
+@layer components{
+  .home-hero-container{ min-height: 88vh; }
+}
+@supports (height: 100dvh){
+  @layer components{
+    .home-hero-container{ min-height: 88dvh; }
   }
 }
 
