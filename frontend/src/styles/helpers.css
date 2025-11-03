@@ -15,7 +15,7 @@
   --anchor-offset: 12vh; /* можно тюнить при ревью */
 }
 
-/* dvh — только при поддержке */
+/* dvh — только при поддержке (iOS 16.4+/modern WebViews) */
 @supports (height: 100dvh){
   :root{
     --home-hero-pt-ideal: 6dvh;
