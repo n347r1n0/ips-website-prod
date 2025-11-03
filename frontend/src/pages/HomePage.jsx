@@ -185,13 +185,11 @@ export function HomePage({ onAuthModalOpen }) {
 
         {/* Hero — привязка к навигации через SectionAnchor */}
         <SectionAnchor id="hero" register={register}>
-          <section className="home-hero-section">
-            <HeroSection
-              videoSources={videoSources}
-              currentVideoIndex={currentVideoIndex}
-              scrollToUserPaths={scrollToUserPaths}
-            />
-          </section>
+          <HeroSection
+            videoSources={videoSources}
+            currentVideoIndex={currentVideoIndex}
+            scrollToUserPaths={scrollToUserPaths}
+          />
         </SectionAnchor>
 
         <GoldLine />
