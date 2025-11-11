@@ -131,7 +131,7 @@ Navigate to `http://localhost:5173` and start developing!
 
 ## 🤖 **CODEX & Internal Agent Rules**
 
-* Смотри `frontend/CODEX.md` — правила агента (one-time read batch, report-first → patch-set).
+* См. [CODEX.md](../CODEX.md) в корне репозитория — правила агента (one-time read batch, report-first → patch-set).
 * DEV используется **как эталон паттернов** (токены/стили), **но** PROD-визуал/поведение не деградируем.
 * **Где лежат подробные отчёты:** только в DEV —
   `ips-ui-lab/frontend/src/PROD_comparison/reports/` и `.../drafts/`.
